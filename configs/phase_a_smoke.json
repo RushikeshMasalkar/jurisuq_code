@@ -1,0 +1,25 @@
+{
+  "run_id": "phaseA-smoke",
+  "out_dir": "runs",
+
+  "provider": "mock",
+  "model": "mock",
+
+  "temperature": 1.0,
+  "max_tokens": 220,
+  "n_samples": 10,
+
+  "clusterer": "both",
+  "entail_threshold": 0.8,
+  "allow_lexical_fallback": true,
+
+  "judge": "provision",
+
+  "slices": ["L7", "L1"],
+  "limit": 0,
+  "seed": 20261005,
+
+  "mock_p_trap_slice": {"L7": 0.55, "L1": 0.05},
+  "mock_p_uncertain": 0.20,
+  "mock_p_wrong_when_uncertain": 0.40
+}
