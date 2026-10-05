@@ -1,0 +1,15 @@
+# Phase A optional: standard semantic entropy (NLI clustering) on your laptop.
+#
+#   CPU wheel (works on any laptop, ~700 MB installed):
+#       pip install -r requirements-nli.txt
+#
+#   Intel Arc / Core Ultra iGPU acceleration via OpenVINO (recommended on the
+#   target machine, do this after the CPU version works):
+#       pip install "optimum[openvino]" openvino
+#       optimum-cli export openvino --model MoritzLaurer/DeBERTa-v3-base-mnli-fever-anli \
+#           --task text-classification ov_models/nli
+#   then set nli_backend="openvino" in the config (wrapper lands in Phase B; in
+#   Phase A the CPU path is sufficient - the NLI channel is not the expensive
+#   part of the run, the generator is).
+torch>=2.2
+transformers>=4.44

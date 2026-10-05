@@ -1,0 +1,5 @@
+# Phase A core - small, pure Python + requests
+requests>=2.31
+numpy>=1.26
+matplotlib>=3.8
+pytest>=8.0
