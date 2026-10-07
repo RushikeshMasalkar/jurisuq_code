@@ -1,0 +1,43 @@
+{
+  "revision": 2,
+  "design": "matched pairs across the 1 July 2024 transition; era-reversed control",
+  "n_items": 200,
+  "n_per_slice": 100,
+  "slices": {
+    "L7": {
+      "n": 100,
+      "asks": "law in force today",
+      "gold_act": "BNS",
+      "trap": "the repealed IPC section"
+    },
+    "L1": {
+      "n": 100,
+      "asks": "law as it stood immediately before 1 July 2024",
+      "gold_act": "IPC",
+      "trap": "the successor BNS section"
+    }
+  },
+  "topics": [
+    "attempt_to_murder",
+    "cheating",
+    "criminal_breach_of_trust",
+    "criminal_intimidation",
+    "cruelty_by_husband",
+    "culpable_homicide",
+    "murder",
+    "theft",
+    "theft_in_dwelling",
+    "wrongful_restraint"
+  ],
+  "templates": {
+    "T1": 28,
+    "T2": 34,
+    "T3": 38,
+    "T4": 30,
+    "T5": 40,
+    "T6": 30
+  },
+  "seed": 20261005,
+  "crosswalk_verified": false,
+  "warning": "The IPC <-> BNS rows in jurisuq/facts.py are the published successor mappings and are flagged verified=False. Check them against the official crosswalk and the gazette text before treating this slice as the released benchmark."
+}

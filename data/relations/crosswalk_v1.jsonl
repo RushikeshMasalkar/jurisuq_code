@@ -1,0 +1,20 @@
+{"from": "IPC 307", "label": "attempt to murder", "offence": "attempt_to_murder", "to": "BNS 109", "type": "successor_of", "verified": false}
+{"from": "IPC 307", "label": "attempt to murder", "offence": "attempt_to_murder", "to": "IPC 302", "type": "different_offence", "verified": false}
+{"from": "IPC 420", "label": "cheating and dishonestly inducing delivery of property", "offence": "cheating", "to": "BNS 318(4)", "type": "successor_of", "verified": false}
+{"from": "IPC 420", "label": "cheating and dishonestly inducing delivery of property", "offence": "cheating", "to": "IPC 406", "type": "different_offence", "verified": false}
+{"from": "IPC 406", "label": "criminal breach of trust", "offence": "criminal_breach_of_trust", "to": "BNS 316(2)", "type": "successor_of", "verified": false}
+{"from": "IPC 406", "label": "criminal breach of trust", "offence": "criminal_breach_of_trust", "to": "IPC 420", "type": "different_offence", "verified": false}
+{"from": "IPC 506", "label": "criminal intimidation", "offence": "criminal_intimidation", "to": "BNS 351(2)", "type": "successor_of", "verified": false}
+{"from": "IPC 506", "label": "criminal intimidation", "offence": "criminal_intimidation", "to": "IPC 504", "type": "different_offence", "verified": false}
+{"from": "IPC 498A", "label": "cruelty by husband or his relatives", "offence": "cruelty_by_husband", "to": "BNS 85", "type": "successor_of", "verified": false}
+{"from": "IPC 498A", "label": "cruelty by husband or his relatives", "offence": "cruelty_by_husband", "to": "IPC 304B", "type": "different_offence", "verified": false}
+{"from": "IPC 304", "label": "culpable homicide not amounting to murder", "offence": "culpable_homicide", "to": "BNS 105", "type": "successor_of", "verified": false}
+{"from": "IPC 304", "label": "culpable homicide not amounting to murder", "offence": "culpable_homicide", "to": "IPC 302", "type": "different_offence", "verified": false}
+{"from": "IPC 302", "label": "murder", "offence": "murder", "to": "BNS 103", "type": "successor_of", "verified": false}
+{"from": "IPC 302", "label": "murder", "offence": "murder", "to": "IPC 304", "type": "different_offence", "verified": false}
+{"from": "IPC 379", "label": "theft", "offence": "theft", "to": "BNS 303(2)", "type": "successor_of", "verified": false}
+{"from": "IPC 379", "label": "theft", "offence": "theft", "to": "IPC 380", "type": "different_offence", "verified": false}
+{"from": "IPC 380", "label": "theft in a dwelling house", "offence": "theft_in_dwelling", "to": "BNS 305", "type": "successor_of", "verified": false}
+{"from": "IPC 380", "label": "theft in a dwelling house", "offence": "theft_in_dwelling", "to": "IPC 379", "type": "different_offence", "verified": false}
+{"from": "IPC 341", "label": "wrongful restraint", "offence": "wrongful_restraint", "to": "BNS 126(2)", "type": "successor_of", "verified": false}
+{"from": "IPC 341", "label": "wrongful restraint", "offence": "wrongful_restraint", "to": "IPC 342", "type": "different_offence", "verified": false}

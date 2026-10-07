@@ -1,0 +1,91 @@
+{
+  "run_id": "phaseA-laptop-v2",
+  "phase": "A",
+  "started": "2026-10-05T10:33:09",
+  "provider": "openai-compat:qwen2.5-7b-instruct",
+  "n_samples": 10,
+  "temperature": 1.0,
+  "nli_backend": "lexical-proxy",
+  "judge": "provision",
+  "prompt_version": "p2-structured",
+  "system_prompt": "You are an Indian legal research assistant answering questions about Indian penal law.\n\nAnswer in exactly this format, with no preamble and no extra headings:\nProvision: <name of the Act>, section <number>\nReason: <one sentence>\nPunishment: <one short line, or 'not applicable'>\n\nRules:\n- Give the provision that applies in the era the question asks about.\n- Use Indian law only. Never cite the law of another country.\n- Always give your single best answer, even if you are not sure.",
+  "slices": [
+    "L7",
+    "L1"
+  ],
+  "n_items": 200,
+  "n_todo": 200,
+  "n_resumed": 0,
+  "config": {
+    "run_id": "phaseA-laptop-v2",
+    "out_dir": "runs",
+    "provider": "openai",
+    "base_url": "http://127.0.0.1:1234/v1",
+    "model": "qwen2.5-7b-instruct",
+    "api_key": "sk-local",
+    "temperature": 1.0,
+    "top_p": 1.0,
+    "max_tokens": 220,
+    "n_samples": 10,
+    "request_timeout": 240,
+    "retries": 3,
+    "workers": 1,
+    "clusterer": "both",
+    "nli_model": "MoritzLaurer/DeBERTa-v3-base-mnli-fever-anli",
+    "entail_threshold": 0.8,
+    "allow_lexical_fallback": true,
+    "judge": "provision",
+    "judge_scope": "representatives",
+    "slices": [
+      "L7",
+      "L1"
+    ],
+    "limit": 0,
+    "seed": 20261005,
+    "mock_p_trap_slice": {
+      "L7": 0.55,
+      "L1": 0.05
+    },
+    "mock_p_uncertain": 0.2,
+    "mock_p_wrong_when_uncertain": 0.4
+  },
+  "finished": "2026-10-05T13:07:30",
+  "elapsed_s": 9261.0,
+  "judge_summary": {
+    "counts": {
+      "stale_law": 832,
+      "gold": 377,
+      "ambiguous": 5,
+      "wrong_section": 716,
+      "gold_first": 40,
+      "gold_with_superseded_note": 1,
+      "other_provision": 29
+    },
+    "shares": {
+      "stale_law": 0.416,
+      "gold": 0.1885,
+      "ambiguous": 0.0025,
+      "wrong_section": 0.358,
+      "gold_first": 0.02,
+      "gold_with_superseded_note": 0.0005,
+      "other_provision": 0.0145
+    },
+    "resolved_share": 0.9975,
+    "per_slice": {
+      "L7": {
+        "stale_law": 832,
+        "other_provision": 18,
+        "wrong_section": 150
+      },
+      "L1": {
+        "gold": 377,
+        "ambiguous": 5,
+        "wrong_section": 566,
+        "gold_first": 40,
+        "gold_with_superseded_note": 1,
+        "other_provision": 11
+      }
+    },
+    "n_records": 200
+  }
+}
