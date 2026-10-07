@@ -614,8 +614,9 @@ Three things follow from that table and are recorded in `configs/phase_b_relatio
 1. **CPU training is cheap here** — under three minutes for three epochs, so the design target of
    6,000 pairs is an overnight job, not a week. `epochs` is now 12: at 3 epochs the loss was still
    1.06 and the model was level with the exact-key baseline.
-2. **A tie is not a pass.** 0.777 vs 0.776 is inside the noise of a 66-pair dev split; gate G2's
-   "beats exact key" condition needs a real margin, which comes from more epochs *and* more data.
+2. **A tie is not a pass.** The final run cleared the strict inequality by **≈ +0.0005**
+   (0.7770 vs 0.7765) — smaller than the third decimal. Gate G2 records a hairline pass; the
+   defensible claim is parity plus graded relations, never "the learned model beats the rule".
 3. **The E2 pass must not spend the encoder on pairs the constraint already decides.** Samples
    asserting the identical provision are merged by rule, so those pairs are filled without a
    forward pass (`identity_pairs` in `cluster_typed.py`); the run prints both counts.
@@ -629,3 +630,15 @@ Three things follow from that table and are recorded in `configs/phase_b_relatio
 | wasted forward passes | all M(M−1) ordered pairs sent to the encoder, including the ones step 1 decides | `identity_pairs` shortcut; the report records `encoder_pairs` and `rule_pairs` |
 | no partial E2 | had to wait for the full pass to see anything | `--limit-items N` for a quick pass, `--skip-e2` for metrics only |
 | `--source both` unusable | observed Phase A pairs stored `asserted: null`, so every one failed verification | assertions are now parsed from the stored text and the contribution is capped per item (`per_item=6`) |
+
+### 16.6 Phase B outcome (run of record `phaseB-relations-full`)
+
+Gate G2: **PASS** on all four conditions — merge precision 0.8824 on the frozen test split
+(≥ 0.85 gate), macro-F1 0.7770 vs the exact-key baseline 0.7765, 130 of 200 Phase A items
+re-clustered, Phase A tree hash unchanged (`a98583fd66db4f46bb1ac014`). Read it with the
+three caveats that matter: the macro-F1 margin is ≈ +0.0005 (parity, not superiority); the
+model has **zero recall on DIFFERENT_PROVISION** (all six test errors are false merges); and
+the E2 gap narrowing (0.882 → 0.4516) comes from pulling incorrect L1 answers into the
+unanimous population — no item was reclassified *out* of a collision population, and L7's
+collision population grew 16 → 44 while staying 100 % wrong. Full transcription, confusion
+matrix and the per-slice E2 table: `docs/results_phase_b.md`.

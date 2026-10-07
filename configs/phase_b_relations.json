@@ -53,11 +53,11 @@
     "test": 1500
   },
   "notes": [
-    "epochs 12 is the setting for the small 198-pair training set: 3 epochs left the loss at 1.06 and the model level with the exact-key baseline.",
+    "epochs 12 suits the small 198-pair set: 3 epochs left the loss at 1.06.",
     "eval_batch_size 64 is the E2 throughput setting; lower it if the machine swaps.",
-    "e2_limit_items 0 = all Phase A items; set e.g. 40 for a quick E2 pass before the full one.",
+    "e2_limit_items 0 = all Phase A items; set ~40 for a quick pass first.",
     "target_sizes are design targets, not measurements: report the achieved counts.",
-    "phases C-I append keys to this file; they never change an existing key's meaning.",
+    "phases C-I append keys; they never change an existing key's meaning.",
     "device empty means auto (xpu -> cuda -> mps -> cpu)."
   ],
   "e2_limit_items": 0
