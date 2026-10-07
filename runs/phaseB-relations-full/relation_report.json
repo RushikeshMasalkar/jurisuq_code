@@ -1,0 +1,177 @@
+{
+  "ambiguous_rate": 0.0606,
+  "checkpoint": "law-ai/InLegalBERT",
+  "confusion": {
+    "AMBIGUOUS": {
+      "AMBIGUOUS": 4,
+      "CONDITIONALLY_EQUIVALENT": 0,
+      "DIFFERENT_PROVISION": 0,
+      "LEGALLY_EQUIVALENT": 0,
+      "SAME_PROVISION": 0
+    },
+    "CONDITIONALLY_EQUIVALENT": {
+      "AMBIGUOUS": 0,
+      "CONDITIONALLY_EQUIVALENT": 8,
+      "DIFFERENT_PROVISION": 0,
+      "LEGALLY_EQUIVALENT": 0,
+      "SAME_PROVISION": 0
+    },
+    "DIFFERENT_PROVISION": {
+      "AMBIGUOUS": 0,
+      "CONDITIONALLY_EQUIVALENT": 0,
+      "DIFFERENT_PROVISION": 0,
+      "LEGALLY_EQUIVALENT": 2,
+      "SAME_PROVISION": 4
+    },
+    "LEGALLY_EQUIVALENT": {
+      "AMBIGUOUS": 0,
+      "CONDITIONALLY_EQUIVALENT": 0,
+      "DIFFERENT_PROVISION": 0,
+      "LEGALLY_EQUIVALENT": 18,
+      "SAME_PROVISION": 0
+    },
+    "SAME_PROVISION": {
+      "AMBIGUOUS": 0,
+      "CONDITIONALLY_EQUIVALENT": 0,
+      "DIFFERENT_PROVISION": 0,
+      "LEGALLY_EQUIVALENT": 0,
+      "SAME_PROVISION": 30
+    }
+  },
+  "dataset_content_hash": "e1aa4ba0916cbc95e9e8edd93aba11a795c7ea66bde636aeb9b2bf4da8177674",
+  "dataset_version": "relations_v1",
+  "e2_separation": {
+    "by_slice": {
+      "L1": {
+        "exact_collision_acc": 0.8823529411764706,
+        "exact_collision_n": 17,
+        "n": 100,
+        "reclassified_out_of_collision": 0,
+        "typed_collision_acc": 0.45161290322580644,
+        "typed_collision_n": 62
+      },
+      "L7": {
+        "exact_collision_acc": 0.0,
+        "exact_collision_n": 16,
+        "n": 100,
+        "reclassified_out_of_collision": 0,
+        "typed_collision_acc": 0.0,
+        "typed_collision_n": 44
+      }
+    },
+    "changed_ids": [
+      "L1-cruelty_by_husband-005",
+      "L1-theft-000",
+      "L1-criminal_breach_of_trust-010",
+      "L1-culpable_homicide-037",
+      "L7-theft-082",
+      "L1-culpable_homicide-063",
+      "L7-cheating-028",
+      "L1-cheating-085",
+      "L1-criminal_breach_of_trust-035",
+      "L1-theft_in_dwelling-016",
+      "L7-criminal_breach_of_trust-029",
+      "L1-theft-082",
+      "L7-wrongful_restraint-044",
+      "L7-wrongful_restraint-093",
+      "L7-wrongful_restraint-050",
+      "L7-theft-061",
+      "L1-cheating-099",
+      "L7-criminal_intimidation-047",
+      "L7-culpable_homicide-081",
+      "L7-criminal_intimidation-002",
+      "L7-wrongful_restraint-033",
+      "L1-criminal_intimidation-001",
+      "L7-theft_in_dwelling-068",
+      "L1-criminal_intimidation-047",
+      "L7-criminal_breach_of_trust-035",
+      "L7-criminal_intimidation-001",
+      "L7-theft_in_dwelling-077",
+      "L7-murder-013",
+      "L1-wrongful_restraint-015",
+      "L7-theft_in_dwelling-075",
+      "L7-culpable_homicide-037",
+      "L1-cheating-028",
+      "L7-cruelty_by_husband-019",
+      "L7-cheating-049",
+      "L1-wrongful_restraint-011",
+      "L1-theft_in_dwelling-075",
+      "L1-criminal_intimidation-009",
+      "L7-criminal_breach_of_trust-052",
+      "L1-wrongful_restraint-050",
+      "L1-criminal_breach_of_trust-029",
+      "L7-culpable_homicide-097",
+      "L1-wrongful_restraint-041",
+      "L1-murder-008",
+      "L1-culpable_homicide-021",
+      "L1-criminal_intimidation-051",
+      "L1-criminal_intimidation-091",
+      "L1-theft_in_dwelling-078",
+      "L1-theft-089",
+      "L7-theft_in_dwelling-090",
+      "L1-criminal_intimidation-092"
+    ],
+    "changed_items": 130,
+    "collision_auroc_typed_entropy": 0.5,
+    "encoder_pairs": 9092,
+    "n_scored": 200,
+    "rule_pairs": 8908,
+    "seconds": 1282.5,
+    "typed_unanimous_accuracy": {
+      "L1": 0.45161290322580644,
+      "L7": 0.0
+    },
+    "typed_unanimous_accuracy_gap": 0.45161290322580644
+  },
+  "exact_key_baseline_macro_f1": 0.7765,
+  "gate_g2": {
+    "conditions": {
+      "beats_exact_key": true,
+      "merge_precision_ok": true,
+      "phase_a_untouched": true,
+      "separation_criterion_met": true
+    },
+    "verdict": "PASS"
+  },
+  "macro_f1": 0.777,
+  "merge_f1": 0.7545,
+  "merge_precision": 0.8824,
+  "merge_threshold": 0.45,
+  "n_test": 66,
+  "per_class": {
+    "AMBIGUOUS": {
+      "f1": 1.0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "support": 4
+    },
+    "CONDITIONALLY_EQUIVALENT": {
+      "f1": 1.0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "support": 8
+    },
+    "DIFFERENT_PROVISION": {
+      "f1": 0.0,
+      "precision": 0.0,
+      "recall": 0.0,
+      "support": 6
+    },
+    "LEGALLY_EQUIVALENT": {
+      "f1": 0.9474,
+      "precision": 0.9,
+      "recall": 1.0,
+      "support": 18
+    },
+    "SAME_PROVISION": {
+      "f1": 0.9375,
+      "precision": 0.8824,
+      "recall": 1.0,
+      "support": 30
+    }
+  },
+  "phase_a_tree_hash_after": "a98583fd66db4f46bb1ac014",
+  "phase_a_tree_hash_before": "a98583fd66db4f46bb1ac014",
+  "phase_a_untouched": true,
+  "run_id": "phaseB-relations-full"
+}

@@ -1,0 +1,270 @@
+{
+  "run_id": "phaseA-laptop-v2-rejudged",
+  "n_items": 200,
+  "slices": [
+    "L1",
+    "L7"
+  ],
+  "gate_auroc_max": 0.7,
+  "per_slice": {
+    "L1": {
+      "n_items": 100,
+      "n_scored": 99,
+      "n_excluded_unresolved": 1,
+      "methods": {
+        "prov_se": {
+          "n": 99,
+          "accuracy": 0.43434343434343436,
+          "auroc": 0.7655730897009967,
+          "aurc_norm": 0.593168899074234,
+          "risk_at_50": 0.3736734693877551,
+          "risk_at_full": 0.5656565656565656,
+          "auroc_lo": 0.6698113207547169,
+          "auroc_hi": 0.8527542372881356
+        },
+        "prov_agreement": {
+          "n": 99,
+          "accuracy": 0.43434343434343436,
+          "auroc": 0.7294435215946844,
+          "aurc_norm": 0.5452626347282239,
+          "risk_at_50": 0.40408163265306124,
+          "risk_at_full": 0.5656565656565656,
+          "auroc_lo": 0.6216566005176877,
+          "auroc_hi": 0.8253086419753086
+        },
+        "disc_se": {
+          "n": 99,
+          "accuracy": 0.43434343434343436,
+          "auroc": 0.5431893687707641,
+          "aurc_norm": 0.07438413263756717,
+          "risk_at_50": 0.6161224489795918,
+          "risk_at_full": 0.5656565656565656,
+          "auroc_lo": 0.48675357443229605,
+          "auroc_hi": 0.6116326530612245
+        },
+        "se": {
+          "n": 99,
+          "accuracy": 0.43434343434343436,
+          "auroc": 0.44476744186046513,
+          "aurc_norm": -0.08775238454366359,
+          "risk_at_50": 0.6161224489795918,
+          "risk_at_full": 0.5656565656565656,
+          "auroc_lo": 0.3330578512396694,
+          "auroc_hi": 0.5587152209492635
+        },
+        "selfcheck": {
+          "n": 99,
+          "accuracy": 0.43434343434343436,
+          "auroc": 0.47134551495016613,
+          "aurc_norm": -0.059982707888731,
+          "risk_at_50": 0.5757142857142856,
+          "risk_at_full": 0.5656565656565656,
+          "auroc_lo": 0.3561464690496949,
+          "auroc_hi": 0.590531561461794
+        },
+        "agreement": {
+          "n": 99,
+          "accuracy": 0.43434343434343436,
+          "auroc": 0.5427740863787376,
+          "aurc_norm": 0.07438413263756717,
+          "risk_at_50": 0.6161224489795918,
+          "risk_at_full": 0.5656565656565656,
+          "auroc_lo": 0.48675357443229605,
+          "auroc_hi": 0.6111111111111112
+        }
+      },
+      "accuracy": 0.43434343434343436
+    },
+    "L7": {
+      "n_items": 100,
+      "n_scored": 100,
+      "n_excluded_unresolved": 0,
+      "methods": {
+        "prov_se": {
+          "n": 100,
+          "accuracy": 0.0,
+          "auroc": NaN,
+          "aurc_norm": NaN,
+          "risk_at_50": 1.0,
+          "risk_at_full": 1.0,
+          "auroc_lo": null,
+          "auroc_hi": null
+        },
+        "prov_agreement": {
+          "n": 100,
+          "accuracy": 0.0,
+          "auroc": NaN,
+          "aurc_norm": NaN,
+          "risk_at_50": 1.0,
+          "risk_at_full": 1.0,
+          "auroc_lo": null,
+          "auroc_hi": null
+        },
+        "disc_se": {
+          "n": 100,
+          "accuracy": 0.0,
+          "auroc": NaN,
+          "aurc_norm": NaN,
+          "risk_at_50": 1.0,
+          "risk_at_full": 1.0,
+          "auroc_lo": null,
+          "auroc_hi": null
+        },
+        "se": {
+          "n": 100,
+          "accuracy": 0.0,
+          "auroc": NaN,
+          "aurc_norm": NaN,
+          "risk_at_50": 1.0,
+          "risk_at_full": 1.0,
+          "auroc_lo": null,
+          "auroc_hi": null
+        },
+        "selfcheck": {
+          "n": 100,
+          "accuracy": 0.0,
+          "auroc": NaN,
+          "aurc_norm": NaN,
+          "risk_at_50": 1.0,
+          "risk_at_full": 1.0,
+          "auroc_lo": null,
+          "auroc_hi": null
+        },
+        "agreement": {
+          "n": 100,
+          "accuracy": 0.0,
+          "auroc": NaN,
+          "aurc_norm": NaN,
+          "risk_at_50": 1.0,
+          "risk_at_full": 1.0,
+          "auroc_lo": null,
+          "auroc_hi": null
+        }
+      },
+      "accuracy": 0.0
+    }
+  },
+  "gaps": {
+    "prov_se": {
+      "point": NaN
+    },
+    "prov_agreement": {
+      "point": NaN
+    },
+    "disc_se": {
+      "point": NaN
+    },
+    "se": {
+      "point": NaN
+    },
+    "selfcheck": {
+      "point": NaN
+    },
+    "agreement": {
+      "point": NaN
+    }
+  },
+  "collision": {
+    "L1": {
+      "n": 17,
+      "n_all_items": 17,
+      "level": "provision",
+      "accuracy": 0.8823529411764706,
+      "lo": 0.6566364940511412,
+      "hi": 0.9671202262362074,
+      "confident_wrong": 0.11764705882352944
+    },
+    "L7": {
+      "n": 16,
+      "n_all_items": 16,
+      "level": "provision",
+      "accuracy": 0.0,
+      "lo": 0.0,
+      "hi": 0.1936076805344365,
+      "confident_wrong": 1.0
+    }
+  },
+  "collision_text": {
+    "L1": {
+      "n": 0,
+      "confident_wrong": NaN
+    },
+    "L7": {
+      "n": 0,
+      "confident_wrong": NaN
+    }
+  },
+  "asserted": {
+    "L1": {
+      "top_provisions": {
+        "IPC 378": 14,
+        "IPC 307": 10,
+        "IPC 420": 10,
+        "IPC 302": 9,
+        "IPC 341": 8,
+        "IPC 406": 6
+      },
+      "repealed_code_share": 0.9840000000000001
+    },
+    "L7": {
+      "top_provisions": {
+        "IPC 341": 11,
+        "IPC 378": 10,
+        "IPC 420": 8,
+        "BNS 304": 8,
+        "IPC 307": 8,
+        "IPC 302": 7
+      },
+      "repealed_code_share": 0.8320000000000001
+    }
+  },
+  "accuracy_contrast": {
+    "point": 0.43434343434343436,
+    "lo": 0.3333333333333333,
+    "hi": 0.5252525252525253,
+    "p_le_zero": 0.0,
+    "n_boot": 2000
+  },
+  "judge_coverage": {
+    "n_items": 200,
+    "n_scored": 100,
+    "share_scored": 0.5,
+    "note": "unresolved answers are excluded from every metric in this report"
+  },
+  "gate_G1": {
+    "pass": true,
+    "ceiling_ok": true,
+    "gap_ok": false,
+    "contrast_ok": true,
+    "reasons": [
+      "ceiling: AUROC on L7 is undefined because the model failed every scored item (accuracy 0.000) - the strongest possible form of the ceiling condition. Its unanimous answers are themselves wrong in 1.000 of the 16 items where every sample asserted the same provision -> met, read from the provision-level collision statistic.",
+      "AUROC contrast: L1-L7 gap excludes zero for 0/6 methods (none)",
+      "collision contrast: confidently wrong (zero entropy, wrong answer) = 1.000 on L7 (n = 16) vs 0.118 on L1 (n = 17); difference +0.882, need >= 0.2 -> met"
+    ],
+    "l7_accuracy": 0.0,
+    "best_method_on_L7": "prov_se",
+    "best_auroc_on_L7": NaN,
+    "ceiling_basis": "collision-statistic (AUROC undefined: single class)",
+    "contrast": 0.8823529411764706,
+    "contrast_non_overlapping": true,
+    "collision_L7": {
+      "n": 16,
+      "n_all_items": 16,
+      "level": "provision",
+      "accuracy": 0.0,
+      "lo": 0.0,
+      "hi": 0.1936076805344365,
+      "confident_wrong": 1.0
+    },
+    "collision_L1": {
+      "n": 17,
+      "n_all_items": 17,
+      "level": "provision",
+      "accuracy": 0.8823529411764706,
+      "lo": 0.6566364940511412,
+      "hi": 0.9671202262362074,
+      "confident_wrong": 0.11764705882352944
+    },
+    "reading": "Reading: on the superseded-provision slice the model produces zero-entropy, self-consistent, wrong answers far more often than on the matched controls, while the best sample-only method cannot rank it above 0.70 AUROC. The premise of JURIS-UQ holds. Quote the collision-population row in the paper; it is the diagnostic result, and the L7 slice is its home."
+  }
+}

@@ -1,6 +1,9 @@
+# never commit these
 .venv/
 __pycache__/
-.pytest_cache/
-runs/
-data/
 *.pyc
+.pytest_cache/
+
+# the trained checkpoint (model.pt is ~440 MB; model.json/tokenizer files are
+# copies of the public encoder) — keep it on disk, keep it out of git
+models/

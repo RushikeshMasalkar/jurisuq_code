@@ -1,0 +1,160 @@
+{
+  "run_id": "phaseA-laptop",
+  "n_items": 200,
+  "slices": [
+    "L1",
+    "L7"
+  ],
+  "gate_auroc_max": 0.7,
+  "per_slice": {
+    "L1": {
+      "n_items": 100,
+      "methods": {
+        "disc_se": {
+          "n": 100,
+          "accuracy": 0.0,
+          "auroc": NaN,
+          "aurc_norm": NaN,
+          "risk_at_50": 1.0,
+          "risk_at_full": 1.0,
+          "auroc_lo": null,
+          "auroc_hi": null
+        },
+        "se": {
+          "n": 100,
+          "accuracy": 0.0,
+          "auroc": NaN,
+          "aurc_norm": NaN,
+          "risk_at_50": 1.0,
+          "risk_at_full": 1.0,
+          "auroc_lo": null,
+          "auroc_hi": null
+        },
+        "selfcheck": {
+          "n": 100,
+          "accuracy": 0.0,
+          "auroc": NaN,
+          "aurc_norm": NaN,
+          "risk_at_50": 1.0,
+          "risk_at_full": 1.0,
+          "auroc_lo": null,
+          "auroc_hi": null
+        },
+        "agreement": {
+          "n": 100,
+          "accuracy": 0.0,
+          "auroc": NaN,
+          "aurc_norm": NaN,
+          "risk_at_50": 1.0,
+          "risk_at_full": 1.0,
+          "auroc_lo": null,
+          "auroc_hi": null
+        },
+        "p_true": {
+          "n": 100,
+          "accuracy": 0.0,
+          "auroc": NaN,
+          "aurc_norm": NaN,
+          "risk_at_50": 1.0,
+          "risk_at_full": 1.0,
+          "auroc_lo": null,
+          "auroc_hi": null
+        }
+      }
+    },
+    "L7": {
+      "n_items": 100,
+      "methods": {
+        "disc_se": {
+          "n": 100,
+          "accuracy": 0.0,
+          "auroc": NaN,
+          "aurc_norm": NaN,
+          "risk_at_50": 1.0,
+          "risk_at_full": 1.0,
+          "auroc_lo": null,
+          "auroc_hi": null
+        },
+        "se": {
+          "n": 100,
+          "accuracy": 0.0,
+          "auroc": NaN,
+          "aurc_norm": NaN,
+          "risk_at_50": 1.0,
+          "risk_at_full": 1.0,
+          "auroc_lo": null,
+          "auroc_hi": null
+        },
+        "selfcheck": {
+          "n": 100,
+          "accuracy": 0.0,
+          "auroc": NaN,
+          "aurc_norm": NaN,
+          "risk_at_50": 1.0,
+          "risk_at_full": 1.0,
+          "auroc_lo": null,
+          "auroc_hi": null
+        },
+        "agreement": {
+          "n": 100,
+          "accuracy": 0.0,
+          "auroc": NaN,
+          "aurc_norm": NaN,
+          "risk_at_50": 1.0,
+          "risk_at_full": 1.0,
+          "auroc_lo": null,
+          "auroc_hi": null
+        },
+        "p_true": {
+          "n": 100,
+          "accuracy": 0.0,
+          "auroc": NaN,
+          "aurc_norm": NaN,
+          "risk_at_50": 1.0,
+          "risk_at_full": 1.0,
+          "auroc_lo": null,
+          "auroc_hi": null
+        }
+      }
+    }
+  },
+  "gaps": {
+    "disc_se": {
+      "point": NaN
+    },
+    "se": {
+      "point": NaN
+    },
+    "selfcheck": {
+      "point": NaN
+    },
+    "agreement": {
+      "point": NaN
+    },
+    "p_true": {
+      "point": NaN
+    }
+  },
+  "collision": {
+    "L1": {
+      "n": 0
+    },
+    "L7": {
+      "n": 0
+    }
+  },
+  "gate_G1": {
+    "pass": false,
+    "ceiling_ok": false,
+    "gap_ok": false,
+    "contrast_ok": false,
+    "reasons": [
+      "ceiling: AUROC on L7 is undefined because every item fell in the same correctness class (the model either gets the whole slice right or the whole slice wrong). Record more items or use a second checkpoint before reading this run.",
+      "AUROC contrast: L1-L7 gap excludes zero for 0/5 methods (none)",
+      "collision contrast: not available (no zero-entropy items measured)"
+    ],
+    "best_method_on_L7": "disc_se",
+    "best_auroc_on_L7": NaN,
+    "reading": "Reading: read the two conditions separately. If the ceiling is met but condition 2 fails, the model may simply not share the bias on this slice - try the second checkpoint (for example the 3B against the 7B model) and a lower temperature before touching the design. If the ceiling is NOT met, sample-only agreement already detects the error on L7, and the honest move is to report that and re-aim the paper at the calibration and abstention contribution rather than at the diagnostic one."
+  }
+}

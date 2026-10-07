@@ -1,0 +1,52 @@
+{
+  "run_id": "phaseA-laptop",
+  "phase": "A",
+  "started": "2026-10-05T03:26:08",
+  "provider": "openai-compat:qwen2.5-7b-instruct",
+  "n_samples": 10,
+  "temperature": 1.0,
+  "nli_backend": "lexical-proxy",
+  "judge": "provision",
+  "slices": [
+    "L7",
+    "L1"
+  ],
+  "n_items": 200,
+  "n_todo": 190,
+  "n_resumed": 10,
+  "config": {
+    "run_id": "phaseA-laptop",
+    "out_dir": "runs",
+    "provider": "openai",
+    "base_url": "http://127.0.0.1:1234/v1",
+    "model": "qwen2.5-7b-instruct",
+    "api_key": "sk-local",
+    "temperature": 1.0,
+    "top_p": 1.0,
+    "max_tokens": 220,
+    "n_samples": 10,
+    "request_timeout": 240,
+    "retries": 3,
+    "workers": 1,
+    "clusterer": "both",
+    "nli_model": "MoritzLaurer/DeBERTa-v3-base-mnli-fever-anli",
+    "entail_threshold": 0.8,
+    "allow_lexical_fallback": true,
+    "judge": "provision",
+    "judge_scope": "representatives",
+    "slices": [
+      "L7",
+      "L1"
+    ],
+    "limit": 0,
+    "seed": 20261005,
+    "mock_p_trap_slice": {
+      "L7": 0.55,
+      "L1": 0.05
+    },
+    "mock_p_uncertain": 0.2,
+    "mock_p_wrong_when_uncertain": 0.4
+  },
+  "finished": "2026-10-05T09:21:10",
+  "elapsed_s": 21301.3
+}

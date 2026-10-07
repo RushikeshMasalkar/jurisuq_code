@@ -1,0 +1,174 @@
+{
+  "run_id": "phaseA-laptop-v2",
+  "n_items": 200,
+  "slices": [
+    "L1",
+    "L7"
+  ],
+  "gate_auroc_max": 0.7,
+  "per_slice": {
+    "L1": {
+      "n_items": 100,
+      "n_scored": 99,
+      "n_excluded_unresolved": 1,
+      "methods": {
+        "disc_se": {
+          "n": 99,
+          "accuracy": 0.43434343434343436,
+          "auroc": 0.5431893687707641,
+          "aurc_norm": 0.07438413263756717,
+          "risk_at_50": 0.6161224489795918,
+          "risk_at_full": 0.5656565656565656,
+          "auroc_lo": 0.48675357443229605,
+          "auroc_hi": 0.6116326530612245
+        },
+        "se": {
+          "n": 99,
+          "accuracy": 0.43434343434343436,
+          "auroc": 0.44476744186046513,
+          "aurc_norm": -0.08775238454366359,
+          "risk_at_50": 0.6161224489795918,
+          "risk_at_full": 0.5656565656565656,
+          "auroc_lo": 0.3330578512396694,
+          "auroc_hi": 0.5587152209492635
+        },
+        "selfcheck": {
+          "n": 99,
+          "accuracy": 0.43434343434343436,
+          "auroc": 0.47134551495016613,
+          "aurc_norm": -0.059982707888731,
+          "risk_at_50": 0.5757142857142856,
+          "risk_at_full": 0.5656565656565656,
+          "auroc_lo": 0.3561464690496949,
+          "auroc_hi": 0.590531561461794
+        },
+        "agreement": {
+          "n": 99,
+          "accuracy": 0.43434343434343436,
+          "auroc": 0.5427740863787376,
+          "aurc_norm": 0.07438413263756717,
+          "risk_at_50": 0.6161224489795918,
+          "risk_at_full": 0.5656565656565656,
+          "auroc_lo": 0.48675357443229605,
+          "auroc_hi": 0.6111111111111112
+        },
+        "p_true": {
+          "n": 99,
+          "accuracy": 0.43434343434343436,
+          "auroc": 0.5735049833887044,
+          "aurc_norm": 0.04125218991265462,
+          "risk_at_50": 0.5555102040816327,
+          "risk_at_full": 0.5656565656565656,
+          "auroc_lo": 0.454664341761116,
+          "auroc_hi": 0.6838983050847458
+        }
+      },
+      "accuracy": 0.43434343434343436
+    },
+    "L7": {
+      "n_items": 100,
+      "n_scored": 100,
+      "n_excluded_unresolved": 0,
+      "methods": {
+        "disc_se": {
+          "n": 100,
+          "accuracy": 0.0,
+          "auroc": NaN,
+          "aurc_norm": NaN,
+          "risk_at_50": 1.0,
+          "risk_at_full": 1.0,
+          "auroc_lo": null,
+          "auroc_hi": null
+        },
+        "se": {
+          "n": 100,
+          "accuracy": 0.0,
+          "auroc": NaN,
+          "aurc_norm": NaN,
+          "risk_at_50": 1.0,
+          "risk_at_full": 1.0,
+          "auroc_lo": null,
+          "auroc_hi": null
+        },
+        "selfcheck": {
+          "n": 100,
+          "accuracy": 0.0,
+          "auroc": NaN,
+          "aurc_norm": NaN,
+          "risk_at_50": 1.0,
+          "risk_at_full": 1.0,
+          "auroc_lo": null,
+          "auroc_hi": null
+        },
+        "agreement": {
+          "n": 100,
+          "accuracy": 0.0,
+          "auroc": NaN,
+          "aurc_norm": NaN,
+          "risk_at_50": 1.0,
+          "risk_at_full": 1.0,
+          "auroc_lo": null,
+          "auroc_hi": null
+        },
+        "p_true": {
+          "n": 100,
+          "accuracy": 0.0,
+          "auroc": NaN,
+          "aurc_norm": NaN,
+          "risk_at_50": 1.0,
+          "risk_at_full": 1.0,
+          "auroc_lo": null,
+          "auroc_hi": null
+        }
+      },
+      "accuracy": 0.0
+    }
+  },
+  "gaps": {
+    "disc_se": {
+      "point": NaN
+    },
+    "se": {
+      "point": NaN
+    },
+    "selfcheck": {
+      "point": NaN
+    },
+    "agreement": {
+      "point": NaN
+    },
+    "p_true": {
+      "point": NaN
+    }
+  },
+  "collision": {
+    "L1": {
+      "n": 0
+    },
+    "L7": {
+      "n": 0
+    }
+  },
+  "judge_coverage": {
+    "n_items": 200,
+    "n_scored": 100,
+    "share_scored": 0.5,
+    "note": "unresolved answers are excluded from every metric in this report"
+  },
+  "gate_G1": {
+    "pass": false,
+    "ceiling_ok": false,
+    "gap_ok": false,
+    "contrast_ok": false,
+    "reasons": [
+      "ceiling: AUROC on L7 is undefined: only one correctness class is present (accuracy 0.0). With fewer than 10 zero-entropy items there is nothing for agreement to rank; record more items or use a second checkpoint.",
+      "AUROC contrast: L1-L7 gap excludes zero for 0/5 methods (none)",
+      "collision contrast: not available (no zero-entropy items measured)"
+    ],
+    "l7_accuracy": 0.0,
+    "best_method_on_L7": "disc_se",
+    "best_auroc_on_L7": NaN,
+    "ceiling_basis": "undefined",
+    "reading": "Reading: read the two conditions separately. If the ceiling is met but condition 2 fails, the model may simply not share the bias on this slice - try the second checkpoint (for example the 3B against the 7B model) and a lower temperature before touching the design. If the ceiling is NOT met, sample-only agreement already detects the error on L7, and the honest move is to report that and re-aim the paper at the calibration and abstention contribution rather than at the diagnostic one."
+  }
+}

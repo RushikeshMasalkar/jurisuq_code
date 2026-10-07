@@ -531,3 +531,101 @@ on the *old* law, where the model does have knowledge, its errors are ordinary
 (individual samples deviate) and sampling still cannot rank them. That is a
 second, independent piece of evidence for the same thesis, and it belongs in the
 paper rather than being treated as a nuisance.
+
+---
+
+## 16. Phase B — the legal relation model (implemented, not yet trained)
+
+Phase B adds one learned component — a classifier that decides the legal relation
+between two answers — and four rules around it. The rules are what make the
+component safe: identity is applied first and cannot be undone, a learned
+equivalence can only merge, and a merge that would contradict a blocking relation
+is skipped and counted.
+
+### 16.1 What was added
+
+| Path | What it is |
+|---|---|
+| `jurisuq/relations/schema.py` | the closed label set, the pair record and its validation |
+| `jurisuq/relations/pairs.py` | template pair generation + the structural verifier |
+| `jurisuq/relations/cluster_typed.py` | typed clustering: constraint, learned merge, cycle repair, canonicalisation |
+| `jurisuq/relations/stats.py` | typed statistics (entropy, agreement, contradiction mass) and classification metrics |
+| `jurisuq/relations/model.py` | pair serialisation, encoder + head, training, threshold selection, checkpoints |
+| `scripts/10_build_relations.py` | builds, verifies and splits the pair dataset; writes the manifest |
+| `scripts/11_train_relation.py` | fine-tunes the encoder, selects tau on dev, writes checkpoint metadata |
+| `scripts/12_eval_relation.py` | test metrics, the E2 separation test on stored Phase A records, gate G2 |
+| `configs/phase_b_relations.json` | dataset, encoder, training and gate settings |
+| `data/relations/crosswalk_v1.jsonl` | provision link table (successor_of, different_offence) |
+| `tests/test_relations.py` | 23 tests; 22 run without torch |
+
+Phase B reads the Phase A artefacts and never writes into them: script 12 hashes
+the whole Phase A run directory before and after evaluation and reports
+`phase_a_untouched`. The Phase A code path is unchanged — if torch is not
+installed, everything in `jurisuq/` still imports and the Phase A suite passes.
+
+### 16.2 Install and run
+
+```powershell
+pip install -r requirements-relations.txt        # ~450 MB encoder download
+python -m pytest tests -q                        # expect 76 passed, 1 skipped -> 0 skipped
+python scripts\10_build_relations.py             # 330 pairs, 214/58/58, manifest + hashes
+python scripts\11_train_relation.py --run-id phaseB-relations-01 --epochs 1 --limit 200
+python scripts\12_eval_relation.py --run-id phaseB-relations-01 --phase-a-run phaseA-laptop-v2-rejudged
+```
+
+The one-epoch limited fine-tune is a smoke test: record the seconds per step it
+prints, because that number — not any estimate — decides whether the full run is
+an overnight job or an hour-long one.
+
+Without a checkpoint, the harness still runs and is still informative:
+
+```powershell
+python scripts\12_eval_relation.py --run-id phaseB-relations-selftest --no-model --phase-a-run phaseA-laptop-v2-rejudged
+```
+
+It then labels relations by rule (identical key merges, a declared crosswalk link
+merges, anything else splits). In the build sandbox that scored macro-F1 0.247 and
+merge precision 0.7895 against an exact-key baseline of 0.776, and reported GATE
+G2 NOT YET — which is the correct outcome: rule-only relations cannot beat exact
+matching, and overturning that is the whole job of the learned model.
+
+### 16.3 What is not verified here
+
+Training, the encoder forward pass and the relation metrics have not been run on
+your machine, and the numbers they produce are yours to record. The synthetic
+pair set is also smaller than its design target and its test split is
+template-generated: `manifest.json` carries `human_verified_test: false` until
+1,500 pairs have been verified by hand, and no relation metric may be reported as
+human-level until then.
+
+### 16.4 Phase B on the target laptop — what was measured
+
+Numbers from the first real runs on the Lenovo (Qwen not involved; encoder-only):
+
+| Step | Setting | Result |
+|---|---|---|
+| InLegalBERT download | first `11_train_relation.py` | ~1.1 GB total (`.bin` + `safetensors`), cached under `%USERPROFILE%\.cache\huggingface` |
+| `11` smoke | 1 epoch, `--limit 200` | 73 s for the epoch; dev macro-F1 0.333 vs exact-key baseline 0.776 (expected: undertrained) |
+| `11` full | 3 epochs, 198 pairs | 161 s total (55.7 / 50.3 / 48.3 s per epoch); dev macro-F1 **0.777**, merge precision **0.903**, τ = 0.45 |
+| `12` | — | crashed on two defects in the harness (fixed below) |
+
+Three things follow from that table and are recorded in `configs/phase_b_relations.json`:
+
+1. **CPU training is cheap here** — under three minutes for three epochs, so the design target of
+   6,000 pairs is an overnight job, not a week. `epochs` is now 12: at 3 epochs the loss was still
+   1.06 and the model was level with the exact-key baseline.
+2. **A tie is not a pass.** 0.777 vs 0.776 is inside the noise of a 66-pair dev split; gate G2's
+   "beats exact key" condition needs a real margin, which comes from more epochs *and* more data.
+3. **The E2 pass must not spend the encoder on pairs the constraint already decides.** Samples
+   asserting the identical provision are merged by rule, so those pairs are filled without a
+   forward pass (`identity_pairs` in `cluster_typed.py`); the run prints both counts.
+
+### 16.5 Fixes applied after the first `12_eval_relation.py` run
+
+| Defect | Symptom | Fix |
+|---|---|---|
+| `UnboundLocalError: m` | E2 crashed whenever a checkpoint was loaded, because the sample count was assigned only in the rule branch | `m = len(texts)` hoisted above the branch; regression test in `tests/test_e2.py` |
+| silent long run | no output while the encoder walked 200 items, so the run looked hung | progress line every N items with elapsed, items/s and ETA (`--progress`, default 10) |
+| wasted forward passes | all M(M−1) ordered pairs sent to the encoder, including the ones step 1 decides | `identity_pairs` shortcut; the report records `encoder_pairs` and `rule_pairs` |
+| no partial E2 | had to wait for the full pass to see anything | `--limit-items N` for a quick pass, `--skip-e2` for metrics only |
+| `--source both` unusable | observed Phase A pairs stored `asserted: null`, so every one failed verification | assertions are now parsed from the stored text and the contribution is capped per item (`per_item=6`) |

@@ -424,9 +424,7 @@ def main() -> int:
         coll_text = collision_population(sub, level="text")
         results["collision"][s] = coll
         results.setdefault("collision_text", {})[s] = {
-           "n": coll_text.get("n", 0),
-	    "confident_wrong": coll_text.get("confident_wrong", float("nan"))
-	}
+            k: coll_text[k] for k in ("n", "accuracy", "lo", "hi", "confident_wrong")}
         if coll["n"]:
             print(f"  unanimous at the provision level: n = {coll['n']} of {len(sub)} items, "
                   f"accuracy = {coll['accuracy']:.3f} [{coll['lo']:.3f}, {coll['hi']:.3f}], "
