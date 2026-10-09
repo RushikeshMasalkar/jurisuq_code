@@ -1,0 +1,12 @@
+{
+  "run_id": "phaseA-laptop-v2-rejudged+ctx",
+  "phase": "C",
+  "source_run": "phaseA-laptop-v2-rejudged",
+  "as_of": "2026-10-01",
+  "jurisdiction": "IN",
+  "generated_utc": "2026-10-09T11:11:29+00:00",
+  "statutes_sha256": "20c98b74c0855c5ec4c8cda2b2d52388ea5f3e8d2514376f56db425bdd90b21e",
+  "links_sha256": "8ab1b9e40ff6cd66e11b0d58ff34c09ecd1579d18fcdc71233858a9ec3ce56d2",
+  "source_tree_hash": "a98583fd66db4f46bb1ac014",
+  "phase_a_untouched": true
+}

@@ -1,0 +1,30 @@
+{
+  "version": "statutes_v1",
+  "created_utc": "2026-10-09T11:21:17+00:00",
+  "n_rows": 48,
+  "n_ipc": 24,
+  "n_bns": 24,
+  "offence_clusters": [
+    "attempt_to_murder",
+    "cheating",
+    "criminal_breach_of_trust",
+    "criminal_intimidation",
+    "cruelty_by_husband",
+    "culpable_homicide",
+    "murder",
+    "theft",
+    "theft_in_dwelling",
+    "wrongful_restraint"
+  ],
+  "n_clusters": 10,
+  "verified_rows": 40,
+  "verified_share": 0.8333333333333334,
+  "sha256": "20c98b74c0855c5ec4c8cda2b2d52388ea5f3e8d2514376f56db425bdd90b21e",
+  "line_endings": "lf",
+  "overwrote_existing": true,
+  "overrides_file": "E:\\PROJECTS\\JURIS-UQ\\jurisuq_code\\data\\statutes\\statutes_v1.overrides.jsonl",
+  "overrides_applied": 40,
+  "overrides_unmatched": [],
+  "scope": "the ten offence clusters of the frozen slice and the provisions those clusters touch; not Indian criminal law",
+  "verification": "every row verified=false until checked against the official text (gazette + Schedule to the BNS, 2023); record results with 22_verify_statutes.py --apply"
+}
