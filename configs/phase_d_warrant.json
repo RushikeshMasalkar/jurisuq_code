@@ -1,0 +1,36 @@
+{
+  "phase": "D",
+  "run_id": "phaseA-laptop-v2-rejudged+ctx+warrant",
+  "out_dir": "runs",
+
+  "source_run": "phaseA-laptop-v2-rejudged+ctx",
+  "out_suffix": "+warrant",
+  "as_of_policy": "era",
+  "fixed_as_of": "2026-10-01",
+  "jurisdiction": "IN",
+
+  "statutes": "data/statutes/statutes_v1.jsonl",
+  "links": "data/relations/crosswalk_v1.jsonl",
+
+  "thresholds": {
+    "temporal": 1.0,
+    "jurisdiction": 1.0,
+    "contradiction": 0.0
+  },
+
+  "era_reference_dates": {
+    "transition_date": "2024-07-01",
+    "L7": "2024-07-01",
+    "L1": "2024-06-30"
+  },
+
+  "validation": {
+    "bootstrap_samples": 2000,
+    "bootstrap_seed": 0,
+    "gate_auroc_min": 0.5,
+    "gate_temporal_share_min": 0.5
+  },
+
+  "correctness_field": "majority_correct",
+  "limit": 0
+}
