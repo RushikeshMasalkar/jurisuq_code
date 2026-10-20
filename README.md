@@ -5,9 +5,10 @@
 ### Legal-aware uncertainty quantification for LLM-based Indian legal question answering
 
 [![Python](https://img.shields.io/badge/Python-3.11%2B-3776AB?logo=python&logoColor=white)](https://www.python.org/)
-[![Implemented through](https://img.shields.io/badge/implemented%20through-Phase%20C-2E7D32)](#implementation-status)
-[![Tests](https://img.shields.io/badge/tests-111%20passed%20%7C%201%20optional-2E7D32)](#testing)
+[![Implemented through](https://img.shields.io/badge/implemented%20through-Phase%20D-2E7D32)](#implementation-status)
+[![Tests](https://img.shields.io/badge/tests-136%20passed-2E7D32)](#testing)
 [![Phase C verification](https://img.shields.io/badge/Phase%20C%20legal%20verification-partial-F9A825)](#phase-c-statute-store-and-context-packs)
+[![Phase D gate](https://img.shields.io/badge/Gate%20G4-PASS-2E7D32)](#phase-d-common-mode-failure-detector)
 [![License](https://img.shields.io/badge/license-not%20yet%20declared-lightgrey)](#license)
 
 **A research codebase for measuring when an LLM repeatedly gives the same legally wrong answer—and for enriching sample-based uncertainty with typed legal relations and time-aware statutory context.**
@@ -17,7 +18,7 @@
 </div>
 
 > [!IMPORTANT]
-> This repository is a **research prototype**, not a legal research service and not a source of legal advice. Its datasets are scoped, partly synthetic, and not a complete statement of Indian criminal law. Phase C's software pipeline is implemented, but primary-source legal verification remains incomplete.
+> This repository is a **research prototype**, not a legal research service and not a source of legal advice. Its datasets are scoped, partly synthetic, and not a complete statement of Indian criminal law. Phase C's software pipeline is implemented, but primary-source legal verification remains incomplete; Phase D inherits that limit because its temporal verdicts are only as good as the Phase C statute store.
 
 ---
 
@@ -30,6 +31,7 @@
   - [Phase A: common-mode diagnostic](#phase-a-common-mode-diagnostic)
   - [Phase B: typed legal relations](#phase-b-typed-legal-relations)
   - [Phase C: statute store and context packs](#phase-c-statute-store-and-context-packs)
+  - [Phase D: common-mode failure detector](#phase-d-common-mode-failure-detector)
 - [System architecture](#system-architecture)
 - [Repository structure](#repository-structure)
 - [Requirements](#requirements)
@@ -39,6 +41,7 @@
   - [Phase A](#phase-a)
   - [Phase B](#phase-b)
   - [Phase C](#phase-c)
+  - [Phase D](#phase-d)
 - [Data and artefact contracts](#data-and-artefact-contracts)
 - [Configuration](#configuration)
 - [Metrics and decision gates](#metrics-and-decision-gates)
@@ -58,11 +61,12 @@
 
 Most sample-based uncertainty estimators treat disagreement across an LLM's answers as evidence of uncertainty and agreement as evidence of confidence. Legal question answering exposes a dangerous failure mode in that assumption: a model can repeatedly cite the same repealed, inapplicable, or incorrect provision across every sample. The samples agree, but the agreement is not legally warranted.
 
-JURIS-UQ studies this **common-mode legal error**. The repository currently implements three cumulative phases:
+JURIS-UQ studies this **common-mode legal error**. The repository currently implements four cumulative phases:
 
 1. **Phase A — diagnostic instrument.** Build a matched pre-/post-transition legal QA slice, sample multiple answers, judge the asserted provisions, compute sample-only uncertainty statistics, and test whether those statistics detect repeated legal error.
 2. **Phase B — typed legal relations.** Replace identity-only grouping with a five-way relation model and typed clustering, then re-cluster the frozen Phase A answers without modifying the original run.
 3. **Phase C — legal context.** Add a deterministic statute store, validity windows, IPC↔BNS links, coverage reporting, and immutable context-packed copies of stored runs.
+4. **Phase D — common-mode failure detector.** Decompose the observed agreement into the part the legal context warrants and the part that is merely repeated, and show that the temporal factor alone separates the unanimously-wrong target slice from the unanimously-correct control.
 
 The current implementation focuses on the transition from the **Indian Penal Code, 1860 (IPC)** to the **Bharatiya Nyaya Sanhita, 2023 (BNS)**, effective **1 July 2024**.
 
@@ -77,7 +81,8 @@ The current implementation focuses on the transition from the **Indian Penal Cod
 - Typed legal-semantic clustering with merge and blocking relations.
 - A date-aware statute store with explicit `True` / `False` / `None` validity semantics.
 - Context packs that report exactly how much of an answer set the statute store covers.
-- Frozen, machine-readable Phase A–C artefacts and integrity hashes.
+- A common-mode failure detector that decomposes agreement into warranted and merely-repeated parts, with era-aware temporal validity.
+- Frozen, machine-readable Phase A–D artefacts and integrity hashes.
 
 ---
 
@@ -100,20 +105,21 @@ Each L7 item has an L1 counterpart with the same underlying facts and `pair_id`.
 
 ## Implementation status
 
-Repository snapshot documented here: commit `e6a21a8` (`phase C: statute store, context packs, +ctx run (48 rows, 8 unresolved)`, 9 October 2026).
+Repository snapshot documented here: commit `e6a21a8` (Phase C) extended through Phase D (`common-mode failure detector, E4 validation, Gate G4 PASS`).
 
 | Phase | Scope | Status | Run / artefact of record |
 |---|---|---|---|
 | **A** | Sampling instrument and E1 common-mode diagnostic | **Complete and frozen** | `runs/phaseA-laptop-v2-rejudged/` |
 | **B** | Five-way relation model, typed clustering, and E2 re-clustering | **Implemented; run of record complete** | `runs/phaseB-relations-full/` |
 | **C** | Statute store, legal links, validity lookups, verification workflow, and context packs | **Engineering complete; legal verification partially complete** | `runs/phaseA-laptop-v2-rejudged+ctx/` |
+| **D** | Common-mode failure detector (M7): warranted-agreement decomposition, E4 validation, Gate G4 | **Complete and frozen** | `runs/phaseA-laptop-v2-rejudged+ctx+warrant/` |
 
 ### Scope boundary
 
-This README documents only the code and evidence implemented through **Phase C**. Later research modules described in the project guides are not represented here as completed functionality.
+This README documents only the code and evidence implemented through **Phase D**. Later research modules described in the project guides (Phases E–I) are not represented here as completed functionality.
 
 > [!WARNING]
-> Phase C must not yet be described as fully legally verified. The repository records 40 of 48 rows with `verified: true` through the checklist workflow, but those 40 are supported by secondary references in the current audit. **No row was independently confirmed against accessible primary India Code or Gazette provision text in that environment**, and eight rows remain unresolved.
+> Phase C must not yet be described as fully legally verified. The repository records 40 of 48 rows with `verified: true` through the checklist workflow, but those 40 are supported by secondary references in the current audit. **No row was independently confirmed against accessible primary India Code or Gazette provision text in that environment**, and eight rows remain unresolved. Phase D reads this store, so its temporal verdicts inherit that limit.
 
 ---
 
@@ -269,6 +275,44 @@ The existing values are preserved until an accessible official source is inspect
 
 See [`PHASE-C-RESULTS.md`](PHASE-C-RESULTS.md) for the consolidated audit and [`PHASE-C.md`](PHASE-C.md) for the implementation and verification workflow.
 
+### Phase D: common-mode failure detector
+
+Phase D is the module the project's thesis turns on. It decomposes the observed agreement among a model's samples into the part the legal context warrants and the part that is merely repeated, and it does so with no learned component. Its output is a fixed four-tuple that Phase E consumes and never recomputes.
+
+- **Observed agreement `A`** — the modal cluster's share (unanimity = 1); Phase A's `prov_agreement` is its exact-key special case.
+- **Temporal validity `T`** — the share of the modal cluster whose asserted provisions are in force at the **item's era date** (L7 → 2024-07-01, L1 → 2024-06-30), read from the Phase C statute store.
+- **Jurisdiction fit `J`** — the share of the modal cluster whose asserted provisions belong to the declared legal order.
+- **Contradiction mass `K`** — the probability mass of clusters whose relation to the modal cluster is `CONTRADICTORY` (from a Phase B relation matrix when present; exactly 0 on a single cluster; absent otherwise).
+- **Warranted agreement `W = A·T·J·(1−K)`** and the **common-mode score `CM = A − W`** — a large positive `CM` is the signature of the failure this project exists to detect.
+
+The factors are reported **separately before they are composed**, so Phase H can ablate one factor and attribute its effect. A factor the statute store cannot resolve is `None` (never `0`); when any factor is undefined, `W` and `CM` are undefined too, and the detector still fires on the resolvable factors.
+
+**The as-of date is the item's, not the analysis date.** An L7 item asks about the law *today*; the matched L1 item asks about the law *immediately before* the transition. The temporal factor is only meaningful at the date the question asks about — that is what makes the detector silent on a correct pre-transition answer (IPC 302 *was* in force then) and loud on a stale current-law answer (IPC 302 is not in force now).
+
+**Run of record:** `phaseA-laptop-v2-rejudged+ctx+warrant` (source `+ctx` run read-only, tree-hashed before and after)
+
+**Validation population:** the unanimous provision-level collision population (`prov_all_same = 1`), 33 items, which already carries the ground truth about which unanimous answers were wrong
+
+| Population | Items | Detector fires | Dominant flag |
+|---|---:|---:|---|
+| L7 unanimous, all wrong | 16 | **16 / 16** | `stale_provision` (15), `unresolvable_assertion` (1) |
+| L1 unanimous, all correct | 15 | **0 / 15** | — |
+| L1 unanimous, wrong | 2 | 0 / 2 | — (wrong-section errors, not staleness) |
+| All other items | 167 | fire rate 0.533 | correct-item alarm **0.000**, wrong-item alarm 0.640 |
+
+| Measurement | Result |
+|---|---:|
+| CM-score AUROC (collision population) | **0.9412** |
+| Bootstrap 95% CI (n = 32 scored) | **[0.8529, 1.0000]** |
+| Binary detector: TP / FP / TN / FN | 16 / 0 / 15 / 2 (precision 1.000, recall 0.889) |
+| Factor attribution (AUROC drop when pinned) | temporal **0.4412** (carries 100% of above-chance separation); jurisdiction 0.000; contradiction 0.000 |
+
+**Gate G4: PASS** — separation (AUROC 0.941, CI excludes 0.5), factor attribution (the temporal factor alone recovers the separation), and base-rate honesty (the false-alarm rate on correct items, 0.000, is below the alarm rate on wrong items, 0.889).
+
+The defensible interpretation: on this checkpoint and slice, agreement that is *total* (`A = 1`) can be legally *unwarranted* (`W = 0`), and the temporal factor alone identifies it — without a learned component and without reading a correctness label on the query path. It is not a general correctness oracle (it is correctly silent on wrong-section errors), and the collision population is small (33 items from one 7B checkpoint).
+
+See [`docs/results_phase_d.md`](docs/results_phase_d.md) for the full E4 record, [`PHASE-D-RESULTS.md`](PHASE-D-RESULTS.md) for the consolidated audit and hashes, and [`PHASE-D.md`](PHASE-D.md) for the implementation, commands, and semantics.
+
 ---
 
 ## System architecture
@@ -290,7 +334,11 @@ flowchart LR
     R1 --> C
     C --> R2[(New +ctx sibling run)]
 
+    C --> W[Phase D common-mode detector]
+    W --> R3[(New +ctx+warrant sibling run)]
+
     R1 -. tree hash before and after .-> R2
+    R2 -. tree hash before and after .-> R3
 ```
 
 ### Component map
@@ -306,6 +354,7 @@ flowchart LR
 | Record pipeline | `jurisuq/pipeline.py` | Converts sampled outputs into immutable JSONL run records |
 | Relations | `jurisuq/relations/` | Pair schema, synthetic data, classifier, typed clustering, relation statistics |
 | Legal context | `jurisuq/context/` | Statute loading, validity lookup, link lookup, and context packing |
+| Warrant | `jurisuq/warrant/` | Common-mode detector (M7): the A/T/J/K factors, warranted agreement, common-mode score, flags, E4 validation and Gate G4 |
 
 ---
 
@@ -316,7 +365,8 @@ jurisuq_code/
 ├── configs/
 │   ├── phase_a.json                 # real Phase A local-model configuration
 │   ├── phase_a_smoke.json           # deterministic mock configuration
-│   └── phase_b_relations.json       # relation dataset/model/E2 configuration
+│   ├── phase_b_relations.json       # relation dataset/model/E2 configuration
+│   └── phase_d_warrant.json         # Phase D era dates, thresholds, validation
 ├── data/
 │   ├── lexuq_slice.jsonl            # checked-in 200-item rebuilt L1/L7 revision
 │   ├── lexuq_slice_summary.json
@@ -330,7 +380,8 @@ jurisuq_code/
 │       └── verification_checklist.csv
 ├── docs/
 │   ├── results_phase_a.md
-│   └── results_phase_b.md
+│   ├── results_phase_b.md
+│   └── results_phase_d.md
 ├── jurisuq/
 │   ├── cluster.py
 │   ├── config.py
@@ -341,18 +392,23 @@ jurisuq_code/
 │   ├── normalize.py
 │   ├── pipeline.py
 │   ├── relations/                    # Phase B
-│   └── context/                      # Phase C
+│   ├── context/                      # Phase C
+│   └── warrant/                      # Phase D
 ├── runs/
 │   ├── phaseA-laptop-v2-rejudged/    # Phase A run of record
 │   ├── phaseB-relations-full/        # Phase B reports (checkpoint excluded)
-│   └── phaseA-laptop-v2-rejudged+ctx/# Phase C packed run
+│   ├── phaseA-laptop-v2-rejudged+ctx/# Phase C packed run
+│   └── phaseA-laptop-v2-rejudged+ctx+warrant/  # Phase D detected run
 ├── scripts/
 │   ├── 00_...06_*.py                 # Phase A
 │   ├── 10_...12_*.py                 # Phase B
-│   └── 20_...22_*.py                 # Phase C
-├── tests/                             # 112 collected tests
+│   ├── 20_...22_*.py                 # Phase C
+│   └── 23_...24_*.py                 # Phase D
+├── tests/                             # 135 collected tests
 ├── PHASE-C.md
 ├── PHASE-C-RESULTS.md
+├── PHASE-D.md
+├── PHASE-D-RESULTS.md
 ├── requirements.txt
 ├── requirements-nli.txt
 ├── requirements-relations.txt
@@ -380,6 +436,7 @@ jurisuq_code/
 | Optional standard semantic entropy | `requirements-nli.txt` | `torch`, `transformers` | Downloads the configured NLI checkpoint on first use |
 | Phase B relation model | `requirements-relations.txt` | `torch`, `transformers`, `sentencepiece` | Downloads `law-ai/InLegalBERT` on first use |
 | Phase C | none beyond base project | Python standard library | No runtime internet or learned model |
+| Phase D | none beyond base project | Python standard library | No runtime internet or learned model; reads the Phase C `+ctx` run |
 
 ### Generator for a real Phase A run
 
@@ -448,13 +505,13 @@ python -m pytest -q
 Expected in a core-only environment:
 
 ```text
-111 passed, 1 skipped
+135 passed, 1 skipped
 ```
 
 The skipped test is the torch-gated relation-model test. With compatible Phase B dependencies installed, the repository record reports:
 
 ```text
-112 passed
+136 passed
 ```
 
 Run the focused Phase C suite with:
@@ -462,6 +519,13 @@ Run the focused Phase C suite with:
 ```bash
 python -m pytest tests/test_context.py -q
 # 31 passed
+```
+
+Run the focused Phase D suite with:
+
+```bash
+python -m pytest tests/test_warrant.py -q
+# 24 passed
 ```
 
 Check the local generator configuration before a real Phase A run:
@@ -709,6 +773,42 @@ python -m pytest -q
 
 Do not hand-edit the generated statute JSONL. The checklist is the human-editable evidence record; `statutes_v1.overrides.jsonl` is its machine-readable projection.
 
+### Phase D
+
+Phase D is deterministic, stdlib-only, and reads the Phase C `+ctx` run. It has no model dependency.
+
+#### Detect the warrant tuple on the packed run
+
+```bash
+python scripts/23_detect_warrant.py \
+  --run-id phaseA-laptop-v2-rejudged+ctx \
+  --out-suffix +warrant
+```
+
+This writes a new sibling run `runs/phaseA-laptop-v2-rejudged+ctx+warrant/` whose records carry the registered `warrant_*` fields. The source `+ctx` run is tree-hashed before and after and the command fails the integrity rule if it changes. The as-of date is the item's era date by default (L7 → 2024-07-01, L1 → 2024-06-30).
+
+#### Validate the detector (E4) and evaluate Gate G4
+
+```bash
+python scripts/24_validate_warrant.py \
+  --run-id phaseA-laptop-v2-rejudged+ctx+warrant
+```
+
+Outputs `warrant_validation.json` and `fig_warrant.png` / `.svg` in the run directory. Every number is reproduced from the stored `warrant_*` fields alone — no re-detection, no model.
+
+Useful options:
+
+```bash
+# smoke: detect on the first 10 items
+python scripts/23_detect_warrant.py --run-id <+ctx run> --out-suffix +warrant-smoke --limit 10
+
+# the fixed-date ablation (fires on both slices by construction)
+python scripts/23_detect_warrant.py --run-id <run> --out-suffix +warrant-fixed \
+  --as-of-policy fixed --fixed-as-of 2026-10-01
+```
+
+Do not overwrite a shipped run: use a new `--out-suffix`.
+
 ---
 
 ## Data and artefact contracts
@@ -821,6 +921,39 @@ Phase C appends one registered field to a copied record:
 }
 ```
 
+### Phase D warrant record
+
+Phase D appends the registered `warrant_*` fields to a copied
+record. Each factor is reported separately before composition,
+and an unresolvable factor is `null`, never `0`:
+
+```json
+{
+  "warrant_observed_agreement": 1.0,
+  "warrant_temporal_validity": 0.0,
+  "warrant_jurisdiction_fit": 1.0,
+  "warrant_contradiction_mass": 0.0,
+  "warrant_warranted_agreement": 0.0,
+  "warrant_common_mode_score": 1.0,
+  "warrant_common_mode_flags": ["stale_provision"],
+  "warrant_modal_key": "IPC 302",
+  "warrant_modal_size": 10,
+  "warrant_n_clusters": 1,
+  "warrant_as_of": "2024-07-01",
+  "warrant_cluster_representation": "exact_key",
+  "warrant_contradiction_source": "exact_single_cluster",
+  "warrant_factor_coverage": {"temporal": {"n": 10, "known": 10, "unknown": 0},
+                              "jurisdiction": {"n": 10, "determinable": 10, "unknown": 0},
+                              "n_clusters": 1, "modal_share": 1.0}
+}
+```
+
+`warrant_as_of` is the item's **era** date (the date its question
+asks about), not the analysis date. `warrant_common_mode_score`
+is `null` whenever any factor is undefined, and the record then
+carries an `unresolvable_assertion` flag instead of a fabricated
+score.
+
 ### Artefact registry
 
 | Artefact | Producer | Purpose |
@@ -835,6 +968,9 @@ Phase C appends one registered field to a copied record:
 | `data/statutes/statutes_v1.jsonl` | `scripts/20_build_statutes.py` | Validated statute store |
 | `runs/<id>+ctx/` | `scripts/21_attach_context.py` | Context-packed sibling run |
 | `data/statutes/verification_checklist.csv` | `scripts/22_verify_statutes.py` | Human verification evidence |
+| `runs/<id>+ctx+warrant/` | `scripts/23_detect_warrant.py` | Warrant-tuple sibling run (`warrant_*` fields) |
+| `runs/<id>+ctx+warrant/warrant_validation.json` | `scripts/24_validate_warrant.py` | E4 record and Gate G4 verdict |
+| `runs/<id>+ctx+warrant/fig_warrant.*` | `scripts/24_validate_warrant.py` | Paper-ready E4 figure |
 
 ---
 
@@ -877,6 +1013,10 @@ The checked-in run of record used three epochs even though the current configura
 
 Phase C deliberately has no learned-model configuration. Its explicit CLI inputs are the source run, output suffix, as-of date, jurisdiction, statute table, link table, run directory, and optional item limit.
 
+### Phase D
+
+`configs/phase_d_warrant.json` controls the detector: the source and output run ids, the as-of policy (`era` or `fixed`) with the per-slice era reference dates, the three firing thresholds (temporal, jurisdiction, contradiction), the validation bootstrap settings, and the correctness field read offline. Phase D, like Phase C, has no learned-model configuration.
+
 ---
 
 ## Metrics and decision gates
@@ -914,11 +1054,21 @@ G2 passes only when all of the following hold:
 
 The run of record passed all four. The margin over the exact-key baseline was extremely small, and the separation condition reflected changed cluster assignments rather than rescued wrong collisions. These caveats are part of the result, not optional commentary.
 
+### Gate G4 — Phase D common-mode detector
+
+G4 passes only when all of the following hold, evaluated on the unanimous provision-level collision population:
+
+1. **Separation** — the common-mode score separates correct from incorrect unanimous answers with AUROC above `0.5` and a bootstrap interval excluding `0.5`;
+2. **Factor attribution** — pinning the temporal factor to its warrant-maximising value removes at least half of the above-chance separation the composite achieves (otherwise the composite is over-fitted to this slice and should be simplified); and
+3. **Base-rate honesty** — the alarm rate on unanimously-correct items is reported and is below the alarm rate on unanimously-wrong items (otherwise the detector is a constant, not a signal).
+
+The run of record passed all three: CM AUROC `0.941` with 95% CI `[0.853, 1.000]`; the temporal factor alone carries the entire above-chance separation (pinning `T` collapses AUROC to `0.500`); and the correct-item alarm rate (`0.000`) is below the wrong-item alarm rate (`0.889`).
+
 ---
 
 ## Testing
 
-The repository currently collects **112 tests**:
+The repository currently collects **135 tests**:
 
 | Test module | Collected tests | Coverage focus |
 |---|---:|---|
@@ -932,11 +1082,12 @@ The repository currently collects **112 tests**:
 | `tests/test_normalize.py` | 6 | Legal text and provision normalization |
 | `tests/test_pipeline_smoke.py` | 4 | End-to-end record construction |
 | `tests/test_relations.py` | 26 | Pair schema, relation data, model path, typed statistics |
+| `tests/test_warrant.py` | 24 | Detector factors, era-matched L1/L7 behaviour, composition, E4 and Gate G4 |
 
 Current core-environment result:
 
 ```text
-111 passed, 1 skipped in 1.71s
+135 passed, 1 skipped in 1.2s
 ```
 
 The one skip is expected when torch is not installed.
@@ -994,6 +1145,14 @@ The schema is additive: later stages may append fields and create new artefacts,
 - Eight rows remain unresolved across the IPC 409, IPC 468, IPC 344, and IPC 345 mapping pairs.
 - Any correction to a frozen crosswalk requires a documented new revision, new hashes, rerun tests, and regenerated dependent artefacts.
 
+### Phase D detector scope
+
+- The detector is a **common-mode temporal** failure detector, not a general correctness oracle: it is deliberately silent on wrong-section and wrong-act errors that are not staleness (the two L1-wrong false negatives are exactly this).
+- The validation population is the 33-item unanimous collision population from one 7B checkpoint on one synthetic slice; the CM AUROC is undefined within L7 alone (all L7 items are wrong), so the separation is read only on the matched L1+L7 collision population.
+- The jurisdiction (`J`) and contradiction (`K`) factors are implemented and tested but carry none of the current separation: no asserted provision in the frozen run is foreign, and the collision population is single-cluster (`K = 0` exactly).
+- The contradiction mass `K` is exact (`0`) on single-cluster records and honestly absent (`null`) on multi-cluster records that carry no relation matrix; Phase D does not fabricate a relation signal the record does not contain.
+- Phase D inherits the Phase C store's legal-verification state, so every temporal verdict is bounded by that store's `verified` flags and its eight unresolved rows.
+
 ### Repository packaging
 
 - There is no `pyproject.toml` or installable package configuration; scripts are intended to run from the repository root.
@@ -1021,6 +1180,9 @@ The schema is additive: later stages may append fields and create new artefacts,
 | L7 AUROC prints `None` / undefined | Every scored L7 answer has the same correctness class | Expected; use the declared collision-statistic interpretation |
 | Smoke run makes tracked data dirty | `run_phase_a.sh smoke` rebuilds an 80-item slice | Run in a clean worktree or restore the frozen data files afterward |
 | `SOURCE RUN CHANGED` | A supposedly frozen source run was modified | Stop, restore/re-clone the source, and investigate before using the output |
+| `ERROR: no such run: …items.jsonl` (Phase D) | The `--run-id` is not a packed `+ctx` run | Run Phase C's `scripts/21_attach_context.py` first |
+| Detector fires on both L1 and L7 | `--as-of-policy fixed` was used | That is the deliberate ablation; use the default `era` policy |
+| `CM defined on 0/200` | The source run has no `asserted_keys` | Detect on a Phase A run of record, not an empty tree |
 
 ---
 
@@ -1030,10 +1192,14 @@ The schema is additive: later stages may append fields and create new artefacts,
 |---|---|
 | [`docs/results_phase_a.md`](docs/results_phase_a.md) | Authoritative Phase A E1 result record and freeze note |
 | [`docs/results_phase_b.md`](docs/results_phase_b.md) | Authoritative Phase B test/E2 result record and freeze note |
+| [`docs/results_phase_d.md`](docs/results_phase_d.md) | Authoritative Phase D E4 result record and Gate G4 freeze note |
 | [`PHASE-C.md`](PHASE-C.md) | Phase C implementation, commands, semantics, and verification workflow |
 | [`PHASE-C-RESULTS.md`](PHASE-C-RESULTS.md) | Consolidated Phase C status, audit evidence, hashes, unresolved rows, and next actions |
+| [`PHASE-D.md`](PHASE-D.md) | Phase D implementation, commands, semantics, and the era-date rule |
+| [`PHASE-D-RESULTS.md`](PHASE-D-RESULTS.md) | Consolidated Phase D E4 validation, Gate G4 verdict, hashes, and next actions |
 | [`configs/phase_a.json`](configs/phase_a.json) | Real local-generator configuration |
 | [`configs/phase_b_relations.json`](configs/phase_b_relations.json) | Relation-model and E2 configuration |
+| [`configs/phase_d_warrant.json`](configs/phase_d_warrant.json) | Phase D era dates, thresholds, and validation settings |
 | [`data/relations/relations_v1/manifest.json`](data/relations/relations_v1/manifest.json) | Relation dataset hashes, counts, labels, and verification state |
 | [`data/statutes/statutes_v1.manifest.json`](data/statutes/statutes_v1.manifest.json) | Statute-table counts, scope, verification share, and content hash |
 
