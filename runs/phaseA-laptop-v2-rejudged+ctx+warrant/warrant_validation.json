@@ -1,0 +1,116 @@
+{
+  "experiment": "E4",
+  "n_records": 200,
+  "collision_population": {
+    "n": 33,
+    "separation": {
+      "auroc": 0.9411764705882353,
+      "n_scored": 32,
+      "n_excluded_undefined": 1,
+      "ci": {
+        "lo": 0.8529411764705882,
+        "hi": 1.0,
+        "n_boot": 2000
+      },
+      "defined": true
+    },
+    "binary_confusion": {
+      "n": 33,
+      "tp": 16,
+      "fp": 0,
+      "tn": 15,
+      "fn": 2,
+      "accuracy": 0.9393939393939394,
+      "precision": 1.0,
+      "recall": 0.8888888888888888,
+      "false_alarm_rate": 0.0
+    },
+    "by_group": {
+      "L1|correct=0": {
+        "n": 2,
+        "fires": 0,
+        "fire_rate": 0.0,
+        "flags": {},
+        "cm_mean": 0.0,
+        "cm_undefined": 0
+      },
+      "L1|correct=1": {
+        "n": 15,
+        "fires": 0,
+        "fire_rate": 0.0,
+        "flags": {},
+        "cm_mean": 0.0,
+        "cm_undefined": 0
+      },
+      "L7|correct=0": {
+        "n": 16,
+        "fires": 16,
+        "fire_rate": 1.0,
+        "flags": {
+          "stale_provision": 15,
+          "unresolvable_assertion": 1
+        },
+        "cm_mean": 1.0,
+        "cm_undefined": 1
+      }
+    },
+    "factor_ablation": {
+      "full_auroc": 0.9411764705882353,
+      "ablations": [
+        {
+          "factor": "temporal",
+          "pinned_to": 1.0,
+          "auroc_when_pinned": 0.5,
+          "auroc_drop_from_full": 0.4411764705882353
+        },
+        {
+          "factor": "jurisdiction",
+          "pinned_to": 1.0,
+          "auroc_when_pinned": 0.9411764705882353,
+          "auroc_drop_from_full": 0.0
+        },
+        {
+          "factor": "contradiction",
+          "pinned_to": 0.0,
+          "auroc_when_pinned": 0.9411764705882353,
+          "auroc_drop_from_full": 0.0
+        }
+      ]
+    }
+  },
+  "base_rate": {
+    "non_collision_items": 167,
+    "non_collision_fire_rate": 0.5329341317365269,
+    "correct_item_alarm_rate": 0.0,
+    "wrong_item_alarm_rate": 0.6402877697841727
+  },
+  "flag_census": {
+    "stale_provision": 80,
+    "unresolvable_assertion": 25
+  },
+  "gate_g4": {
+    "gate": "G4",
+    "conditions": {
+      "separation_auroc_gt_0.5_ci_excludes_0.5": true,
+      "temporal_factor_carries_half_of_above_chance": true,
+      "correct_item_alarm_below_wrong_item_alarm": true
+    },
+    "verdict": "PASS",
+    "notes": {
+      "separation_auroc": 0.9411764705882353,
+      "separation_ci": {
+        "lo": 0.8529411764705882,
+        "hi": 1.0,
+        "n_boot": 2000
+      },
+      "full_auroc": 0.9411764705882353,
+      "temporal_auroc_drop": 0.4411764705882353,
+      "temporal_share_of_above_chance": 1.0,
+      "correct_item_alarm_rate": 0.0,
+      "wrong_item_alarm_rate": 0.8888888888888888
+    }
+  },
+  "run_id": "phaseA-laptop-v2-rejudged+ctx+warrant",
+  "phase": "D",
+  "source_run": "phaseA-laptop-v2-rejudged+ctx"
+}
