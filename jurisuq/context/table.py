@@ -18,8 +18,8 @@ of the frozen slice and the provisions those clusters touch. Three tiers:
    Mappings were taken from published IPC->BNS comparative tables (the
    Schedule correspondence reproduced by state-police and legal-reference
    sources, e.g. IPC 306 -> BNS 108, IPC 384 -> BNS 308, IPC 417 -> BNS
-   318(2), IPC 468 -> BNS 336, IPC 344 -> BNS 127(4), IPC 345 -> BNS 127(5),
-   IPC 409 -> BNS 316(4), IPC 34 -> BNS 3(5)).
+   318(2), IPC 468 -> BNS 336(3), IPC 344 -> BNS 127(4), IPC 345 -> BNS
+   127(5), IPC 409 -> BNS 316(5), IPC 34 -> BNS 3(5)).
 
 EVERY row carries ``verified: false`` until a human compares it with the
 official text (gazette + the Schedule to the Bharatiya Nyaya Sanhita, 2023).
@@ -214,20 +214,20 @@ PAIRS: list[tuple] = [
      "dominion over property, dishonestly misappropriates or converts to his "
      "own use that property, commits criminal breach of trust.",
      "criminal_breach_of_trust", "definition", "extension"),
-    ("409", "316(4)",
+    ("409", "316(5)",
      "criminal breach of trust by public servant, banker, merchant or agent",
-     "Whoever, being in any manner entrusted with property, in the way of "
-     "his employment as a public servant, banker, merchant, factor, broker, "
-     "attorney or agent, commits criminal breach of trust in respect of that "
-     "property, shall be punished with imprisonment for life, or with "
-     "imprisonment of either description for a term which may extend to ten "
-     "years, and shall also be liable to fine.",
-     "Whoever, being in any manner entrusted with property, in the way of "
-     "his employment as a public servant, banker, merchant, factor, broker, "
-     "attorney or agent, commits criminal breach of trust in respect of that "
-     "property, shall be punished with imprisonment for life, or with "
-     "imprisonment of either description for a term which may extend to ten "
-     "years, and shall also be liable to fine.",
+     "Whoever, being in any manner entrusted with property, or with any "
+     "dominion over property, in his capacity of a public servant or in the "
+     "way of his business as a banker, merchant, factor, broker, attorney or "
+     "agent, commits criminal breach of trust in respect of that property, "
+     "shall be punished with imprisonment for life or up to ten years and "
+     "fine.",
+     "Whoever, being in any manner entrusted with property, or with any "
+     "dominion over property in his capacity of a public servant or in the "
+     "way of his business as a banker, merchant, factor, broker, attorney or "
+     "agent commits criminal breach of trust in respect of that property, "
+     "shall be punished with imprisonment for life or up to ten years and "
+     "fine.",
      "criminal_breach_of_trust", "custodial", "extension"),
     ("306", "108", "abetment of suicide",
      "If any person commits suicide, whoever abets the commission of such "
@@ -247,15 +247,15 @@ PAIRS: list[tuple] = [
      "description for a term which may extend to three years, or with fine, "
      "or with both.",
      "cheating", "custodial", "extension"),
-    ("468", "336", "forgery for purpose of cheating",
+    ("468", "336(3)", "forgery for purpose of cheating",
      "Whoever commits forgery, intending that the document forged shall be "
      "used for the purpose of cheating, shall be punished with imprisonment "
      "of either description for a term which may extend to seven years, and "
      "shall also be liable to fine.",
-     "Whoever commits forgery, intending that the document forged shall be "
-     "used for the purpose of cheating, shall be punished with imprisonment "
-     "of either description for a term which may extend to seven years, and "
-     "shall also be liable to fine.",
+     "Whoever commits forgery, intending that the document or electronic "
+     "record forged shall be used for the purpose of cheating, shall be "
+     "punished with imprisonment of either description for a term which may "
+     "extend to seven years, and shall also be liable to fine.",
      "cheating", "custodial", "extension"),
     ("34", "3(5)", "acts done by several persons in furtherance of common "
                    "intention",
@@ -285,8 +285,9 @@ PAIRS: list[tuple] = [
      "Whoever keeps any person in wrongful confinement, knowing that a writ "
      "for the liberation of that person has been duly issued, shall be "
      "punished with imprisonment of either description for a term which may "
-     "extend to two years in addition to any other term of imprisonment, and "
-     "shall also be liable to fine.",
+     "extend to two years in addition to any term of imprisonment to which "
+     "he may be liable under any other section of this Chapter and shall "
+     "also be liable to fine.",
      "wrongful_restraint", "custodial", "extension"),
 ]
 

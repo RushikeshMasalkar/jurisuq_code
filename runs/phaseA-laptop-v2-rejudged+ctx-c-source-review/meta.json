@@ -1,0 +1,12 @@
+{
+  "run_id": "phaseA-laptop-v2-rejudged+ctx-c-source-review",
+  "phase": "C",
+  "source_run": "phaseA-laptop-v2-rejudged",
+  "as_of": "2026-10-01",
+  "jurisdiction": "IN",
+  "generated_utc": "2026-10-21T11:18:53+00:00",
+  "statutes_sha256": "f82f479d67db3711d5f8c74dd9f49d9dc6b75f6e343e905b75581c6458fbcffc",
+  "links_sha256": "8ab1b9e40ff6cd66e11b0d58ff34c09ecd1579d18fcdc71233858a9ec3ce56d2",
+  "source_tree_hash": "a98583fd66db4f46bb1ac014",
+  "phase_a_untouched": true
+}

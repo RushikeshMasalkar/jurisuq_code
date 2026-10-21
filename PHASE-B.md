@@ -15,6 +15,8 @@ read-only.
 - `configs/phase_b_relations.json`: model, split, device, and threshold setup.
 - `data/relations/relations_v1/`: train/dev/test data and manifest.
 - `runs/phaseB-relations-full/`: run-of-record reports.
+- `runs/full/`: supplemental full E2 evaluation report.
+- `runs/relations-full/`: supplemental test-only evaluation report.
 
 The seven controlled strata cover same-provision paraphrases, context
 dependence, IPC/BNS crosswalk equivalence, adjacent-section and cross-act hard
@@ -39,6 +41,22 @@ or `--no-model --limit-items 10` for the rule-only plumbing path. The
 approximately 440 MB learned checkpoint is ignored by Git, so a fresh clone
 must train or provide a compatible checkpoint before reproducing the learned
 report.
+
+### Supplemental evaluation records
+
+Two additional local evaluations were run without changing the dataset,
+checkpoint, or frozen Phase A input:
+
+| Output | Scope | Result |
+|---|---|---|
+| `runs/full/relation_report.json` | Full learned evaluation, including E2 | Same test metrics as the run of record; 130 changed items; G2 `PASS`; E2 took 636.6 s |
+| `runs/relations-full/relation_report.json` | Learned test metrics with `--skip-e2` | Same test metrics; E2 intentionally skipped; G2 `NOT YET` because the separation criterion was not evaluated |
+
+These are supplemental reruns, not replacements for
+`runs/phaseB-relations-full/`. The authoritative Phase B result remains the
+run of record below because it includes the complete training metadata,
+training log, test report, and full E2 results. The shorter `full` report has
+the same metrics and gate outcome but does not include the training metadata.
 
 ## Result record
 
