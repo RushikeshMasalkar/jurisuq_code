@@ -1,0 +1,23 @@
+{
+  "phase": "E",
+  "module": "M8",
+  "run_id": "phaseA-laptop-v2-rejudged+ctx+warrant+uq",
+  "source_run_id": "phaseA-laptop-v2-rejudged+ctx+warrant",
+  "source_tree_sha256_before": "12a1039b4a7b4650f356431f18c3ceec719d3a47ad331b954b20f7e2463976f3",
+  "source_tree_sha256_after": "12a1039b4a7b4650f356431f18c3ceec719d3a47ad331b954b20f7e2463976f3",
+  "source_unchanged": true,
+  "generated_utc": "2026-10-21T08:38:54Z",
+  "n_items": 200,
+  "score_modes": {
+    "legal_aware": 32,
+    "sample_only_fallback": 168,
+    "unscorable": 0
+  },
+  "fallback_reasons": {
+    "warrant_warranted_agreement missing, null, or invalid; warrant_common_mode_score missing, null, or invalid; warrant_contradiction_mass missing, null, or invalid": 167,
+    "warrant_warranted_agreement missing, null, or invalid; warrant_common_mode_score missing, null, or invalid": 1
+  },
+  "model_path": "runs\\phaseE_model.json",
+  "correctness_labels_used_by_scoring_path": false,
+  "calibration_status": "uncalibrated; not a probability of correctness"
+}

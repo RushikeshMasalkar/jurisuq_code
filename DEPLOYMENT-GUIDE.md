@@ -84,7 +84,7 @@ python -m pytest -q
 Expected (core environment, no torch):
 
 ```text
-135 passed, 1 skipped in ~1s
+138 passed, 1 skipped in ~1s
 ```
 
 The single skip is the pre-existing torch-gated Phase B
@@ -92,7 +92,7 @@ relation-model test. The **24** new Phase D tests are in
 `tests/test_warrant.py`; run them alone with:
 
 ```powershell
-python -m pytest tests\test_warrant.py -q     # 24 passed
+python -m pytest tests\test_warrant.py -q     # 27 passed
 ```
 
 ## 4. Run the phases, in order
@@ -163,10 +163,10 @@ table must hash to
 
 ```powershell
 :: Step 1 — attach the warrant tuple to the Phase C +ctx run
-python -X utf8 scripts\23_detect_warrant.py --run-id "phaseA-laptop-v2-rejudged+ctx" --out-suffix "+warrant"
+python scripts\23_detect_warrant.py --run-id phaseA-laptop-v2-rejudged+ctx --out-suffix +warrant
 
 :: Step 2 — E4 validation and Gate G4
-python -X utf8 scripts\24_validate_warrant.py --run-id "phaseA-laptop-v2-rejudged+ctx+warrant"
+python scripts\24_validate_warrant.py --run-id phaseA-laptop-v2-rejudged+ctx+warrant
 ```
 
 **Step 1 expected output:**
@@ -204,7 +204,7 @@ it and confirm the two integrity anchors hash to the documented
 values:
 
 ```powershell
-python -X utf8 scripts\23_detect_warrant.py --run-id "phaseA-laptop-v2-rejudged+ctx" --out-suffix "+warrant" --force
+python scripts\23_detect_warrant.py --run-id phaseA-laptop-v2-rejudged+ctx --out-suffix +warrant --force
 python -m pytest tests\test_warrant.py -q
 # then:
 Get-FileHash -Algorithm SHA256 runs\phaseA-laptop-v2-rejudged+ctx+warrant\items.jsonl
@@ -243,7 +243,7 @@ git apply ..\README_phaseD_patch.diff
 The patch makes exactly these edits to `README.md`:
 
 1. **Badges** — "Implemented through" `Phase C` → `Phase D`;
-   tests `111 passed` → `135 passed`; adds a
+   tests `111 passed` → `138 passed`; adds a
    `Gate G4-PASS` badge.
 2. **Disclaimer** — notes Phase D inherits Phase C's
    legal-verification limit.
@@ -272,7 +272,7 @@ The patch makes exactly these edits to `README.md`:
     `+ctx+warrant` run, `scripts/23…24`, `PHASE-D.md`,
     `PHASE-D-RESULTS.md`; test count 112 → 135.
 11. **Requirements** — adds the Phase D row (stdlib-only).
-12. **Quick verification** — `135 passed, 1 skipped`; adds the
+12. **Quick verification** — `138 passed, 1 skipped`; adds the
     focused Phase D suite command.
 13. **Reproducing the project** — adds a **"Phase D"**
     subsection with the two commands and the useful options.
@@ -317,17 +317,33 @@ git checkout -b phase-d
 Expand-Archive -Path ..\jurisuq_phaseD_drop.zip -DestinationPath . -Force
 ```
 
-The drop contains only additive files (a new `jurisuq/warrant/`
+The drop contains the new Phase D files (a new `jurisuq/warrant/`
 package, two new scripts, one new test module, one new config,
-three new docs); it overwrites nothing. Then apply the README
-patch (§6), install nothing new, and run §3 → §4.4.
+three new docs) **plus three one-line encoding-robustness fixes
+to existing Phase C files** — `jurisuq/context/statute.py`,
+`jurisuq/context/links.py` and `scripts/21_attach_context.py` —
+so that every read on the Phase D path is explicit UTF-8. Those
+three changes are backward-compatible (they alter no behaviour on
+ASCII data; they only stop a Windows cp1252 locale from raising on
+the non-ASCII text that Phase C itself writes). Nothing else is
+overwritten. Then apply the README patch (§6), install nothing
+new, and run §3 → §4.4.
+
+Why this matters: Phase C writes its `+ctx` artefacts with
+`ensure_ascii=False`, so `runs/…+ctx/items.jsonl` carries real
+UTF-8 (curly quotes, and in some samples CJK text). The Phase A
+source files are pure ASCII, which is why Phases A–C ran clean;
+Phase D is the first phase to *read* the non-ASCII `+ctx` output,
+so it is where a locale-default read raises. The fix is explicit
+`encoding="utf-8"` on every read — already applied, so the plain
+commands in §4 work without `python -X utf8`.
 
 ## 8. Troubleshooting
 
 | Symptom | Cause | Fix |
 |---|---|---|
 | `ModuleNotFoundError: jurisuq` | you ran from a subfolder | `cd` to the repo root (every script inserts the root into `sys.path`) |
-| `135 passed` becomes `111 passed` | the drop was not extracted into the repo root | re-extract the drop so `jurisuq/warrant/` sits next to `jurisuq/context/` |
+| `138 passed` becomes `111 passed` | the drop was not extracted into the repo root | re-extract the drop so `jurisuq/warrant/` sits next to `jurisuq/context/` |
 | `ERROR: no such run: …+ctx/items.jsonl` | Phase D was pointed at an unpacked run | run Phase C's `21_attach_context.py` first, or point at the shipped `phaseA-laptop-v2-rejudged+ctx` |
 | `ERROR: <out> already exists` | re-running a shipped suffix | use a new `--out-suffix`, or `--force` for a deliberate replacement |
 | Detector fires on **both** slices | `--as-of-policy fixed` was used | that is the deliberate ablation; use the default `era` policy |
@@ -335,20 +351,42 @@ patch (§6), install nothing new, and run §3 → §4.4.
 | `SOURCE RUN CHANGED` (exit 2) | something wrote into the frozen `+ctx` run | restore it from git / re-clone; investigate before trusting the report |
 | `Get-FileHash` shows a different value than documented | you are hashing `warrant_report.json` | that file carries a timestamp; the deterministic anchors are `items.jsonl` and `warrant_validation.json` |
 | `git apply` fails on the README patch | your README already diverged | apply the patch to the Phase C README, or copy the Phase D sections by hand from `PHASE-D.md` |
+| `UnicodeDecodeError: 'charmap' codec can't decode byte 0x9d` | Windows' cp1252 locale default reading the UTF-8 `+ctx` artefacts (they contain curly quotes and CJK text) | **fixed in this drop** — every Phase D/C read is now explicit UTF-8, so the plain command works. Re-extract the updated drop zip. `python -X utf8` was only a workaround. |
 
 ## 9. Where Phase D sits in the roadmap
 
-Phase D is module **M7**. Its output — the four-tuple
-`(A, T, J, K)` composed into `W` and `CM`, plus the flags — is
-consumed by **Phase E** (the legal-aware uncertainty estimator,
-M8), which must weight and combine the evidence but **must not
-recompute** any of it. The `warrant_*` fields are now registered
-on the `+ctx+warrant` records, so Phase E reads
-`warrant_warranted_agreement` (the warrant deficit `1 − W`),
-`warrant_common_mode_score`, and the flags directly. With the
-detector absent, those fields are `null` and the estimator must
-fall back to the sample-only scores — never treat `null` as
-zero. That is the degradation ladder the deployment contract
-requires, and it is already exercised by the design.
+Phase D is module **M7**; Phase E is the **M8** uncertainty estimator. Phase E consumes the stored `warrant_warranted_agreement`, `warrant_common_mode_score`, and `warrant_contradiction_mass` fields. It never recomputes `(A, T, J, K)`, `W`, or `CM`. If any required legal field is missing, null, non-finite, or invalid, the record takes the documented sample-only `u_prov` fallback; no null becomes zero. The scorer is label-blind, while the separate fit and validation scripts access correctness labels only for training and evaluation respectively. The score is uncalibrated, and the current G5 status is NOT_EVALUABLE because the target L7 population has only one correctness class.
 
-Windows encoding note: Use Python's -X utf8 option when running the Phase D scripts on Windows if the default system encoding cannot decode the input JSONL file.
+See [`PHASE-E.md`](PHASE-E.md) for the full interface and field definitions and [`docs/results_phase_e.md`](docs/results_phase_e.md) for the actual sandbox run results and caveats.
+
+## 10. Run Phase E (M8)
+
+Run these commands from the repository root in PowerShell. Phase E uses the already-generated Phase D run; do not rerun Phase D unless its input artefacts are missing. It does not call LM Studio and needs no additional package beyond the project's existing environment (`pytest` is used for tests).
+
+```powershell
+# Optional: activate the existing environment.
+.\.venv\Scripts\Activate.ps1
+
+# Mandatory focused test.
+python -X utf8 -m pytest tests\test_uncertainty.py -q
+
+# Mandatory: fit the model on legal-complete development records only.
+python -X utf8 scripts\25_fit_uncertainty.py --run-id "phaseA-laptop-v2-rejudged+ctx+warrant" --model-out runs\phaseE_model.json
+
+# Mandatory: score into a distinct sibling run; this command does not read correctness labels.
+python -X utf8 scripts\26_estimate_uncertainty.py --run-id "phaseA-laptop-v2-rejudged+ctx+warrant" --model runs\phaseE_model.json --out-suffix "+uq"
+
+# Mandatory: held-out E5 comparison and G5 status.
+python -X utf8 scripts\27_validate_uncertainty.py --run-id "phaseA-laptop-v2-rejudged+ctx+warrant+uq"
+
+# Optional: inspect output metadata and metrics.
+Get-Content runs\phaseA-laptop-v2-rejudged+ctx+warrant+uq\meta.json -Raw
+Get-Content runs\phaseA-laptop-v2-rejudged+ctx+warrant+uq\uq_validation.json -Raw
+
+# Mandatory full regression check after the Phase E changes.
+python -X utf8 -m pytest -q
+```
+
+The fit command creates `runs/phaseE_model.json`; scoring creates `runs/phaseA-laptop-v2-rejudged+ctx+warrant+uq/` with `items.jsonl`, `meta.json`, and a copy `uq_model.json`; validation adds `uq_validation.json`. If the `+uq` output already exists, use `--force` on script 26 to replace only that generated Phase E sibling output.
+
+The checked-in pilot produces 32 `legal_aware` and 168 `sample_only_fallback` rows. This can vary if the local Phase D files differ. The prior sandbox execution reported 149 passed, 1 skipped (the torch-gated test). A historical Windows PowerShell execution in the project `.venv` on 2026-10-21 reported 147 passed in 36.84s; the latest post-change Windows PowerShell execution in the same `.venv`, using `.\.venv\Scripts\python.exe -X utf8 -m pytest -q`, reported 149 passed in 7.58s. These are separate environment-specific executions. The current held-out L7 slice is single-class, so AUROC is undefined and G5 must report NOT_EVALUABLE—not PASS. The L1/control comparison is exploratory; it does not establish universal performance.
