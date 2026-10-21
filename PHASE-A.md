@@ -1,3 +1,69 @@
+# JURIS-UQ Phase A: sampling and common-mode diagnostic
+
+Phase A is the diagnostic instrument. It builds a matched 200-item L1/L7
+slice, samples answers from an OpenAI-compatible local model, extracts asserted
+provisions, resolves correctness, computes sample-only uncertainty statistics,
+and evaluates the E1 common-mode premise.
+
+## Components and data
+
+- `jurisuq/generators.py`: mock and OpenAI-compatible local generators.
+- `jurisuq/normalize.py` and `jurisuq/judge.py`: conservative extraction and
+  provision-based correctness resolution.
+- `jurisuq/cluster.py` and `jurisuq/metrics.py`: clustering and AUROC,
+  risk-coverage, AURC, ECE, bootstrap, and kappa metrics.
+- `scripts/00_env_check.py` through `06_pilot.py`: environment, data,
+  inference, analysis, plotting, re-judging, and pilot workflows.
+- `data/lexuq_slice.jsonl`: 200 records, 100 matched L1/L7 pairs.
+- `runs/phaseA-laptop-v2-rejudged/`: frozen run of record.
+
+The laptop-frozen Phase A dataset hash is
+`45b2d194e9c2f623457481c0d7d02f36c6267ec65c0b75ee3df2be4c0d1d010a`.
+The currently generated repository slice has a different recorded hash; do
+not compare runs without recording the dataset digest.
+
+## Reproduce or inspect
+
+Install the shared requirements and, for the optional standard NLI backend,
+`requirements-phase-a.txt`. For a report-only analysis of the shipped run:
+
+```bash
+python scripts/03_analyze_e1.py --run-id phaseA-laptop-v2-rejudged
+python scripts/04_make_figure.py --run-id phaseA-laptop-v2-rejudged
+```
+
+For a new local-model run, start LM Studio or `llama-server`, check it, pilot,
+then run the resumable inference:
+
+```bash
+python scripts/00_env_check.py --model qwen2.5-7b-instruct
+python scripts/06_pilot.py --config configs/phase_a.json --run-id phaseA-pilot --set model=qwen2.5-7b-instruct
+python scripts/02_run_inference.py --config configs/phase_a.json --run-id phaseA-my-run --set model=qwen2.5-7b-instruct
+python scripts/03_analyze_e1.py --run-id phaseA-my-run
+```
+
+Use `python scripts/00_env_check.py --skip-endpoint` for a local-only check.
+`run_phase_a.sh smoke` uses a mock generator but rewrites the data slice, so
+run it only in a disposable worktree. Re-judging uses stored answers and does
+not resample:
+
+```bash
+python scripts/05_rejudge.py --config configs/phase_a.json --run-id phaseA-my-run --out-suffix=-rejudged
+```
+
+## Result record
+
+[The results section below is authoritative. It preserves the E1 AUROC
+single-class limitation, collision counts, confidence
+intervals, G1 PASS, historical v1/re-judged runs, and the frozen dataset note.
+Phase B consumes the stored answers without changing this run.
+
+---
+
+## Complete experimental results and validation record
+
+### Merged record: `PHASE-A.md`
+
 # Phase A results — E1 common-mode diagnostic
 
 Run of record. The numbers below are transcribed from the run report produced by

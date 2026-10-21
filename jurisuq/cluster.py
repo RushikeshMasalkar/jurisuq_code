@@ -186,7 +186,7 @@ class NLIEntailmentBackend:
         except ImportError as exc:  # pragma: no cover - depends on the machine
             raise ImportError(
                 "NLIEntailmentBackend needs `transformers` and `torch`. "
-                "Install them (see requirements-nli.txt) or set "
+                "Install them (see requirements-phase-a.txt) or set "
                 "allow_lexical_fallback=true."
             ) from exc
         self._torch = torch

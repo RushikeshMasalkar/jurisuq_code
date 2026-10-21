@@ -69,8 +69,8 @@ python -m pip install -r requirements.txt
 `requirements.txt` installs `requests`, `numpy`, `matplotlib`
 and `pytest`. That is everything Phase D (and the Phase A/B/C
 plumbing you are about to re-verify) needs. The optional NLI and
-relation-model requirements (`requirements-nli.txt`,
-`requirements-relations.txt`) are **not** needed for Phase D.
+relation-model requirements (`requirements-phase-a.txt`,
+`requirements-phase-b.txt`) are **not** needed for Phase D.
 
 ## 3. Quick verification (the non-mutating check)
 
@@ -268,9 +268,9 @@ The patch makes exactly these edits to `README.md`:
    own tree-hash edge; the component map gains the *Warrant*
    layer (`jurisuq/warrant/`).
 10. **Repository structure** — adds `configs/phase_d_warrant.json`,
-    `docs/results_phase_d.md`, `jurisuq/warrant/`, the
+    `PHASE-D.md`, `jurisuq/warrant/`, the
     `+ctx+warrant` run, `scripts/23…24`, `PHASE-D.md`,
-    `PHASE-D-RESULTS.md`; test count 112 → 135.
+    `PHASE-D.md`; test count 112 → 135.
 11. **Requirements** — adds the Phase D row (stdlib-only).
 12. **Quick verification** — `138 passed, 1 skipped`; adds the
     focused Phase D suite command.
@@ -292,8 +292,8 @@ The patch makes exactly these edits to `README.md`:
 
 If you prefer to edit by hand rather than apply the patch, the
 authoritative Phase D prose already lives in
-`PHASE-D.md`, `PHASE-D-RESULTS.md` and
-`docs/results_phase_d.md`; mirror those sections into the README
+`PHASE-D.md`, `PHASE-D.md` and
+`PHASE-D.md`; mirror those sections into the README
 at the anchor points listed above.
 
 After editing, commit on a new branch with a new run id for any
@@ -357,7 +357,8 @@ commands in §4 work without `python -X utf8`.
 
 Phase D is module **M7**; Phase E is the **M8** uncertainty estimator. Phase E consumes the stored `warrant_warranted_agreement`, `warrant_common_mode_score`, and `warrant_contradiction_mass` fields. It never recomputes `(A, T, J, K)`, `W`, or `CM`. If any required legal field is missing, null, non-finite, or invalid, the record takes the documented sample-only `u_prov` fallback; no null becomes zero. The scorer is label-blind, while the separate fit and validation scripts access correctness labels only for training and evaluation respectively. The score is uncalibrated, and the current G5 status is NOT_EVALUABLE because the target L7 population has only one correctness class.
 
-See [`PHASE-E.md`](PHASE-E.md) for the full interface and field definitions and [`docs/results_phase_e.md`](docs/results_phase_e.md) for the actual sandbox run results and caveats.
+See [`PHASE-E.md`](PHASE-E.md) for the full interface, field definitions,
+actual sandbox run results, and caveats.
 
 ## 10. Run Phase E (M8)
 

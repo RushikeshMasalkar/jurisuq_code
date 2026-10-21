@@ -62,7 +62,7 @@ def main() -> None:
 
     if not M.HAS_TORCH or not M.HAS_TRANSFORMERS:
         raise SystemExit("torch/transformers are required to train; install the relation "
-                         "extras first (see requirements-relations.txt)")
+                         "extras first (see requirements-phase-b.txt)")
 
     run_dir = ROOT / cfg["run_dir"] / args.run_id
     run_dir.mkdir(parents=True, exist_ok=True)
