@@ -1,3 +1,60 @@
+# JURIS-UQ Phase B: typed legal relations
+
+Phase B replaces identity-only grouping with a five-way relation model and
+typed clustering. It builds a deterministic relation dataset, trains/evaluates
+an InLegalBERT classifier, and re-clusters the frozen Phase A answers
+read-only.
+
+## Components and data
+
+- `jurisuq/relations/`: pair schema, synthetic strata, model, typed clustering,
+  and relation statistics.
+- `scripts/10_build_relations.py`: build or verify `relations_v1`.
+- `scripts/11_train_relation.py`: train a checkpoint under `models/relation/`.
+- `scripts/12_eval_relation.py`: test metrics and E2 re-clustering.
+- `configs/phase_b_relations.json`: model, split, device, and threshold setup.
+- `data/relations/relations_v1/`: train/dev/test data and manifest.
+- `runs/phaseB-relations-full/`: run-of-record reports.
+
+The seven controlled strata cover same-provision paraphrases, context
+dependence, IPC/BNS crosswalk equivalence, adjacent-section and cross-act hard
+negatives, and ambiguous assertions. Labels are rule-generated, not
+human-annotated. The relation dataset content hash is
+`e1aa4ba0916cbc95e9e8edd93aba11a795c7ea66bde636aeb9b2bf4da8177674`.
+
+## Reproduce
+
+Install the shared requirements and the phase file. Install the PyTorch wheel
+appropriate to the machine before the phase file if needed:
+
+```bash
+python scripts/10_build_relations.py --verify-only
+python scripts/10_build_relations.py --config configs/phase_b_relations.json --source synthetic
+python scripts/11_train_relation.py --config configs/phase_b_relations.json --run-id phaseB-relations-repro --epochs 3
+python scripts/12_eval_relation.py --config configs/phase_b_relations.json --run-id phaseB-relations-repro --phase-a-run phaseA-laptop-v2-rejudged
+```
+
+Use `--skip-e2` for test metrics only, `--limit-items 10` for a timing pass,
+or `--no-model --limit-items 10` for the rule-only plumbing path. The
+approximately 440 MB learned checkpoint is ignored by Git, so a fresh clone
+must train or provide a compatible checkpoint before reproducing the learned
+report.
+
+## Result record
+
+[The results section below is authoritative. It preserves the complete
+train/test metrics, confusion matrix, merge metrics,
+E2 counts and timing, G2 interpretation, and limitations. In particular,
+test macro-F1 is 0.7770 versus 0.7765 exact-key baseline; all six errors are
+false merges; and typed clustering changes 130 item states without rescuing
+an exact collision.
+
+---
+
+## Complete experimental results and validation record
+
+### Merged record: `PHASE-B.md`
+
 # Phase B results — typed legal relations and the E2 re-clustering test
 
 Run of record. Numbers below are transcribed from
@@ -207,7 +264,7 @@ characterises the pipeline, not the legal domain.
    population) before Phase C relies on G2-style gates; the current alternative cannot
    fire and the typed-gap alternative can be satisfied by dilution.
 9. **Phase A is unchanged.** `phaseA-laptop-v2-rejudged` remains the Phase A run of
-   record; every number in `docs/results_phase_a.md` stands as published.
+   record; every number in `PHASE-A.md` stands as published.
 
 ## Freeze note
 

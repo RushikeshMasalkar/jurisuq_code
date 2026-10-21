@@ -1,4 +1,5 @@
 # Phase B extras. Phase A does not need any of these.
+-r requirements.txt
 # CPU or Intel-Arc (xpu) PyTorch: install the wheel that matches the machine first,
 #   pip install torch --index-url https://download.pytorch.org/whl/cpu
 # or, for Intel Arc / Core Ultra (XPU build),
