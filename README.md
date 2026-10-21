@@ -39,8 +39,8 @@ leave their source runs unchanged. Phase E never recomputes Phase D outputs.
 | Phase | Status | Run or record of reference |
 |---|---|---|
 | A | Complete and frozen | `runs/phaseA-laptop-v2-rejudged/` |
-| B | Implemented; run of record complete | `runs/phaseB-relations-full/` |
-| C | Engineering complete; legal verification partial | `runs/phaseA-laptop-v2-rejudged+ctx/` |
+| B | Implemented; run of record complete; supplemental evaluations retained | `runs/phaseB-relations-full/` |
+| C | Engineering complete; four mappings corrected and eight target rows verified from documented statutory text | `runs/phaseA-laptop-v2-rejudged+ctx/` |
 | D | Complete and frozen; G4 PASS | `runs/phaseA-laptop-v2-rejudged+ctx+warrant/` |
 | E | Implemented pilot; G5 NOT_EVALUABLE | `runs/phaseA-laptop-v2-rejudged+ctx+warrant+uq/` |
 
@@ -176,10 +176,19 @@ The project preserves the original metrics rather than normalizing them:
   its provision-level collision population is 16/100 and all 16 are wrong.
 - Phase B test macro-F1 is 0.7770 versus the 0.7765 exact-key baseline;
   all six errors are false merges, and the L7 typed collision population is
-  44 with accuracy 0.0000.
-- Phase C contains 48 statute rows (40 secondary-source supported, 8
-  unresolved), 0/48 independently primary-source verified, and context
-  coverage 0.689034 (421 known of 611 lookups).
+  44 with accuracy 0.0000. The supplemental full E2 evaluation in
+  `runs/full/relation_report.json` reproduces G2 PASS with 130 changed items
+  in 636.6 seconds; `runs/relations-full/relation_report.json` is a
+  metrics-only run with E2 skipped and is not a G2 verdict.
+- Phase C contains 48 statute rows. The eight target rows are now verified from
+  user-transcribed text from a government-hosted IPC reproduction, the enacted
+  BNS Act text, and the BNS section 1 commencement footnote. The 40 existing
+  overrides retain their prior secondary-supported provenance and are not
+  newly primary-source verified. Current table SHA-256:
+  `ef50705e99b3ba8de8287df0e289c3df2dd5a4f648ccd58bdb9a9afd2c682b18`.
+  Context coverage remains 0.689034 (421 known of 611 asserted-reference
+  lookups; the separate validity-entry count is 890 because each record's gold
+  and trap keys are also packed).
 - Phase D reports CM AUROC 0.9412 with bootstrap 95% CI [0.8529, 1.0000],
   binary TP/FP/TN/FN 16/0/15/2, and G4 PASS; temporal ablation carries all
   above-chance separation.
@@ -197,7 +206,7 @@ records. Unknown legal provisions remain `None`, never stale/false.
 The checked-in 200-item data slice, relation dataset, statute table, manifests,
 overrides, run records, and validation JSON files are research artifacts.
 Phase C's current statute hash is
-`20c98b74c0855c5ec4c8cda2b2d52388ea5f3e8d2514376f56db425bdd90b21e`; the
+`ef50705e99b3ba8de8287df0e289c3df2dd5a4f648ccd58bdb9a9afd2c682b18`; the
 Phase A and Phase B dataset hashes and Phase D/E run hashes are recorded in
 their result documents. Source runs are tree-hashed before and after overlay
 steps. Do not modify generated metrics or model outputs when documenting a new

@@ -132,6 +132,19 @@ carries Phase B cluster labels.
 python scripts\10_build_relations.py --verify-only   # dataset check, no model
 ```
 
+Supplemental learned-evaluation outputs may also be present:
+
+```text
+runs\full\relation_report.json
+runs\relations-full\relation_report.json
+```
+
+`runs\full` is a full E2 evaluation and reproduces the run-of-record test
+metrics and G2 PASS, with 130 changed items. `runs\relations-full` is a
+metrics-only evaluation with `--skip-e2`; its G2 result is `NOT YET` because
+the separation criterion was intentionally not evaluated. Neither replaces
+`runs\phaseB-relations-full`.
+
 ### 4.3 Phase C — reproduce the context packs
 
 Phase C is deterministic and stdlib-only. Rebuild the statute

@@ -179,6 +179,50 @@ def test_successor_predecessor_are_symmetric(store):
                 f"{r['act']} {r['section']}"
 
 
+def test_primary_review_target_mappings_and_subsections(store):
+    expected = {
+        "IPC 409": "BNS 316(5)",
+        "BNS 316(5)": "IPC 409",
+        "IPC 468": "BNS 336(3)",
+        "BNS 336(3)": "IPC 468",
+        "IPC 344": "BNS 127(4)",
+        "BNS 127(4)": "IPC 344",
+        "IPC 345": "BNS 127(5)",
+        "BNS 127(5)": "IPC 345",
+    }
+    for key, counterpart in expected.items():
+        row = next(r for r in store.rows()
+               if f"{r['act']} {r['section']}" == key)
+        assert f"{row['act']} {row['section']}" == key
+        if key.startswith("IPC "):
+            assert row["successor"] == counterpart
+        else:
+            assert row["predecessor"] == counterpart
+        assert row["verified"] is False
+
+    assert store.in_force("BNS 316(5)", "2024-07-01") is True
+    assert store.in_force("BNS 336(3)", "2024-07-01") is True
+    assert store.in_force("BNS 127(4)", "2024-07-01") is True
+    assert store.in_force("BNS 127(5)", "2024-07-01") is True
+
+
+def test_overrides_applied_mark_reviewed_targets_verified(tmp_path):
+    out = tmp_path / "statutes_v1.jsonl"
+    p = _run_script(
+        "20_build_statutes.py", "--out", str(out),
+        "--overrides", str(ROOT / "data" / "statutes" /
+                           "statutes_v1.overrides.jsonl"))
+    assert p.returncode == 0, p.stdout + p.stderr
+    rows = json.loads("[" + ",".join(
+        out.read_text(encoding="utf-8").splitlines()) + "]")
+    by_key = {f"{r['act']} {r['section']}": r for r in rows}
+    targets = {
+        "IPC 409", "BNS 316(5)", "IPC 468", "BNS 336(3)",
+        "IPC 344", "BNS 127(4)", "IPC 345", "BNS 127(5)",
+    }
+    assert all(by_key[key]["verified"] is True for key in targets)
+
+
 def test_every_ipc_row_is_repealed_and_every_bns_row_in_force(store):
     for r in store.rows():
         if r["act"] == "IPC":
@@ -372,8 +416,8 @@ def test_script_21_refuses_to_overwrite_and_reports_missing_run(tmp_path):
 # human-verification workflow
 # --------------------------------------------------------------------------
 
-CANONICAL_TABLE_SHA = ("7be783e38c21effb24734a8be5400b9bd0c358d63130bb896aa13220"
-                       "ea09b61f")
+CANONICAL_TABLE_SHA = ("e21beffc850735f666ab62ffeb5d6f545491a549a1847ff0a3a505250"
+                       "87fccac")
 
 
 def test_script_20_output_is_lf_and_hash_is_canonical(tmp_path):
