@@ -6,7 +6,7 @@
 
 [![Python](https://img.shields.io/badge/Python-3.11%2B-3776AB?logo=python&logoColor=white)](https://www.python.org/)
 [![Implemented through](https://img.shields.io/badge/implemented%20through-Phase%20D-2E7D32)](#implementation-status)
-[![Tests](https://img.shields.io/badge/tests-136%20passed-2E7D32)](#testing)
+[![Tests](https://img.shields.io/badge/tests-135%20passed%20%7C%201%20optional-2E7D32)](#testing)
 [![Phase C verification](https://img.shields.io/badge/Phase%20C%20legal%20verification-partial-F9A825)](#phase-c-statute-store-and-context-packs)
 [![Phase D gate](https://img.shields.io/badge/Gate%20G4-PASS-2E7D32)](#phase-d-common-mode-failure-detector)
 [![License](https://img.shields.io/badge/license-not%20yet%20declared-lightgrey)](#license)
@@ -61,12 +61,13 @@
 
 Most sample-based uncertainty estimators treat disagreement across an LLM's answers as evidence of uncertainty and agreement as evidence of confidence. Legal question answering exposes a dangerous failure mode in that assumption: a model can repeatedly cite the same repealed, inapplicable, or incorrect provision across every sample. The samples agree, but the agreement is not legally warranted.
 
-JURIS-UQ studies this **common-mode legal error**. The repository currently implements four cumulative phases:
+JURIS-UQ studies this **common-mode legal error**. The repository currently implements five cumulative phases (with Phase E implemented as a pilot; its G5 is not evaluable on the present target slice):
 
 1. **Phase A — diagnostic instrument.** Build a matched pre-/post-transition legal QA slice, sample multiple answers, judge the asserted provisions, compute sample-only uncertainty statistics, and test whether those statistics detect repeated legal error.
 2. **Phase B — typed legal relations.** Replace identity-only grouping with a five-way relation model and typed clustering, then re-cluster the frozen Phase A answers without modifying the original run.
 3. **Phase C — legal context.** Add a deterministic statute store, validity windows, IPC↔BNS links, coverage reporting, and immutable context-packed copies of stored runs.
 4. **Phase D — common-mode failure detector.** Decompose the observed agreement into the part the legal context warrants and the part that is merely repeated, and show that the temporal factor alone separates the unanimously-wrong target slice from the unanimously-correct control.
+5. **Phase E — legal-aware uncertainty estimation (M8).** Fit a small monotone model on the development split, consume stored Phase D `warrant_*` outputs without recomputing them, and fall back to sample-only provision entropy wherever legal evidence is missing. Its scores are uncalibrated; G5 is not evaluable until the target slice contains both correctness classes.
 
 The current implementation focuses on the transition from the **Indian Penal Code, 1860 (IPC)** to the **Bharatiya Nyaya Sanhita, 2023 (BNS)**, effective **1 July 2024**.
 
@@ -105,7 +106,7 @@ Each L7 item has an L1 counterpart with the same underlying facts and `pair_id`.
 
 ## Implementation status
 
-Repository snapshot documented here: commit `e6a21a8` (Phase C) extended through Phase D (`common-mode failure detector, E4 validation, Gate G4 PASS`).
+Repository snapshot documented here: Phase C base extended through Phase D and the Phase E M8 pilot (`E5` evaluation; G5 NOT_EVALUABLE on the present target population).
 
 | Phase | Scope | Status | Run / artefact of record |
 |---|---|---|---|
@@ -113,10 +114,11 @@ Repository snapshot documented here: commit `e6a21a8` (Phase C) extended through
 | **B** | Five-way relation model, typed clustering, and E2 re-clustering | **Implemented; run of record complete** | `runs/phaseB-relations-full/` |
 | **C** | Statute store, legal links, validity lookups, verification workflow, and context packs | **Engineering complete; legal verification partially complete** | `runs/phaseA-laptop-v2-rejudged+ctx/` |
 | **D** | Common-mode failure detector (M7): warranted-agreement decomposition, E4 validation, Gate G4 | **Complete and frozen** | `runs/phaseA-laptop-v2-rejudged+ctx+warrant/` |
+| **E** | Legal-aware uncertainty estimator (M8): monotone learned head, Phase D consumption, explicit sample-only fallback, held-out E5 pilot | **Implemented; G5 NOT_EVALUABLE** (L7 holdout has one correctness class; score uncalibrated) | `runs/phaseA-laptop-v2-rejudged+ctx+warrant+uq/` |
 
 ### Scope boundary
 
-This README documents only the code and evidence implemented through **Phase D**. Later research modules described in the project guides (Phases E–I) are not represented here as completed functionality.
+This README documents implemented code and evidence through the **Phase E pilot**. Phase E is not a passed G5 or calibrated estimator; later research modules (Phases F–I) remain unimplemented.
 
 > [!WARNING]
 > Phase C must not yet be described as fully legally verified. The repository records 40 of 48 rows with `verified: true` through the checklist workflow, but those 40 are supported by secondary references in the current audit. **No row was independently confirmed against accessible primary India Code or Gazette provision text in that environment**, and eight rows remain unresolved. Phase D reads this store, so its temporal verdicts inherit that limit.
@@ -313,6 +315,14 @@ The defensible interpretation: on this checkpoint and slice, agreement that is *
 
 See [`docs/results_phase_d.md`](docs/results_phase_d.md) for the full E4 record, [`PHASE-D-RESULTS.md`](PHASE-D-RESULTS.md) for the consolidated audit and hashes, and [`PHASE-D.md`](PHASE-D.md) for the implementation, commands, and semantics.
 
+### Phase E: legal-aware uncertainty estimator (M8)
+
+Phase E fits a small projected logistic model with non-negative main-effect and pairwise-interaction coefficients. It predicts error risk from normalized Phase A provision entropy, normalized text entropy, and stored Phase D-derived components (`1-W`, positive `CM`, and `K`). The scoring command is label-blind; correctness labels are used only by the separate development-fit and held-out validation commands.
+
+When any required Phase D factor is missing, null, non-finite, or invalid, the record uses normalized provision entropy as its explicit sample-only fallback. It never fills an unresolved legal factor with zero. The current Phase D run uses `exact_key` clusters and does not carry Phase B typed-cluster statistics, so `u_prov` is Phase A exact-key provision entropy—not typed-cluster entropy. The estimator does not recompute `A`, `T`, `J`, `K`, `W`, or `CM`.
+
+The pilot created a 44-item pair-grouped holdout. On the L1 control subset, AUROC was 0.900 versus 0.871 for provision entropy; the paired bootstrap interval for improvement was [−0.0417, +0.1500]. The L7 holdout contains only incorrect answers, so its AUROC is undefined and **Gate G5 is NOT_EVALUABLE**. The score is uncalibrated and is not a probability. See [`PHASE-E.md`](PHASE-E.md) for the exact pipeline and [`docs/results_phase_e.md`](docs/results_phase_e.md) for the run record and limitations.
+
 ---
 
 ## System architecture
@@ -337,8 +347,13 @@ flowchart LR
     C --> W[Phase D common-mode detector]
     W --> R3[(New +ctx+warrant sibling run)]
 
+    R3 --> U[Phase E label-blind scoring]
+    M8[Phase E model fit on development groups] --> U
+    U --> R4[(New +ctx+warrant+uq sibling run)]
+
     R1 -. tree hash before and after .-> R2
     R2 -. tree hash before and after .-> R3
+    R3 -. tree hash before and after .-> R4
 ```
 
 ### Component map
@@ -355,6 +370,7 @@ flowchart LR
 | Relations | `jurisuq/relations/` | Pair schema, synthetic data, classifier, typed clustering, relation statistics |
 | Legal context | `jurisuq/context/` | Statute loading, validity lookup, link lookup, and context packing |
 | Warrant | `jurisuq/warrant/` | Common-mode detector (M7): the A/T/J/K factors, warranted agreement, common-mode score, flags, E4 validation and Gate G4 |
+| Uncertainty estimator | `jurisuq/uncertainty/` | Phase E (M8): label-free feature extraction/scoring, monotone model, and sample-only fallback |
 
 ---
 
@@ -404,7 +420,7 @@ jurisuq_code/
 │   ├── 10_...12_*.py                 # Phase B
 │   ├── 20_...22_*.py                 # Phase C
 │   └── 23_...24_*.py                 # Phase D
-├── tests/                             # 135 collected tests
+├── tests/                             # 138 collected tests
 ├── PHASE-C.md
 ├── PHASE-C-RESULTS.md
 ├── PHASE-D.md
@@ -502,17 +518,26 @@ From the repository root:
 python -m pytest -q
 ```
 
-Expected in a core-only environment:
+Expected in the current core-only environment after Phase E tests are included:
 
 ```text
-135 passed, 1 skipped
-```
+149 passed, 1 skipped (sandbox environment)
 
-The skipped test is the torch-gated relation-model test. With compatible Phase B dependencies installed, the repository record reports:
+Separate Windows PowerShell validation in the project `.venv` on 2026-10-21:
 
 ```text
-136 passed
+147 passed in 36.84s
 ```
+
+Latest post-change Windows PowerShell validation in the project `.venv` on 2026-10-21, using
+`.\.venv\Scripts\python.exe -X utf8 -m pytest -q`:
+
+```text
+149 passed in 7.58s
+```
+```
+
+The skipped test is the torch-gated relation-model test. With compatible Phase B dependencies installed, expect one additional pass (150 passed with the Phase E tests included).
 
 Run the focused Phase C suite with:
 
@@ -525,7 +550,7 @@ Run the focused Phase D suite with:
 
 ```bash
 python -m pytest tests/test_warrant.py -q
-# 24 passed
+# 27 passed
 ```
 
 Check the local generator configuration before a real Phase A run:
@@ -1082,12 +1107,13 @@ The repository currently collects **135 tests**:
 | `tests/test_normalize.py` | 6 | Legal text and provision normalization |
 | `tests/test_pipeline_smoke.py` | 4 | End-to-end record construction |
 | `tests/test_relations.py` | 26 | Pair schema, relation data, model path, typed statistics |
-| `tests/test_warrant.py` | 24 | Detector factors, era-matched L1/L7 behaviour, composition, E4 and Gate G4 |
+| `tests/test_warrant.py` | 27 | Detector factors, era-matched L1/L7 behaviour, composition, E4 and Gate G4 |
+| `tests/test_uncertainty.py` | 11 | Phase E feature extraction, null fallback, label boundary, monotonicity, split determinism and real Phase D schema |
 
 Current core-environment result:
 
 ```text
-135 passed, 1 skipped in 1.2s
+149 passed, 1 skipped in 1.44s
 ```
 
 The one skip is expected when torch is not installed.
@@ -1183,6 +1209,7 @@ The schema is additive: later stages may append fields and create new artefacts,
 | `ERROR: no such run: …items.jsonl` (Phase D) | The `--run-id` is not a packed `+ctx` run | Run Phase C's `scripts/21_attach_context.py` first |
 | Detector fires on both L1 and L7 | `--as-of-policy fixed` was used | That is the deliberate ablation; use the default `era` policy |
 | `CM defined on 0/200` | The source run has no `asserted_keys` | Detect on a Phase A run of record, not an empty tree |
+| `UnicodeDecodeError: 'charmap' codec` on a Phase D/C script | Windows' cp1252 locale default reading the UTF-8 `+ctx` artefacts (they carry curly quotes / CJK text) | Fixed in this drop: every Phase D/C read is explicit UTF-8, so plain `python scripts\23_detect_warrant.py …` works. The `python -X utf8` flag is a workaround, not a fix. |
 
 ---
 
@@ -1197,6 +1224,8 @@ The schema is additive: later stages may append fields and create new artefacts,
 | [`PHASE-C-RESULTS.md`](PHASE-C-RESULTS.md) | Consolidated Phase C status, audit evidence, hashes, unresolved rows, and next actions |
 | [`PHASE-D.md`](PHASE-D.md) | Phase D implementation, commands, semantics, and the era-date rule |
 | [`PHASE-D-RESULTS.md`](PHASE-D-RESULTS.md) | Consolidated Phase D E4 validation, Gate G4 verdict, hashes, and next actions |
+| [`PHASE-E.md`](PHASE-E.md) | Phase E components, label boundary, Windows run commands, output schema, and fallback semantics |
+| [`docs/results_phase_e.md`](docs/results_phase_e.md) | Actual Phase E pilot results, G5 NOT_EVALUABLE status, tests, and limitations |
 | [`configs/phase_a.json`](configs/phase_a.json) | Real local-generator configuration |
 | [`configs/phase_b_relations.json`](configs/phase_b_relations.json) | Relation-model and E2 configuration |
 | [`configs/phase_d_warrant.json`](configs/phase_d_warrant.json) | Phase D era dates, thresholds, and validation settings |
