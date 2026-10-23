@@ -17,10 +17,16 @@ and evaluates the E1 common-mode premise.
 - `data/lexuq_slice.jsonl`: 200 records, 100 matched L1/L7 pairs.
 - `runs/phaseA-laptop-v2-rejudged/`: frozen run of record.
 
-The laptop-frozen Phase A dataset hash is
-`45b2d194e9c2f623457481c0d7d02f36c6267ec65c0b75ee3df2be4c0d1d010a`.
-The currently generated repository slice has a different recorded hash; do
-not compare runs without recording the dataset digest.
+The authoritative Phase A dataset on disk has sha256
+`89bc1180a4df76287768ce59432aa7ff0aa9d38c16d5f296ed16c3e45449bd53`
+(decision recorded 2026-10-22). It regenerates byte-for-byte from
+`scripts/01_make_data.py` with seed `20261005`; all 200 frozen item IDs and
+their content fields match, and re-scoring the 2,000 stored answers reproduces
+all 200 stored verdict-label arrays. The previously registered
+`45b2d194e9c2f623457481c0d7d02f36c6267ec65c0b75ee3df2be4c0d1d010a` value is
+stale and remains visible here as a historical value. Line-ending conversion
+does not produce it, so the discrepancy is a re-serialization artifact.
+All later run metadata must record the authoritative digest.
 
 ## Reproduce or inspect
 
@@ -170,3 +176,15 @@ subpopulation property to the whole slice.
      lives at `runs/phaseA-laptop-v2` unchanged.
   No change was made to the metric definitions, the sampling configuration, or the
   frozen slice after the run of record.
+## Structural composition of the frozen slices
+
+The frozen instrument has `majority_correct = 43/100` on L1 and `0/100` on
+L7. Every L7 item is resolved by the judge (`frac_unresolved = 0.000` on all
+100 items). Across the 1,000 L7 stored answers, the verdict mix is
+`stale_law = 832`, `wrong_section = 150`, and `other_provision = 18`.
+
+The 150 `wrong_section` answers are exactly the 15 L7 items whose modal key is
+BNS. They cite sections that mostly exceed BNS 2023's 358 sections, treating
+IPC numbers as if they were BNS sections. The missing second correctness class
+on L7 is therefore a property of the model under test, not of the judge and
+not of the statute store.
