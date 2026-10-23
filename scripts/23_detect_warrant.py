@@ -39,8 +39,10 @@ ROOT = pathlib.Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 from jurisuq.context import load_links, load_statutes  # noqa: E402
+from jurisuq.relations.schema import RELATIONS  # noqa: E402
 from jurisuq.warrant.detector import (EraPolicy,  # noqa: E402
-                                        WarrantDetector, WarrantThresholds)
+                                        WarrantDetector, WarrantThresholds,
+                                        _cluster_groups)
 
 
 def tree_hash(d: pathlib.Path) -> str:
@@ -81,6 +83,11 @@ def main() -> int:
     ap.add_argument("--stale-threshold", type=float, default=1.0)
     ap.add_argument("--jurisdiction-threshold", type=float, default=1.0)
     ap.add_argument("--contradiction-threshold", type=float, default=0.0)
+    ap.add_argument("--cluster-source", choices=("auto", "exact", "typed"),
+                    default="auto")
+    ap.add_argument("--contradiction-source",
+                    choices=("auto", "rule", "model", "none"),
+                    default="auto")
     ap.add_argument("--limit", type=int, default=0,
                     help="detect on only the first N items (smoke)")
     ap.add_argument("--force", action="store_true",
@@ -118,6 +125,13 @@ def main() -> int:
     hash_before = tree_hash(src)
     store = load_statutes(statutes)
     links = load_links(links_path) if links_path.exists() else {}
+    raw_links = [
+        json.loads(line) for line in links_path.read_text().splitlines()
+        if line.strip()
+    ] if links_path.exists() else []
+    different_offence_rows = [
+        row for row in raw_links if row.get("type") == "different_offence"
+    ]
     era = EraPolicy(mode=args.as_of_policy,
                     fixed_date=args.fixed_as_of)
     thresholds = WarrantThresholds(
@@ -137,13 +151,44 @@ def main() -> int:
     flag_counts: collections.Counter = collections.Counter()
     rep_counts: collections.Counter = collections.Counter()
     ksrc_counts: collections.Counter = collections.Counter()
+    fallback_counts: collections.Counter = collections.Counter()
+    typed_modal_trap_counts = collections.Counter({"L1": 0, "L7": 0})
+    dataset_path = ROOT / "data" / "lexuq_slice.jsonl"
+    dataset = {r["item_id"]: r for r in (
+        json.loads(line) for line in dataset_path.read_text().splitlines()
+        if line.strip())}
     cm_defined = 0
     per_slice: dict[str, dict] = collections.defaultdict(
         lambda: {"items": 0, "fires": 0, "cm_defined": 0,
                  "cm_sum": 0.0})
 
     for rec in records:
-        res = detector.detect(rec)
+        labels = rec.get("clusters") if args.cluster_source in ("auto", "typed") else None
+        relation = rec.get("relation_matrix") if args.cluster_source in ("auto", "typed") else None
+        typed_valid = (
+            isinstance(labels, list) and len(labels) == len(rec.get("asserted_keys") or [])
+            and isinstance(relation, list) and len(relation) == len(labels)
+            and all(isinstance(row, list) and len(row) == len(labels) for row in relation)
+            and all(value in RELATIONS for row in relation for value in row)
+        )
+        if args.cluster_source == "exact":
+            labels = relation = None
+        elif not typed_valid:
+            if args.cluster_source == "typed" or args.cluster_source == "auto":
+                fallback_counts["invalid_typed_signal"] += 1
+            labels = relation = None
+        if labels is not None:
+            keys = rec.get("asserted_keys") or []
+            groups = _cluster_groups(labels, keys)
+            source_item = dataset.get(rec.get("item_id"), {})
+            gold = f"{source_item.get('gold_act')} {source_item.get('gold_provision')}"
+            trap = f"{source_item.get('trap_act')} {source_item.get('trap_provision')}"
+            modal = max(groups, key=len, default=[])
+            if gold in modal and trap in modal:
+                typed_modal_trap_counts[rec.get("slice", "?")] += 1
+        res = detector.detect(
+            rec, cluster_labels=labels, relation_matrix=relation,
+            contradiction_source=args.contradiction_source)
         rec.update(res.to_record())
         sl = per_slice[rec.get("slice", "?")]
         sl["items"] += 1
@@ -183,6 +228,8 @@ def main() -> int:
         "thresholds": {"temporal": args.stale_threshold,
                        "jurisdiction": args.jurisdiction_threshold,
                        "contradiction": args.contradiction_threshold},
+        "cluster_source": args.cluster_source,
+        "contradiction_source_requested": args.contradiction_source,
         "items_detected": len(records),
         "fires": fire_counts["fires"],
         "silent": fire_counts["silent"],
@@ -193,6 +240,16 @@ def main() -> int:
         "flag_counts": dict(flag_counts),
         "cluster_representation_counts": dict(rep_counts),
         "contradiction_source_counts": dict(ksrc_counts),
+        "typed_signal_fallback_counts": dict(fallback_counts),
+        "typed_modal_cluster_contains_gold_and_trap": {
+            "overall": sum(typed_modal_trap_counts.values()),
+            "per_slice": dict(sorted(typed_modal_trap_counts.items())),
+        },
+        "crosswalk_different_offence_rows": len(different_offence_rows),
+        "crosswalk_different_offence_rows_verified": False,
+        "crosswalk_different_offence_unverified_rows": sum(
+            1 for row in different_offence_rows if row.get("verified") is not True),
+        "dataset_sha256": sha256_file(dataset_path),
         "per_slice": {k: dict(v) for k, v in sorted(per_slice.items())},
         "source_tree_hash_before": hash_before,
         "source_tree_hash_after": hash_after,
@@ -221,6 +278,7 @@ def main() -> int:
         "links_sha256": report["links_sha256"],
         "source_tree_hash": hash_after,
         "source_run_untouched": untouched,
+        "dataset_sha256": sha256_file(dataset_path),
     }
     (out / "meta.json").write_text(json.dumps(meta, indent=2) + "\n",
                                      encoding="utf-8", newline="\n")

@@ -29,8 +29,9 @@ sys.path.insert(0, str(ROOT))
 
 from jurisuq.relations import model as M  # noqa: E402
 from jurisuq.relations.cluster_typed import typed_cluster  # noqa: E402
+from jurisuq.relations.pairs import form, offences  # noqa: E402
 from jurisuq.relations.schema import (LABEL2IDX, OPERATIONAL, PairRecord,  # noqa: E402
-                                      text_hash)
+                                      make_pair, text_hash)
 from jurisuq.relations.stats import (confusion as _confusion, exact_key_baseline,  # noqa: E402
                                      merge_effect, per_class, typed_stats)
 
@@ -63,6 +64,64 @@ def load_crosswalk(path: pathlib.Path) -> dict:
         r = json.loads(line)
         out[(r["from"], r["to"])] = r.get("type", "successor_of")
     return out
+
+
+def merge_metrics(probs, labels, tau):
+    merge_idx = [M.LABEL2IDX[r] for r in sorted(M.MERGE_RELATIONS)]
+    gold = [label in M.MERGE_RELATIONS for label in labels]
+    pred = [sum(p[k] for k in merge_idx) >= tau for p in probs]
+    tp = sum(a and b for a, b in zip(gold, pred))
+    fp = sum(not a and b for a, b in zip(gold, pred))
+    fn = sum(a and not b for a, b in zip(gold, pred))
+    tn = sum(not a and not b for a, b in zip(gold, pred))
+    return {
+        "precision": tp / (tp + fp) if tp + fp else 0.0,
+        "recall": tp / (tp + fn) if tp + fn else 0.0,
+        "f1": 2 * tp / (2 * tp + fp + fn) if 2 * tp + fp + fn else 0.0,
+        "tp": tp, "fp": fp, "fn": fn, "tn": tn, "threshold": tau,
+    }
+
+
+def transition_probe_pairs(dataset_version: str) -> list[PairRecord]:
+    """Build gold/trap IPC/BNS pairs for both slices and both as-of dates."""
+    out = []
+    for offence in offences():
+        surfaces = {
+            "L1": (offence.old_act, offence.old_prov, offence.new_act, offence.new_prov),
+            "L7": (offence.new_act, offence.new_prov, offence.old_act, offence.old_prov),
+        }
+        for slice_name, (gold_act, gold_prov, trap_act, trap_prov) in surfaces.items():
+            for as_of in ("2024-01-01", "2026-10-01"):
+                a = form(0, gold_act, gold_prov, offence.label, offence.punishment)
+                b = form(1, trap_act, trap_prov, offence.label, offence.punishment)
+                out.append(make_pair(
+                    a, {"act": gold_act, "provision": gold_prov},
+                    b, {"act": trap_act, "provision": trap_prov},
+                    {"as_of": as_of, "jurisdiction": "IN",
+                     "crosswalk_relation": None},
+                    "DIFFERENT_PROVISION", dataset_version, "test", "S6",
+                    provenance={"generator": "transition_gold_trap_probe",
+                                "slice": slice_name, "topic": offence.topic},
+                    verifier="rule"))
+    return out
+
+
+def evaluate_transition_probe(model, tokenizer, cfg, meta, dataset_version):
+    pairs = transition_probe_pairs(dataset_version)
+    probs = M.predict_proba(model, tokenizer, pairs, cfg)
+    tau = float(meta["merge_threshold"])
+    grouped = {}
+    for pair, p in zip(pairs, probs):
+        key = (pair.provenance["slice"], pair.context["as_of"])
+        grouped.setdefault(key, []).append(sum(
+            p[M.LABEL2IDX[r]] for r in sorted(M.MERGE_RELATIONS)) >= tau)
+    return {
+        f"{slice_name}/{as_of}": {
+            "n": len(values), "merged": sum(values),
+            "merge_rate": sum(values) / len(values) if values else None,
+        }
+        for (slice_name, as_of), values in sorted(grouped.items())
+    }
 
 
 def e2_separation(phase_a_dir: pathlib.Path, model=None, tokenizer=None, meta=None,
@@ -118,6 +177,7 @@ def e2_separation(phase_a_dir: pathlib.Path, model=None, tokenizer=None, meta=No
             "exact_agreement": exact["agreement"], "typed_agreement": typed["agreement"],
             "typed_entropy": typed["entropy"], "typed_contradiction": typed.get("contradiction_mass"),
             "changed": int(eff["d_agreement"] != 0 or exact["all_same"] != typed["all_same"]),
+            "unanimously_wrong": int(exact["all_same"] and not rec.get("majority_correct", 0)),
         })
         if eff["d_agreement"] != 0 or exact["all_same"] != typed["all_same"]:
             changed.append(rec["item_id"])
@@ -139,6 +199,9 @@ def e2_separation(phase_a_dir: pathlib.Path, model=None, tokenizer=None, meta=No
             if coll_typed else None,
             "reclassified_out_of_collision": len(
                 [i for i in items if i["exact_all_same"] and not i["typed_all_same"]]),
+            "rescue_unanimously_wrong_out_of_collision": len(
+                [i for i in items if i["unanimously_wrong"] and
+                 i["exact_all_same"] and not i["typed_all_same"]]),
         }
     # criterion 3: does the typed score rank correctness inside the collision population?
     pop = [i for sl in by_slice.values() for i in sl if i["exact_all_same"]]
@@ -226,6 +289,8 @@ def main() -> None:
         "per_class": rows,
         "merge_f1": round(merge_f1, 4),
         "merge_precision": merge_prec,
+        "different_provision_precision": rows["DIFFERENT_PROVISION"]["precision"],
+        "different_provision_recall": rows["DIFFERENT_PROVISION"]["recall"],
         "exact_key_baseline_macro_f1": round(exact_key_baseline(test, M.MERGE_RELATIONS), 4),
         "confusion": _confusion(y_true, preds, OPERATIONAL),
         "ambiguous_rate": round(sum(1 for p in preds if p == "AMBIGUOUS") / len(preds), 4),
@@ -234,18 +299,51 @@ def main() -> None:
         "phase_a_tree_hash_before": before,
         "phase_a_tree_hash_after": after,
     }
+    if not args.no_model:
+        report["merge_decision"] = merge_metrics(
+            probs, y_true, float(meta["merge_threshold"]))
+        report["transition_gold_trap_probe"] = evaluate_transition_probe(
+            model, tokenizer, cfg, meta, manifest.get("dataset_version", "relations_v2"))
     gates = {
         "merge_precision_ok": (merge_prec or 0.0) >= cfg["gates"]["merge_precision_min"],
         "beats_exact_key": mf1 > report["exact_key_baseline_macro_f1"],
-        "separation_criterion_met": bool(
-            e2.get("changed_items") or
-            (e2.get("typed_unanimous_accuracy_gap") is not None and
-             e2["typed_unanimous_accuracy_gap"] < 0.882) or
-            (e2.get("collision_auroc_typed_entropy") or 0) > 0.5),
+        "rescue_criterion_met": any(
+            (v.get("rescue_unanimously_wrong_out_of_collision") or 0) > 0
+            for v in e2.get("by_slice", {}).values()),
         "phase_a_untouched": report["phase_a_untouched"] is not False,
     }
     report["gate_g2"] = {"conditions": gates,
                          "verdict": "PASS" if all(gates.values()) else "NOT YET"}
+    old_report_path = ROOT / cfg["run_dir"] / "phaseB-relations-full" / "relation_report.json"
+    if old_report_path.exists():
+        old = json.loads(old_report_path.read_text())
+        report["g2_old_vs_new"] = {
+            "old_run_id": old.get("run_id"),
+            "old": {
+                "macro_f1": old.get("macro_f1"),
+                "exact_key_baseline_macro_f1": old.get("exact_key_baseline_macro_f1"),
+                "different_provision": old.get("per_class", {}).get("DIFFERENT_PROVISION"),
+                "merge_precision": old.get("merge_precision"),
+                "changed_items": old.get("e2_separation", {}).get("changed_items"),
+                "rescue_by_slice": {
+                    sl: old.get("e2_separation", {}).get("by_slice", {}).get(sl, {})
+                    .get("rescue_unanimously_wrong_out_of_collision", 0)
+                    for sl in ("L1", "L7")},
+                "gate_conditions": old.get("gate_g2", {}).get("conditions"),
+            },
+            "new": {
+                "macro_f1": report["macro_f1"],
+                "exact_key_baseline_macro_f1": report["exact_key_baseline_macro_f1"],
+                "different_provision": rows.get("DIFFERENT_PROVISION"),
+                "merge_decision": report.get("merge_decision"),
+                "changed_items": e2.get("changed_items"),
+                "rescue_by_slice": {
+                    sl: e2.get("by_slice", {}).get(sl, {})
+                    .get("rescue_unanimously_wrong_out_of_collision", 0)
+                    for sl in ("L1", "L7")},
+                "gate_conditions": gates,
+            },
+        }
     (run_dir / "relation_report.json").write_text(json.dumps(report, indent=2, sort_keys=True) + "\n")
     print(f"test n={len(test)}  macro-F1 {mf1:.3f}  merge precision {merge_prec}  "
           f"exact-key baseline {report['exact_key_baseline_macro_f1']:.3f}")

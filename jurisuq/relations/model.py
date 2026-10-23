@@ -172,8 +172,12 @@ if HAS_TORCH:
         for r in pairs:
             counts[LABEL2IDX[r.label]] += 1
         total = sum(counts) or 1
+        weight_cap = float(cfg.get("class_weight_cap", 10.0))
+        overrides = cfg.get("class_weight_overrides", {})
         weights = torch.tensor(
-            [min(10.0, total / max(1, c) / len(OPERATIONAL)) for c in counts],
+            [float(overrides.get(label, min(weight_cap, total / max(1, c) /
+                                             len(OPERATIONAL))))
+             for label, c in zip(OPERATIONAL, counts)],
             dtype=torch.float32, device=device)
         lossf = nn.CrossEntropyLoss(weight=weights)
         opt = torch.optim.AdamW(model.parameters(), lr=float(cfg.get("lr", 2e-5)),

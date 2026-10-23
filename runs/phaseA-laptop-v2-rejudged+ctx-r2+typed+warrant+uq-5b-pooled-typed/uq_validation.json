@@ -1,0 +1,241 @@
+{
+  "phase": "E",
+  "experiment": "E5",
+  "gate": "G5",
+  "source_run_id": "phaseA-laptop-v2-rejudged+ctx-r2+typed+warrant",
+  "output_run_id": "phaseA-laptop-v2-rejudged+ctx-r2+typed+warrant+uq-5b-pooled-typed",
+  "split": {
+    "kind": "pair-grouped SHA-256 holdout",
+    "seed": "phaseE-v1",
+    "test_fraction": 0.2,
+    "n_test": 44,
+    "evaluation_slice": "pooled",
+    "test_item_ids": [
+      "L7-theft-038",
+      "L1-criminal_breach_of_trust-035",
+      "L1-murder-013",
+      "L7-criminal_breach_of_trust-029",
+      "L7-wrongful_restraint-033",
+      "L7-criminal_breach_of_trust-035",
+      "L7-murder-013",
+      "L1-wrongful_restraint-015",
+      "L7-criminal_intimidation-087",
+      "L7-theft_in_dwelling-075",
+      "L1-theft_in_dwelling-075",
+      "L1-criminal_intimidation-009",
+      "L1-criminal_breach_of_trust-029",
+      "L7-criminal_intimidation-032",
+      "L7-theft_in_dwelling-067",
+      "L1-theft-083",
+      "L1-murder-008",
+      "L1-murder-003",
+      "L1-criminal_intimidation-092",
+      "L1-wrongful_restraint-033",
+      "L7-criminal_intimidation-092",
+      "L7-culpable_homicide-030",
+      "L1-criminal_intimidation-032",
+      "L1-criminal_breach_of_trust-018",
+      "L7-wrongful_restraint-060",
+      "L1-criminal_intimidation-087",
+      "L7-murder-008",
+      "L1-wrongful_restraint-060",
+      "L7-criminal_intimidation-009",
+      "L1-murder-046",
+      "L7-criminal_intimidation-034",
+      "L7-theft-083",
+      "L1-theft_in_dwelling-067",
+      "L1-culpable_homicide-030",
+      "L1-cruelty_by_husband-020",
+      "L1-criminal_intimidation-034",
+      "L1-theft-038",
+      "L7-murder-046",
+      "L1-murder-036",
+      "L7-cruelty_by_husband-020",
+      "L7-criminal_breach_of_trust-018",
+      "L7-wrongful_restraint-015",
+      "L7-murder-036",
+      "L7-murder-003"
+    ]
+  },
+  "evaluation_label_field": "majority_correct",
+  "labels_used_only_for_offline_evaluation": true,
+  "holdout_metrics_by_slice": {
+    "L1": {
+      "n": 22,
+      "correct": 7,
+      "incorrect": 15,
+      "phase_e_score": {
+        "n": 22,
+        "correct": 7,
+        "incorrect": 15,
+        "auroc": 0.6238095238095238,
+        "auprc": 0.7242904933617006,
+        "nAURC": 0.39627173404193217,
+        "normalized_aurc": 0.39627173404193217,
+        "risk_at_50": 0.5454545454545454
+      },
+      "sample_only_baseline": {
+        "n": 22,
+        "correct": 7,
+        "incorrect": 15,
+        "auroc": 0.638095238095238,
+        "auprc": 0.8018920730685436,
+        "nAURC": 0.2680633447238361,
+        "normalized_aurc": 0.2680633447238361,
+        "risk_at_50": 0.5454545454545454
+      }
+    },
+    "L7": {
+      "n": 22,
+      "correct": 0,
+      "incorrect": 22,
+      "phase_e_score": {
+        "n": 22,
+        "correct": 0,
+        "incorrect": 22,
+        "auroc": null,
+        "auprc": 1.0,
+        "nAURC": null,
+        "normalized_aurc": null,
+        "risk_at_50": 1.0
+      },
+      "sample_only_baseline": {
+        "n": 22,
+        "correct": 0,
+        "incorrect": 22,
+        "auroc": null,
+        "auprc": 1.0,
+        "nAURC": null,
+        "normalized_aurc": null,
+        "risk_at_50": 1.0
+      }
+    }
+  },
+  "control_slice": "L1",
+  "strongest_phase_a_baseline": "normalized provision-level entropy (methods.prov_se)",
+  "control_auroc": 0.6238095238095238,
+  "control_baseline_auroc": 0.638095238095238,
+  "control_metrics": {
+    "n": 22,
+    "correct": 7,
+    "incorrect": 15,
+    "auroc": 0.6238095238095238,
+    "auprc": 0.7242904933617006,
+    "nAURC": 0.39627173404193217,
+    "normalized_aurc": 0.39627173404193217,
+    "risk_at_50": 0.5454545454545454
+  },
+  "control_baseline_metrics": {
+    "n": 22,
+    "correct": 7,
+    "incorrect": 15,
+    "auroc": 0.638095238095238,
+    "auprc": 0.8018920730685436,
+    "nAURC": 0.2680633447238361,
+    "normalized_aurc": 0.2680633447238361,
+    "risk_at_50": 0.5454545454545454
+  },
+  "control_auroc_difference_bootstrap_ci": {
+    "point": -0.014285714285714235,
+    "lo": -0.14583333333333337,
+    "hi": 0.08823529411764708,
+    "valid_replicates": 2000,
+    "n_boot": 2000,
+    "seed": 0
+  },
+  "target_slice": "L7",
+  "target_slice_both_classes_present": false,
+  "target_slice_metrics": {
+    "n": 22,
+    "correct": 0,
+    "incorrect": 22,
+    "auroc": null,
+    "auprc": 1.0,
+    "nAURC": null,
+    "normalized_aurc": null,
+    "risk_at_50": 1.0
+  },
+  "legal_aware_only_test_population": {
+    "n": 37,
+    "correct": 7,
+    "incorrect": 30,
+    "auroc": 0.8214285714285714,
+    "auprc": 0.9533367955362944,
+    "nAURC": 0.6151684997084644,
+    "normalized_aurc": 0.6151684997084644,
+    "risk_at_50": 0.6754385964912281
+  },
+  "provision_entropy_variant": "typed",
+  "g5_conditions": {
+    "target_slice_has_both_correctness_classes": {
+      "value": false,
+      "pass": false,
+      "reason": "held-out L7 target slice has one correctness class"
+    },
+    "control_auroc_defined": {
+      "value": 0.6238095238095238,
+      "pass": true,
+      "reason": "defined"
+    },
+    "paired_improvement_ci_defined": {
+      "value": -0.14583333333333337,
+      "pass": true,
+      "reason": "defined"
+    }
+  },
+  "ablation_status": {
+    "u_prov": {
+      "method": "zero that component's fitted coefficients and all interactions containing it; no refit",
+      "n_legal_aware_test": 37,
+      "full_auroc": 0.8214285714285714,
+      "ablated_auroc": 0.8214285714285714,
+      "auroc_drop": 0.0,
+      "interpretation": "descriptive only; small holdout; Phase H should use confirmatory refits"
+    },
+    "u_text": {
+      "method": "zero that component's fitted coefficients and all interactions containing it; no refit",
+      "n_legal_aware_test": 37,
+      "full_auroc": 0.8214285714285714,
+      "ablated_auroc": 0.8071428571428572,
+      "auroc_drop": 0.014285714285714235,
+      "interpretation": "descriptive only; small holdout; Phase H should use confirmatory refits"
+    },
+    "u_warrant": {
+      "method": "zero that component's fitted coefficients and all interactions containing it; no refit",
+      "n_legal_aware_test": 37,
+      "full_auroc": 0.8214285714285714,
+      "ablated_auroc": 0.8214285714285714,
+      "auroc_drop": 0.0,
+      "interpretation": "descriptive only; small holdout; Phase H should use confirmatory refits"
+    },
+    "u_cm": {
+      "method": "zero that component's fitted coefficients and all interactions containing it; no refit",
+      "n_legal_aware_test": 37,
+      "full_auroc": 0.8214285714285714,
+      "ablated_auroc": 0.8214285714285714,
+      "auroc_drop": 0.0,
+      "interpretation": "descriptive only; small holdout; Phase H should use confirmatory refits"
+    },
+    "u_contra": {
+      "method": "zero that component's fitted coefficients and all interactions containing it; no refit",
+      "n_legal_aware_test": 37,
+      "full_auroc": 0.8214285714285714,
+      "ablated_auroc": 0.8214285714285714,
+      "auroc_drop": 0.0,
+      "interpretation": "descriptive only; small holdout; Phase H should use confirmatory refits"
+    }
+  },
+  "gate_status": "NOT_EVALUABLE",
+  "gate_reason": "held-out L7 target slice lacks both correctness classes; target AUROC undefined",
+  "limitations": [
+    "Only the deterministic 20% pair-grouped holdout is evaluated; this 200-item synthetic slice is small.",
+    "The L7 run-of-record has no correct majority answers, so L7 AUROC is undefined.",
+    "The shipped Phase D records use exact_key representation; Phase B typed-cluster entropy is not present. u_prov uses Phase A provision entropy.",
+    "The legal-aware head is trained on 150 legal-complete development records in this run; all scores are uncalibrated.",
+    "Fallback rows use normalized provision entropy; they are explicitly marked and are not interpreted as model probabilities.",
+    "Component-removal refits are not performed in this pilot; Phase H owns confirmatory ablation testing."
+  ],
+  "output_tree_hash_before": "df017ede35c7b4d1ef9eec7fda42b97969603187696e221b10ca622de73d186d",
+  "output_tree_hash_after_validation": "df017ede35c7b4d1ef9eec7fda42b97969603187696e221b10ca622de73d186d",
+  "output_unchanged_by_validation": true
+}

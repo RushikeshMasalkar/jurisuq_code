@@ -1,0 +1,220 @@
+{
+  "ambiguous_rate": 0.013,
+  "checkpoint": "law-ai/InLegalBERT",
+  "confusion": {
+    "AMBIGUOUS": {
+      "AMBIGUOUS": 4,
+      "CONDITIONALLY_EQUIVALENT": 0,
+      "DIFFERENT_PROVISION": 0,
+      "LEGALLY_EQUIVALENT": 0,
+      "SAME_PROVISION": 0
+    },
+    "CONDITIONALLY_EQUIVALENT": {
+      "AMBIGUOUS": 0,
+      "CONDITIONALLY_EQUIVALENT": 8,
+      "DIFFERENT_PROVISION": 0,
+      "LEGALLY_EQUIVALENT": 0,
+      "SAME_PROVISION": 0
+    },
+    "DIFFERENT_PROVISION": {
+      "AMBIGUOUS": 0,
+      "CONDITIONALLY_EQUIVALENT": 0,
+      "DIFFERENT_PROVISION": 142,
+      "LEGALLY_EQUIVALENT": 0,
+      "SAME_PROVISION": 4
+    },
+    "LEGALLY_EQUIVALENT": {
+      "AMBIGUOUS": 0,
+      "CONDITIONALLY_EQUIVALENT": 0,
+      "DIFFERENT_PROVISION": 0,
+      "LEGALLY_EQUIVALENT": 18,
+      "SAME_PROVISION": 0
+    },
+    "SAME_PROVISION": {
+      "AMBIGUOUS": 0,
+      "CONDITIONALLY_EQUIVALENT": 0,
+      "DIFFERENT_PROVISION": 0,
+      "LEGALLY_EQUIVALENT": 0,
+      "SAME_PROVISION": 132
+    }
+  },
+  "dataset_content_hash": "6e39a85276af8136bdfb4b2a5831862bbf85c662d232e29515d68386b3e9a94b",
+  "dataset_version": "relations_v2",
+  "different_provision_precision": 1.0,
+  "different_provision_recall": 0.9726,
+  "e2_separation": {
+    "by_slice": {
+      "L1": {
+        "exact_collision_acc": 0.8823529411764706,
+        "exact_collision_n": 17,
+        "n": 100,
+        "reclassified_out_of_collision": 0,
+        "rescue_unanimously_wrong_out_of_collision": 0,
+        "typed_collision_acc": 0.8823529411764706,
+        "typed_collision_n": 17
+      },
+      "L7": {
+        "exact_collision_acc": 0.0,
+        "exact_collision_n": 16,
+        "n": 100,
+        "reclassified_out_of_collision": 0,
+        "rescue_unanimously_wrong_out_of_collision": 0,
+        "typed_collision_acc": 0.0,
+        "typed_collision_n": 16
+      }
+    },
+    "changed_ids": [
+      "L1-murder-036"
+    ],
+    "changed_items": 1,
+    "collision_auroc_typed_entropy": 0.5,
+    "encoder_pairs": 9092,
+    "n_scored": 200,
+    "rule_pairs": 8908,
+    "seconds": 644.7,
+    "typed_unanimous_accuracy": {
+      "L1": 0.8823529411764706,
+      "L7": 0.0
+    },
+    "typed_unanimous_accuracy_gap": 0.8823529411764706
+  },
+  "exact_key_baseline_macro_f1": 0.7941,
+  "g2_old_vs_new": {
+    "new": {
+      "changed_items": 1,
+      "different_provision": {
+        "f1": 0.9861,
+        "precision": 1.0,
+        "recall": 0.9726,
+        "support": 146
+      },
+      "exact_key_baseline_macro_f1": 0.7941,
+      "gate_conditions": {
+        "beats_exact_key": true,
+        "merge_precision_ok": true,
+        "phase_a_untouched": true,
+        "rescue_criterion_met": false
+      },
+      "macro_f1": 0.9942,
+      "merge_decision": {
+        "f1": 0.9875,
+        "fn": 0,
+        "fp": 4,
+        "precision": 0.9753086419753086,
+        "recall": 1.0,
+        "threshold": 0.05,
+        "tn": 146,
+        "tp": 158
+      },
+      "rescue_by_slice": {
+        "L1": 0,
+        "L7": 0
+      }
+    },
+    "old": {
+      "changed_items": 130,
+      "different_provision": {
+        "f1": 0.0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "support": 6
+      },
+      "exact_key_baseline_macro_f1": 0.7765,
+      "gate_conditions": {
+        "beats_exact_key": true,
+        "merge_precision_ok": true,
+        "phase_a_untouched": true,
+        "separation_criterion_met": true
+      },
+      "macro_f1": 0.777,
+      "merge_precision": 0.8824,
+      "rescue_by_slice": {
+        "L1": 0,
+        "L7": 0
+      }
+    },
+    "old_run_id": "phaseB-relations-full"
+  },
+  "gate_g2": {
+    "conditions": {
+      "beats_exact_key": true,
+      "merge_precision_ok": true,
+      "phase_a_untouched": true,
+      "rescue_criterion_met": false
+    },
+    "verdict": "NOT YET"
+  },
+  "macro_f1": 0.9942,
+  "merge_decision": {
+    "f1": 0.9875,
+    "fn": 0,
+    "fp": 4,
+    "precision": 0.9753086419753086,
+    "recall": 1.0,
+    "threshold": 0.05,
+    "tn": 146,
+    "tp": 158
+  },
+  "merge_f1": 0.9858,
+  "merge_precision": 0.9706,
+  "merge_threshold": 0.05,
+  "n_test": 308,
+  "per_class": {
+    "AMBIGUOUS": {
+      "f1": 1.0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "support": 4
+    },
+    "CONDITIONALLY_EQUIVALENT": {
+      "f1": 1.0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "support": 8
+    },
+    "DIFFERENT_PROVISION": {
+      "f1": 0.9861,
+      "precision": 1.0,
+      "recall": 0.9726,
+      "support": 146
+    },
+    "LEGALLY_EQUIVALENT": {
+      "f1": 1.0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "support": 18
+    },
+    "SAME_PROVISION": {
+      "f1": 0.9851,
+      "precision": 0.9706,
+      "recall": 1.0,
+      "support": 132
+    }
+  },
+  "phase_a_tree_hash_after": "a98583fd66db4f46bb1ac014",
+  "phase_a_tree_hash_before": "a98583fd66db4f46bb1ac014",
+  "phase_a_untouched": true,
+  "run_id": "phaseB-relations-02",
+  "transition_gold_trap_probe": {
+    "L1/2024-01-01": {
+      "merge_rate": 0.0,
+      "merged": 0,
+      "n": 10
+    },
+    "L1/2026-10-01": {
+      "merge_rate": 0.0,
+      "merged": 0,
+      "n": 10
+    },
+    "L7/2024-01-01": {
+      "merge_rate": 0.1,
+      "merged": 1,
+      "n": 10
+    },
+    "L7/2026-10-01": {
+      "merge_rate": 0.2,
+      "merged": 2,
+      "n": 10
+    }
+  }
+}

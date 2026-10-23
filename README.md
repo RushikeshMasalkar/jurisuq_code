@@ -41,12 +41,89 @@ leave their source runs unchanged. Phase E never recomputes Phase D outputs.
 | A | Complete and frozen | `runs/phaseA-laptop-v2-rejudged/` |
 | B | Implemented; run of record complete; supplemental evaluations retained | `runs/phaseB-relations-full/` |
 | C | Engineering complete; four mappings corrected and eight target rows verified from documented statutory text | `runs/phaseA-laptop-v2-rejudged+ctx/` |
-| D | Complete and frozen; G4 PASS | `runs/phaseA-laptop-v2-rejudged+ctx+warrant/` |
-| E | Implemented pilot; G5 NOT_EVALUABLE | `runs/phaseA-laptop-v2-rejudged+ctx+warrant+uq/` |
+| D | Typed-cluster rerun complete; G4 PASS; CM coverage limited by 13 unresolved records | `runs/phaseA-laptop-v2-rejudged+ctx-r2+typed+warrant/` |
+| E | Two-variant typed-run evaluation; G5 NOT_EVALUABLE | `runs/phaseA-laptop-v2-rejudged+ctx-r2+typed+warrant+uq-typed/` and `...+uq-exact/` |
 
 Phase E's target holdout contains only incorrect L7 answers, so its L7 AUROC
 is undefined and no G5 pass is claimed. The score is an uncalibrated risk
 ranking, not a probability.
+
+### Block 5b attribution-controlled evaluation
+
+Block 5b added four new sibling runs and did not modify the frozen Phase E
+outputs. Missing legal factors use the fitted sample-only degradation
+(intercept + `u_prov` + `u_text` + `u_prov*u_text`), with
+`uq_score_mode=sample_only_degraded`; all four runs have 187 legal-aware and
+13 degraded records, with no raw fallback or unscorable records. The pooled
+models use 156 development and 44 holdout records; the L1-only models use 78
+development and 22 holdout records and are evaluated only within L1.
+
+| Fit / variant | Evaluation | AUROC | AUPRC | nAURC | risk@50% | baseline AUROC |
+|---|---|---:|---:|---:|---:|---:|
+| pooled / typed | L1 (22) | 0.6238 | 0.7243 | 0.3963 | 0.5455 | 0.6381 |
+| pooled / exact | L1 (22) | 0.6905 | 0.7568 | 0.5054 | 0.5455 | 0.8714 |
+| L1-only / typed | L1 (22) | 0.5714 | 0.7129 | 0.3358 | 0.5455 | 0.6381 |
+| L1-only / exact | L1 (22) | 0.8714 | 0.9349 | 0.7078 | 0.4545 | 0.8714 |
+
+The L7 holdout in pooled runs is 22/22 incorrect, so AUROC and nAURC are
+undefined (AUPRC 1.0 and risk@50% 1.0 are reported descriptively). L1-only
+runs have no L7 evaluation population. Pooled paired AUROC differences
+(score minus baseline) are -0.0143 (typed, 95% CI [-0.1458, 0.0882]) and
+-0.1810 (exact, [-0.5000, 0.0000]); L1-only differences are -0.0667
+([-0.3158, 0.1880]) and 0.0000 ([0.0000, 0.0000]). G5 remains
+NOT_EVALUABLE. The exact-key variant is the like-for-like comparison with the
+frozen pilot; neither variant is selected.
+
+For the exact-key pooled L1 holdout, 20 records were legal-aware and 2 were
+degraded fallbacks; both fallbacks were incorrect. On the identical
+legal-aware subset, learned-score AUROC was 0.6868 versus exact `u_prov`
+0.8626. On the full L1 holdout after degradation rescaling, the corresponding
+values were 0.6905 and 0.8714. This is a negative result, not an imputation
+artifact. Typed entropy is exactly zero on 106/200 records (exact-key 33/200);
+the frozen pilot's 32 legal-aware records all had `u_prov=0`, explaining its
+zero fitted `u_prov` weight.
+
+### Structural limitation of the current instrument
+
+The temporal factor is constant within each slice: `T=1.0` on 94/94
+resolvable L1 records and `T=0.0` on 80/81 resolvable L7 records. With
+`J=1` and `K` approximately zero, `W=A` on L1 and `W=0` on L7. Thus `u_cm`
+is identically zero on L1, and `u_warrant` is only a function of observed
+agreement `A`, already encoded by `u_prov`. The legal-aware components have no
+within-slice information: zero variance on L1 and a single correctness class
+on L7.
+
+This explains the exact L1-only result (AUROC `0.8714` versus baseline
+`0.8714`; paired difference `0.0000`, interval `[0.0000, 0.0000]`) and the
+pooled exact result falling to `0.6905` within L1 because it uses `u_warrant`
+and `u_cm` as slice indicators. Therefore G5 cannot be satisfied by any
+estimator, hyperparameter, or ablation on this instrument. G5 requires a
+slice with both correctness classes where the detector both fires and stays
+silent. Building that population is Phase G work and the sole remaining G5
+blocker.
+
+Block 6 is a typed-representation trustworthiness check, not a route to G5:
+typed entropy is zero on 106/200 records versus 33/200 under exact keys, and
+`DIFFERENT_PROVISION` recall is `0.00`. It cannot create the missing variance
+in `T`. The expensive chain will be rerun once, after the two-class target
+population exists.
+
+Block 6 subsequently improved the relation model without rerunning the
+downstream chain. `relations_v2` combines synthetic and observed Phase A pairs
+(1,520 kept; 918/294/308 train/dev/test) and was trained for 12 epochs in
+5,980 seconds. On its 308-pair test split, macro-F1 is 0.9942 versus the
+0.7941 exact-key baseline (margin +0.2001), and
+`DIFFERENT_PROVISION` precision/recall/F1 are 1.0000/0.9726/0.9861.
+Separately thresholded merge precision/recall are 0.9753/1.0000 at
+`tau=0.05`.
+
+The gold/trap probe merge rates are L1 `0/10` at both 2024-01-01 and
+2026-10-01, and L7 `1/10` and `2/10`, respectively. E2 changed items remain
+a diagnostic (0 L1, 1 L7); the corrected rescue count is 0 in both slices.
+Thus corrected G2 is `NOT YET`: precision, macro-F1, and integrity pass, but
+the required unanimously-wrong collision rescue does not occur. G5 remains
+blocked by the missing within-slice temporal-factor variance, independently
+of this relation-model improvement.
 
 ## Documentation map
 
@@ -85,7 +162,7 @@ Phase E: sample statistics + stored W/CM/K -> monotone risk score/fallback
 Primary modules are in [`jurisuq/`](jurisuq/): core pipeline and metrics,
 `relations/` for Phase B, `context/` for Phase C, `warrant/` for Phase D, and
 `uncertainty/` for Phase E. Scripts are numbered by phase:
-`00`–`06` (A), `10`–`12` (B), `20`–`22` (C), and `23`–`27` (D/E).
+`00`–`06` (A), `10`–`13` (B), `20`–`22` (C), and `23`–`27` (D/E).
 
 ## Requirements and installation
 
@@ -161,6 +238,11 @@ python scripts/21_attach_context.py --run-id phaseA-laptop-v2-rejudged --out-suf
 
 # Phase D (requires the Phase C +ctx run)
 python scripts/23_detect_warrant.py --run-id phaseA-laptop-v2-rejudged+ctx --out-suffix +warrant-repro
+
+# Phase D typed-cluster rerun (requires the rebuilt Phase C +typed run)
+python scripts/23_detect_warrant.py --run-id phaseA-laptop-v2-rejudged+ctx-r2+typed `
+  --out-suffix +warrant --cluster-source typed --contradiction-source rule
+python scripts/24_validate_warrant.py --run-id phaseA-laptop-v2-rejudged+ctx-r2+typed+warrant
 ```
 
 The phase guides contain complete commands, inputs, outputs, smoke modes,
@@ -191,7 +273,39 @@ The project preserves the original metrics rather than normalizing them:
   and trap keys are also packed).
 - Phase D reports CM AUROC 0.9412 with bootstrap 95% CI [0.8529, 1.0000],
   binary TP/FP/TN/FN 16/0/15/2, and G4 PASS; temporal ablation carries all
-  above-chance separation.
+  above-chance separation. The typed rerun preserves the collision population
+  at n=33 and the same AUROC/CI. It defines CM for 187/200 records; 13 remain
+  undefined because a required factor is unresolved. The rule contradiction
+  channel uses all 10 `different_offence` crosswalk rows, all of which carry
+  `verified: false`: K is non-zero on 4/200 records, always 0.3, and the
+  internal-contradiction flag fires 4 times. The typed modal cluster contains
+  both the gold and trap keys on 0 records overall (0 L1, 0 L7). This
+  contradiction measurement inherits the crosswalk verification gap.
+- Phase E Block 5 evaluates both `typed_stats.entropy_norm` and the
+  like-for-like `methods.prov_se / log2(n_samples)` variant. Both runs use a
+  156/44 development/holdout split, with 150 legal-complete development rows
+  and modes 187 legal-aware / 13 sample-only fallback. On L1, typed scores
+  AUROC 0.5476, AUPRC 0.6978, nAURC 0.0417, risk@50% 0.5455 versus its
+  baseline AUROC 0.6381, AUPRC 0.8019, nAURC 0.2681, risk@50% 0.5455;
+  exact scores AUROC 0.6524, AUPRC 0.7516, nAURC 0.2624, risk@50% 0.5455
+  versus baseline AUROC 0.8714, AUPRC 0.9349, nAURC 0.7078, risk@50%
+  0.4545. L7 AUROC and nAURC are undefined because the holdout has one
+  correctness class; AUPRC and risk@50% remain defined. Paired AUROC
+  differences are -0.0905 [−0.2500, +0.0427] for typed and -0.2190
+  [−0.5235, 0.0000] for exact. The exact variant is the like-for-like
+  frozen-pilot comparison; neither variant is selected.
+- The typed gold/trap diagnostic is 0/200 (L1 0, L7 0); sample-level
+  co-occurrence is L1 gold-only 69 / neither 31 and L7 trap-only 52 /
+  neither 48. False-merge risk across the transition is unmeasured.
+- The typed Phase D run changed flag sets on 12 records: 10 old-only fires
+  (all old `unresolvable_assertion` flags cleared after typed modal clusters
+  enlarged) and 2 new-only fires (both `internal_contradiction`, L1 murder
+  items with modal `IPC 302` and non-modal `IPC 307`). This explains the
+  base-rate movement from the old run's correct-item alarm 0.000 and
+  wrong-item alarm 0.640 to 0.071 and 0.568. It is not evidence that typed
+  merging pulled a stale provision into an otherwise-correct modal cluster;
+  the changed examples reflect unresolved-factor clearing and the newly
+  enabled rule contradiction channel.
 - Phase E reports 32 legal-aware scores and 168 sample-only fallbacks;
   L1 AUROC 0.9000 versus 0.8714 provision-entropy baseline, paired difference
   +0.0286 with 95% interval [−0.0417, +0.1500], and a legal-aware-only

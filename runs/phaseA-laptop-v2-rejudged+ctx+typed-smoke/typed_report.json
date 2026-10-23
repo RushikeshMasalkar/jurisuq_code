@@ -1,0 +1,28 @@
+{
+  "run_id": "phaseA-laptop-v2-rejudged+ctx+typed-smoke",
+  "source_run": "phaseA-laptop-v2-rejudged+ctx",
+  "n_scored": 5,
+  "n_skipped": 0,
+  "skipped_item_ids": [],
+  "encoder_pairs": 176,
+  "rule_pairs": 274,
+  "seconds": 10.3,
+  "changed_agreement_item_ids": [
+    "L1-cruelty_by_husband-005",
+    "L1-theft-000"
+  ],
+  "changed_agreement_item_ids_capped": false,
+  "changed_agreement_count": 2,
+  "n_clusters_distribution": {
+    "1": 2,
+    "2": 3
+  },
+  "checkpoint": "E:\\PROJECTS\\JURIS-UQ\\jurisuq_code\\models\\relation\\relations_v1-InLegalBERT-phaseB-relations-full",
+  "tau": 0.45,
+  "source_tree_hash_before": "a39434fa145c0fc98378ba8b",
+  "source_tree_hash_after": "a39434fa145c0fc98378ba8b",
+  "source_run_untouched": true,
+  "dataset_sha256": "89bc1180a4df76287768ce59432aa7ff0aa9d38c16d5f296ed16c3e45449bd53",
+  "statutes_sha256": "ef50705e99b3ba8de8287df0e289c3df2dd5a4f648ccd58bdb9a9afd2c682b18",
+  "links_sha256": "8ab1b9e40ff6cd66e11b0d58ff34c09ecd1579d18fcdc71233858a9ec3ce56d2"
+}
