@@ -21,7 +21,8 @@ jurisuq/context/
 scripts/
 ├── 20_build_statutes.py      # builds, validates and writes data/statutes/statutes_v1.jsonl
 ├── 21_attach_context.py      # packs a stored Phase A run into a new sibling run (+ctx)
-└── 22_verify_statutes.py     # human-verification workflow: checklist CSV <-> overrides
+├── 22_verify_statutes.py     # human-verification workflow: checklist CSV <-> overrides
+└── 28_adapt_encoder.py      # continued MLM adaptation on statute and answer text
 tests/
 └── test_context.py           # 33 tests, incl. all five spec §15.3 acceptance tests
 PHASE-C.md                    # this file
@@ -38,6 +39,7 @@ PHASE-C.md                    # this file
 | `typed_stats` | object | `scripts/13_attach_typed.py` | Phase E (`u_prov`) | registered |
 | `scripts/13_attach_typed.py` | `--run-id`, `--out-suffix`, `--checkpoint`, `--config`, `--limit`, `--force`, `--progress` | Phase B | Phase D, E | registered |
 | `scripts/23_detect_warrant.py --cluster-source {auto,exact,typed}` | CLI flag; default `auto` | Phase D | Phase D evaluation | registered; pending Block 4 |
+| `scripts/28_adapt_encoder.py` | continued masked-LM adaptation; `--encoder`, `--out-dir`, `--epochs`, `--batch-size`, `--max-length`, `--learning-rate` | Phase C | Phase B relation experiments | registered; Block 7a |
 
 The authoritative frozen dataset sha256 for every new context run is
 `89bc1180a4df76287768ce59432aa7ff0aa9d38c16d5f296ed16c3e45449bd53`.
