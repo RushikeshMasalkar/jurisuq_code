@@ -1,0 +1,12 @@
+{
+  "run_id": "phaseA-laptop-v2-rejudged+ctx+typed-smoke",
+  "phase": "B",
+  "source_run": "phaseA-laptop-v2-rejudged+ctx",
+  "checkpoint": "E:\\PROJECTS\\JURIS-UQ\\jurisuq_code\\models\\relation\\relations_v1-InLegalBERT-phaseB-relations-full",
+  "tau": 0.45,
+  "dataset_sha256": "89bc1180a4df76287768ce59432aa7ff0aa9d38c16d5f296ed16c3e45449bd53",
+  "statutes_sha256": "ef50705e99b3ba8de8287df0e289c3df2dd5a4f648ccd58bdb9a9afd2c682b18",
+  "links_sha256": "8ab1b9e40ff6cd66e11b0d58ff34c09ecd1579d18fcdc71233858a9ec3ce56d2",
+  "source_tree_hash": "a39434fa145c0fc98378ba8b",
+  "source_run_untouched": true
+}

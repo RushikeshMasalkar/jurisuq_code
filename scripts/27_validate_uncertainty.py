@@ -16,7 +16,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-from jurisuq.metrics import auroc
+from jurisuq.metrics import auprc, auroc, normalized_aurc, risk_coverage
 from jurisuq.uncertainty.estimator import MonotoneLogistic, score_features
 from jurisuq.uncertainty.io import read_jsonl, tree_hash, write_json
 from jurisuq.uncertainty.split import load_pair_ids, split_name
@@ -25,6 +25,34 @@ from jurisuq.uncertainty.split import load_pair_ids, split_name
 def safe_metric(values, labels):
     value = auroc(values, labels) if values and len(values) == len(labels) else float("nan")
     return None if not math.isfinite(value) else value
+
+
+def error_metrics(rows, score_key):
+    usable = [r for r in rows if isinstance(r.get(score_key), (int, float))
+              and not isinstance(r.get(score_key), bool)
+              and math.isfinite(float(r[score_key]))
+              and r.get("majority_correct") in (0, 1)]
+    correct = [int(r["majority_correct"]) for r in usable]
+    uncertainty = [float(r[score_key]) for r in usable]
+    errors = [1 - c for c in correct]
+    if not usable:
+        return {"n": 0, "correct": 0, "incorrect": 0,
+                "auroc": None, "auprc": None, "nAURC": None,
+                "normalized_aurc": None,
+                "risk_at_50": None}
+    rc = risk_coverage(correct, uncertainty, coverages=(0.5,))
+    risk50 = rc.get("at", {}).get(0.5, {}).get("risk")
+    precision = auprc(uncertainty, errors)
+    nau_r_c = normalized_aurc(correct, uncertainty)
+    return {
+        "n": len(usable), "correct": sum(correct), "incorrect": sum(errors),
+        "auroc": safe_metric(uncertainty, correct),
+        "auprc": precision if math.isfinite(precision) else None,
+        "nAURC": nau_r_c if math.isfinite(nau_r_c) else None,
+        "normalized_aurc": nau_r_c if math.isfinite(nau_r_c) else None,
+        "risk_at_50": risk50 if isinstance(risk50, (int, float))
+        and math.isfinite(risk50) else None,
+    }
 
 
 def bootstrap_delta(rows, seed=0, n_boot=2000):
@@ -113,12 +141,15 @@ def main() -> int:
     seed = model["split"]["seed"]
     test_fraction = float(model["split"]["test_fraction"])
 
+    evaluation_slice = model.get("fit_slice", "pooled")
     test_rows = []
     for record in records:
         item_id = record.get("item_id")
         if item_id not in pair_ids:
             raise SystemExit(f"ERROR: no pair_id for {item_id!r}")
         if split_name(pair_ids[item_id], seed=seed, test_fraction=test_fraction) != "test":
+            continue
+        if evaluation_slice != "pooled" and record.get("slice") != evaluation_slice:
             continue
         label = record.get("majority_correct")
         if isinstance(label, bool) or label not in (0, 1):
@@ -134,8 +165,8 @@ def main() -> int:
             "n": len(rows),
             "correct": sum(int(r["majority_correct"]) for r in rows),
             "incorrect": sum(1-int(r["majority_correct"]) for r in rows),
-            "uq_auroc": metric_block(rows, "uq_uncertainty"),
-            "sample_only_provision_entropy_auroc": metric_block(
+            "phase_e_score": error_metrics(rows, "uq_uncertainty"),
+            "sample_only_baseline": error_metrics(
                 [{**r, "u_prov_score": (r.get("uq_components") or {}).get("u_prov")} for r in rows],
                 "u_prov_score"),
         }
@@ -146,8 +177,8 @@ def main() -> int:
 
     delta = bootstrap_delta(control, seed=args.bootstrap_seed,
                             n_boot=args.bootstrap_samples)
-    control_uq = metric_block(control, "uq_uncertainty")
-    control_baseline = metric_block(
+    control_uq = error_metrics(control, "uq_uncertainty")
+    control_baseline = error_metrics(
         [{**r, "u_prov_score": (r.get("uq_components") or {}).get("u_prov")} for r in control],
         "u_prov_score")
     legal_test = [r for r in test_rows if r.get("uq_score_mode") == "legal_aware"]
@@ -196,11 +227,32 @@ def main() -> int:
         gate_status = "FAIL"
         gate_reason = "held-out control-slice improvement criterion was not met"
 
+    g5_conditions = {
+        "target_slice_has_both_correctness_classes": {
+            "value": target_classes_defined,
+            "pass": target_classes_defined,
+            "reason": ("both classes present" if target_classes_defined
+                       else "held-out L7 target slice has one correctness class"),
+        },
+        "control_auroc_defined": {
+            "value": control_uq["auroc"],
+            "pass": control_uq["auroc"] is not None,
+            "reason": ("defined" if control_uq["auroc"] is not None
+                       else "control AUROC undefined"),
+        },
+        "paired_improvement_ci_defined": {
+            "value": delta["lo"],
+            "pass": delta["lo"] is not None,
+            "reason": ("defined" if delta["lo"] is not None
+                       else "paired improvement interval undefined"),
+        },
+    }
     result = {
         "phase": "E", "experiment": "E5", "gate": "G5",
         "source_run_id": model.get("source_run_id"), "output_run_id": args.run_id,
         "split": {"kind": "pair-grouped SHA-256 holdout", "seed": seed,
                   "test_fraction": test_fraction, "n_test": len(test_rows),
+                  "evaluation_slice": evaluation_slice,
                   "test_item_ids": [r["item_id"] for r in test_rows]},
         "evaluation_label_field": "majority_correct",
         "labels_used_only_for_offline_evaluation": True,
@@ -209,11 +261,15 @@ def main() -> int:
         "strongest_phase_a_baseline": "normalized provision-level entropy (methods.prov_se)",
         "control_auroc": control_uq["auroc"],
         "control_baseline_auroc": control_baseline["auroc"],
+        "control_metrics": control_uq,
+        "control_baseline_metrics": control_baseline,
         "control_auroc_difference_bootstrap_ci": delta,
         "target_slice": "L7",
         "target_slice_both_classes_present": target_classes_defined,
-        "target_slice_auroc": metric_block(target, "uq_uncertainty")["auroc"],
-        "legal_aware_only_test_population": metric_block(legal_test, "uq_uncertainty"),
+        "target_slice_metrics": error_metrics(target, "uq_uncertainty"),
+        "legal_aware_only_test_population": error_metrics(legal_test, "uq_uncertainty"),
+        "provision_entropy_variant": model.get("provision_entropy_variant", "exact"),
+        "g5_conditions": g5_conditions,
         "ablation_status": ablations,
         "gate_status": gate_status,
         "gate_reason": gate_reason,

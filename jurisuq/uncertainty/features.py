@@ -35,7 +35,7 @@ def _normalized_entropy(methods: dict, key: str, n_samples: Any) -> float | None
     return min(1.0, max(0.0, value / denom))
 
 
-def extract_features(record: dict) -> dict:
+def extract_features(record: dict, provision_variant: str = "exact") -> dict:
     """Return explicit Phase E components and fallback provenance.
 
     ``u_prov`` is normalized Phase A provision-key entropy (``methods.prov_se``)
@@ -53,10 +53,21 @@ def extract_features(record: dict) -> dict:
     only when all required stored factors and sample components are present and
     valid. Otherwise the caller must use ``u_prov`` as the sample-only fallback.
     """
+    if provision_variant not in ("exact", "typed"):
+        raise ValueError(f"unknown provision entropy variant: {provision_variant}")
     methods = record.get("methods")
     methods = methods if isinstance(methods, dict) else {}
     n_samples = record.get("n_samples")
-    u_prov = _normalized_entropy(methods, "prov_se", n_samples)
+    typed_stats = record.get("typed_stats")
+    typed_entropy = None
+    if isinstance(typed_stats, dict):
+        typed_entropy = _finite_unit(typed_stats.get("entropy_norm"))
+    if provision_variant == "typed" and typed_entropy is not None:
+        u_prov = typed_entropy
+        provision_source = "typed_stats.entropy_norm"
+    else:
+        u_prov = _normalized_entropy(methods, "prov_se", n_samples)
+        provision_source = "methods.prov_se / log2(n_samples)"
     u_text = _normalized_entropy(methods, "disc_se", n_samples)
 
     reasons = []
@@ -99,7 +110,7 @@ def extract_features(record: dict) -> dict:
         "legal_complete": bool(legal_complete),
         "fallback_score": u_prov,
         "fallback_reason": fallback_reason,
-        "provision_entropy_source": "methods.prov_se / log2(n_samples)",
+        "provision_entropy_source": provision_source,
         "text_entropy_source": "methods.disc_se / log2(n_samples)",
         "warrant_source": "stored Phase D warrant_* fields",
     }

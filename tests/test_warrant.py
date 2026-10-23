@@ -170,10 +170,28 @@ def test_contradiction_mass_from_a_relation_matrix(detector):
             relation[j][i] = "CONTRADICTORY"
     rec = _rec(keys, "L7", prov_all_same=0)
     res = detector.detect(rec, cluster_labels=labels,
-                            relation_matrix=relation)
+                            relation_matrix=relation, contradiction_source="model")
     assert res.contradiction_mass == pytest.approx(0.4)
     assert res.contradiction_source == "model"
     assert FLAG_CONTRADICTION in res.flags
+
+
+def test_rule_contradiction_mass_uses_typed_clusters(detector):
+    keys = ["IPC 420"] * 6 + ["IPC 406"] * 4
+    labels = [0] * 6 + [1] * 4
+    res = detector.detect(_rec(keys, "L7", prov_all_same=0),
+                          cluster_labels=labels,
+                          contradiction_source="rule")
+    assert res.contradiction_mass == pytest.approx(0.4)
+    assert res.contradiction_source == "rule_crosswalk_different_offence"
+    assert FLAG_CONTRADICTION in res.flags
+
+
+def test_invalid_relation_label_is_not_trusted_by_detection_cli():
+    relation = [["SAME_PROVISION", "NOT_A_RELATION"],
+                ["NOT_A_RELATION", "SAME_PROVISION"]]
+    from jurisuq.relations.schema import RELATIONS
+    assert all(value in RELATIONS for row in relation for value in row) is False
 
 
 def test_warranted_agreement_product_form(detector):

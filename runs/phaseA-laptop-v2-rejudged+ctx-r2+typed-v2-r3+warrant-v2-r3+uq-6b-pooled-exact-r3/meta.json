@@ -1,0 +1,27 @@
+{
+  "phase": "E",
+  "module": "M8",
+  "run_id": "phaseA-laptop-v2-rejudged+ctx-r2+typed-v2-r3+warrant-v2-r3+uq-6b-pooled-exact-r3",
+  "source_run_id": "phaseA-laptop-v2-rejudged+ctx-r2+typed-v2-r3+warrant-v2-r3",
+  "source_tree_sha256_before": "325047b62c11ced43e3b955c77f3ee44d30bc777b455050410a4019192958db0",
+  "source_tree_sha256_after": "325047b62c11ced43e3b955c77f3ee44d30bc777b455050410a4019192958db0",
+  "source_unchanged": true,
+  "generated_utc": "2026-10-23T07:48:07Z",
+  "n_items": 200,
+  "score_modes": {
+    "legal_aware": 172,
+    "sample_only_degraded": 28,
+    "sample_only_fallback": 0,
+    "unscorable": 0
+  },
+  "fallback_reasons": {
+    "warrant_warranted_agreement missing, null, or invalid; warrant_common_mode_score missing, null, or invalid": 28
+  },
+  "model_path": "runs\\phaseE-6b-pooled-exact-r3_model.json",
+  "correctness_labels_used_by_scoring_path": false,
+  "dataset_sha256": "89bc1180a4df76287768ce59432aa7ff0aa9d38c16d5f296ed16c3e45449bd53",
+  "statutes_sha256": "ef50705e99b3ba8de8287df0e289c3df2dd5a4f648ccd58bdb9a9afd2c682b18",
+  "links_sha256": "8ab1b9e40ff6cd66e11b0d58ff34c09ecd1579d18fcdc71233858a9ec3ce56d2",
+  "provision_entropy_variant": "exact",
+  "calibration_status": "uncalibrated; not a probability of correctness"
+}
