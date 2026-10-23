@@ -1,0 +1,72 @@
+{
+  "run_id": "phaseA-laptop-v2-rejudged+ctx-r2+typed-v2-r3+warrant-v2-r3",
+  "source_run": "phaseA-laptop-v2-rejudged+ctx-r2+typed-v2-r3",
+  "phase": "D",
+  "experiment": "E4-detector",
+  "generated_utc": "2026-10-23T07:47:50+00:00",
+  "statutes_file": "E:\\PROJECTS\\JURIS-UQ\\jurisuq_code\\data\\statutes\\statutes_v1.jsonl",
+  "statutes_sha256": "ef50705e99b3ba8de8287df0e289c3df2dd5a4f648ccd58bdb9a9afd2c682b18",
+  "statutes_rows": 48,
+  "links_file": "E:\\PROJECTS\\JURIS-UQ\\jurisuq_code\\data\\relations\\crosswalk_v1.jsonl",
+  "links_sha256": "8ab1b9e40ff6cd66e11b0d58ff34c09ecd1579d18fcdc71233858a9ec3ce56d2",
+  "as_of_policy": "era",
+  "fixed_as_of": null,
+  "era_reference_dates": {
+    "L7": "2024-07-01",
+    "L1": "2024-06-30"
+  },
+  "jurisdiction": "IN",
+  "thresholds": {
+    "temporal": 1.0,
+    "jurisdiction": 1.0,
+    "contradiction": 0.0
+  },
+  "cluster_source": "typed",
+  "contradiction_source_requested": "rule",
+  "items_detected": 200,
+  "fires": 117,
+  "silent": 83,
+  "fire_rate": 0.585,
+  "cm_defined": 172,
+  "cm_undefined": 28,
+  "flag_counts": {
+    "stale_provision": 78,
+    "internal_contradiction": 16,
+    "unresolvable_assertion": 28
+  },
+  "cluster_representation_counts": {
+    "typed": 200
+  },
+  "contradiction_source_counts": {
+    "rule_crosswalk_different_offence": 200
+  },
+  "typed_signal_fallback_counts": {},
+  "typed_modal_cluster_contains_gold_and_trap": {
+    "overall": 0,
+    "per_slice": {
+      "L1": 0,
+      "L7": 0
+    }
+  },
+  "crosswalk_different_offence_rows": 10,
+  "crosswalk_different_offence_rows_verified": false,
+  "crosswalk_different_offence_unverified_rows": 10,
+  "dataset_sha256": "89bc1180a4df76287768ce59432aa7ff0aa9d38c16d5f296ed16c3e45449bd53",
+  "per_slice": {
+    "L1": {
+      "items": 100,
+      "fires": 18,
+      "cm_defined": 93,
+      "cm_sum": 1.2999999999999998
+    },
+    "L7": {
+      "items": 100,
+      "fires": 99,
+      "cm_defined": 79,
+      "cm_sum": 52.899999999999984
+    }
+  },
+  "source_tree_hash_before": "caf8b8d2d625e8bee0d08f64",
+  "source_tree_hash_after": "caf8b8d2d625e8bee0d08f64",
+  "source_run_untouched": true
+}

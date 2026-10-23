@@ -51,6 +51,9 @@ def main() -> int:
     if model_payload.get("phase") != "E" or model_payload.get("source_run_id") != args.run_id:
         raise SystemExit("ERROR: model phase/source_run_id does not match the input run")
     model_sha256 = hashlib.sha256(model_path.read_bytes()).hexdigest()
+    dataset_path = ROOT / "data" / "lexuq_slice.jsonl"
+    statutes_path = ROOT / "data" / "statutes" / "statutes_v1.jsonl"
+    links_path = ROOT / "data" / "relations" / "crosswalk_v1.jsonl"
     before = tree_hash(source)
     if before != model_payload.get("source_tree_sha256"):
         raise SystemExit("ERROR: source run differs from the immutable tree used to fit this model")
@@ -69,16 +72,21 @@ def main() -> int:
 
     records = read_jsonl(src_items)
     rows = []
-    modes = {"legal_aware": 0, "sample_only_fallback": 0, "unscorable": 0}
+    modes = {"legal_aware": 0, "sample_only_degraded": 0,
+             "sample_only_fallback": 0, "unscorable": 0}
     reasons: dict[str, int] = {}
     for source_record in records:
         # Query-time feature path: pass a whitelist, never iterate over/read labels.
         allowed = ("methods", "n_samples", "warrant_warranted_agreement",
-                   "warrant_common_mode_score", "warrant_contradiction_mass")
+                   "warrant_common_mode_score", "warrant_contradiction_mass",
+                   "typed_stats")
         feature_record = {key: source_record.get(key) for key in allowed}
-        extracted = extract_features(feature_record)
+        extracted = extract_features(
+            feature_record,
+            provision_variant=model_payload.get("provision_entropy_variant", "exact"),
+        )
         components = extracted["components"]
-        estimated = estimate(extracted, legal_head)
+        estimated = estimate(extracted, legal_head, degraded_fallback=True)
         score = estimated["score"]
         mode = estimated["mode"]
         reason = estimated["fallback_reason"]
@@ -116,6 +124,10 @@ def main() -> int:
         "n_items": len(rows), "score_modes": modes, "fallback_reasons": reasons,
         "model_path": str(model_path.relative_to(ROOT)) if ROOT in model_path.parents else str(model_path),
         "correctness_labels_used_by_scoring_path": False,
+        "dataset_sha256": hashlib.sha256(dataset_path.read_bytes()).hexdigest(),
+        "statutes_sha256": hashlib.sha256(statutes_path.read_bytes()).hexdigest(),
+        "links_sha256": hashlib.sha256(links_path.read_bytes()).hexdigest(),
+        "provision_entropy_variant": model_payload.get("provision_entropy_variant", "exact"),
         "calibration_status": "uncalibrated; not a probability of correctness",
     })
     print(f"scored {len(rows)} records -> {dest}")

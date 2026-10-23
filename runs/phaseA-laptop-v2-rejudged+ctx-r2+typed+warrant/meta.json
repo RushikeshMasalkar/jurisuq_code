@@ -1,0 +1,13 @@
+{
+  "run_id": "phaseA-laptop-v2-rejudged+ctx-r2+typed+warrant",
+  "phase": "D",
+  "source_run": "phaseA-laptop-v2-rejudged+ctx-r2+typed",
+  "as_of_policy": "era",
+  "jurisdiction": "IN",
+  "generated_utc": "2026-10-22T19:00:07+00:00",
+  "statutes_sha256": "ef50705e99b3ba8de8287df0e289c3df2dd5a4f648ccd58bdb9a9afd2c682b18",
+  "links_sha256": "8ab1b9e40ff6cd66e11b0d58ff34c09ecd1579d18fcdc71233858a9ec3ce56d2",
+  "source_tree_hash": "3af7795d452ba5a7e12c23d9",
+  "source_run_untouched": true,
+  "dataset_sha256": "89bc1180a4df76287768ce59432aa7ff0aa9d38c16d5f296ed16c3e45449bd53"
+}

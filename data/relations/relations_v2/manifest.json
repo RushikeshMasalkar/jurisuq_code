@@ -1,0 +1,101 @@
+{
+  "content_hash": "6e39a85276af8136bdfb4b2a5831862bbf85c662d232e29515d68386b3e9a94b",
+  "counts": {
+    "by_label": {
+      "AMBIGUOUS": 20,
+      "CONDITIONALLY_EQUIVALENT": 40,
+      "DIFFERENT_PROVISION": 774,
+      "LEGALLY_EQUIVALENT": 90,
+      "SAME_PROVISION": 596
+    },
+    "by_split": {
+      "dev": 294,
+      "test": 308,
+      "train": 918
+    },
+    "by_split_stratum": {
+      "dev/S1": 128,
+      "dev/S2": 24,
+      "dev/S3": 8,
+      "dev/S4": 18,
+      "dev/S5": 110,
+      "dev/S6": 2,
+      "dev/S7": 4,
+      "test/S1": 108,
+      "test/S2": 24,
+      "test/S3": 8,
+      "test/S4": 18,
+      "test/S5": 144,
+      "test/S6": 2,
+      "test/S7": 4,
+      "train/S1": 240,
+      "train/S2": 72,
+      "train/S3": 24,
+      "train/S4": 54,
+      "train/S5": 510,
+      "train/S6": 6,
+      "train/S7": 12
+    },
+    "by_stratum": {
+      "S1": 476,
+      "S2": 120,
+      "S3": 40,
+      "S4": 90,
+      "S5": 764,
+      "S6": 10,
+      "S7": 20
+    }
+  },
+  "dataset_version": "relations_v2",
+  "files": {
+    "dev": {
+      "n": 294,
+      "path": "data\\relations\\relations_v2\\dev.jsonl",
+      "sha256": "449e38cd89e803944847bbd5f09911cc8928ad6c0cec3e282e148a0cb968de04"
+    },
+    "test": {
+      "n": 308,
+      "path": "data\\relations\\relations_v2\\test.jsonl",
+      "sha256": "fce1d5c0272366f167689c84e4a0295f1ee4031d58feadb834ca5a978d84c3be"
+    },
+    "train": {
+      "n": 918,
+      "path": "data\\relations\\relations_v2\\train.jsonl",
+      "sha256": "d81e7a097a3e1413796d4fd73950c75cfb589ac2c80797ea697b7827f088414a"
+    }
+  },
+  "human_verified_test": false,
+  "label_order": [
+    "SAME_PROVISION",
+    "LEGALLY_EQUIVALENT",
+    "CONDITIONALLY_EQUIVALENT",
+    "DIFFERENT_PROVISION",
+    "AMBIGUOUS"
+  ],
+  "label_to_index": {
+    "AMBIGUOUS": 4,
+    "CONDITIONALLY_EQUIVALENT": 2,
+    "DIFFERENT_PROVISION": 3,
+    "LEGALLY_EQUIVALENT": 1,
+    "SAME_PROVISION": 0
+  },
+  "notes": [
+    "Splits are topic-disjoint; a topic appears in exactly one split.",
+    "test must be replaced by the human-verified file before any reported metric."
+  ],
+  "rejected": {
+    "duplicate pair under the same context": 10
+  },
+  "schema_version": "pb1",
+  "seed": 20261005,
+  "source": "both",
+  "strata": {
+    "S1": "same provision, paraphrase (easy positive)",
+    "S2": "same provision, heavy paraphrase / reordered (hard positive)",
+    "S3": "context-dependent: identical text under two contexts",
+    "S4": "crosswalk-equivalent provisions across the transition",
+    "S5": "hard negative: adjacent sections of the same act",
+    "S6": "hard negative: same number, different act",
+    "S7": "ambiguous: act-only or truncated assertion"
+  }
+}

@@ -29,6 +29,9 @@ def main() -> int:
                     help="model JSON path, relative to repository root unless absolute")
     ap.add_argument("--split-seed", default="phaseE-v1")
     ap.add_argument("--test-fraction", type=float, default=0.20)
+    ap.add_argument("--provision-variant", choices=("typed", "exact"),
+                    default="exact")
+    ap.add_argument("--fit-slice", choices=("pooled", "L1"), default="pooled")
     args = ap.parse_args()
     if not 0.0 < args.test_fraction < 1.0:
         ap.error("--test-fraction must be between 0 and 1")
@@ -50,16 +53,20 @@ def main() -> int:
     train_records, train_labels = [], []
     training_ids, test_ids = [], []
     unsupported_ids = []
+    fit_population = 0
     for record in records:
         item_id = record.get("item_id")
         if item_id not in pair_ids:
             raise SystemExit(f"ERROR: {item_id!r} has no pair_id in data/lexuq_slice.jsonl")
         part = split_name(pair_ids[item_id], seed=args.split_seed,
                           test_fraction=args.test_fraction)
+        if args.fit_slice != "pooled" and record.get("slice") != args.fit_slice:
+            continue
+        fit_population += 1
         if part == "test":
             test_ids.append(item_id)
             continue
-        feat = extract_features(record)
+        feat = extract_features(record, provision_variant=args.provision_variant)
         if not feat["legal_complete"]:
             unsupported_ids.append(item_id)
             continue
@@ -91,10 +98,12 @@ def main() -> int:
         "module": "M8",
         "source_run_id": args.run_id,
         "source_tree_sha256": before,
+        "provision_entropy_variant": args.provision_variant,
+        "fit_slice": args.fit_slice,
         "split": {"kind": "sha256 pair-grouped holdout",
                   "seed": args.split_seed,
                   "test_fraction": args.test_fraction,
-                  "development_item_count": len(records) - len(test_ids),
+                  "development_item_count": fit_population - len(test_ids),
                   "test_item_count": len(test_ids),
                   "training_pair_grouped_item_ids": training_ids,
                   "test_item_ids": test_ids,
@@ -108,7 +117,7 @@ def main() -> int:
         "fit_note": fit_note,
         "feature_spec": ["u_prov", "u_text", "u_warrant", "u_cm", "u_contra",
                          "all pairwise interactions; all coefficients constrained >= 0"],
-        "fallback": "normalized sample-only provision entropy u_prov; null is not zero",
+        "fallback": "selected normalized sample-only provision entropy u_prov; null is not zero",
         "calibration_status": "uncalibrated ranking/risk score; Phase F owns calibration",
     }
     model_path = Path(args.model_out)
@@ -118,7 +127,7 @@ def main() -> int:
         raise SystemExit("ERROR: model output must not be inside the frozen source run")
     write_json(model_path, payload)
     print(f"Phase E model written: {model_path}")
-    print(f"development records: {len(records) - len(test_ids)}; holdout records: {len(test_ids)}")
+    print(f"development records: {fit_population - len(test_ids)}; holdout records: {len(test_ids)}")
     print(f"legal-complete development rows fitted: {len(train_labels)} "
           f"(incorrect={sum(train_labels)}, correct={len(train_labels)-sum(train_labels)})")
     print(f"legal-aware head: {'trained' if model_obj else 'unavailable; sample-only fallback'}")

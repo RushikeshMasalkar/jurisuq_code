@@ -95,6 +95,7 @@ def main() -> int:
     links_path = pathlib.Path(args.links)
     if not links_path.is_absolute():
         links_path = ROOT / links_path
+    dataset_path = ROOT / "data" / "lexuq_slice.jsonl"
 
     hash_before = tree_hash(src)
     store = load_statutes(statutes)
@@ -150,6 +151,7 @@ def main() -> int:
         "statutes_verified_share": store.verified_share(),
         "links_file": str(links_path),
         "links_sha256": sha256_file(links_path) if links_path.exists() else None,
+        "dataset_sha256": sha256_file(dataset_path),
         "items_packed": len(records),
         "assertion_lookups": known + unknown,
         "known": known,
@@ -183,6 +185,7 @@ def main() -> int:
         "generated_utc": report["generated_utc"],
         "statutes_sha256": report["statutes_sha256"],
         "links_sha256": report["links_sha256"],
+        "dataset_sha256": report["dataset_sha256"],
         "source_tree_hash": hash_after,
         "phase_a_untouched": untouched,
     }
