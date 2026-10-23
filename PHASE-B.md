@@ -18,6 +18,33 @@ read-only.
 - `runs/full/`: supplemental full E2 evaluation report.
 - `runs/relations-full/`: supplemental test-only evaluation report.
 
+## Field and script registry
+
+| Field or script | Type / interface | Producer | Consumer | Status |
+|---|---|---|---|---|
+| `clusters` | `list[int]` | `scripts/13_attach_typed.py` | Phase D, E | registered; pending typed run |
+| `cluster_provisions` | `list[str]` | `scripts/13_attach_typed.py` | Phase D | registered; pending typed run |
+| `relation_matrix` | `list[list[str]]` | `scripts/13_attach_typed.py` | Phase D (K) | registered; pending typed run |
+| `relation_scores` | `list[list[float]]` | `scripts/13_attach_typed.py` | audit / figures | registered; pending typed run |
+| `typed_stats` | object | `scripts/13_attach_typed.py` | Phase E (`u_prov`) | registered; pending typed run |
+| `typed_stats.n_clusters, counts, entropy, entropy_norm, top_share, agreement, all_same, canonical, contradiction_mass, merges_applied, merges_skipped, forced_unions, flags` | object keys | `scripts/13_attach_typed.py` | Phase E / audit | registered; exact `jurisuq.relations.stats.typed_stats` keys |
+| `scripts/13_attach_typed.py` | CLI script; `--run-id`, `--out-suffix`, `--checkpoint`, `--config`, `--limit`, `--force`, `--progress` | Phase B | Phase D, E | registered; implementation in progress |
+
+The authoritative frozen Phase A dataset digest is
+`89bc1180a4df76287768ce59432aa7ff0aa9d38c16d5f296ed16c3e45449bd53`.
+Historical registry value `45b2d194e9c2f623457481c0d7d02f36c6267ec65c0b75ee3df2be4c0d1d010a`
+is retained only as a stale historical value.
+
+### Block 5 limitation: gold/trap co-occurrence
+
+On the frozen 200-item slice, no item's ten stored samples contain both its
+gold provision and its trap provision. The counts are L1 gold-only 69,
+L1 neither 31, L7 trap-only 52, L7 neither 48, and both 0. The typed
+gold/trap modal-cluster diagnostic therefore has a measured ceiling of zero:
+it provides no evidence about whether the relation model falsely merges
+legally distinct provisions across the IPC-to-BNS transition. That risk is
+unmeasured on this benchmark.
+
 The seven controlled strata cover same-provision paraphrases, context
 dependence, IPC/BNS crosswalk equivalence, adjacent-section and cross-act hard
 negatives, and ambiguous assertions. Labels are rule-generated, not
@@ -261,6 +288,95 @@ characterises the pipeline, not the legal domain.
    is largely learning to reproduce rules that are already free at inference time. Its
    scientific value lies on pairs the rules cannot decide, which this dataset
    under-samples (DIFFERENT_PROVISION has 30 pairs in total, 6 in test).
+
+   ## Block 6 — Phase B model-quality follow-up
+
+   Block 6 was run on the current frozen Phase A data without rerunning any typed
+   attachment, warrant detection, or Phase E scripts. The accepted Block 5c
+   structural finding remains decisive: typed representation quality cannot create
+   the missing within-slice variance in `T`, so this block does not make G5
+   evaluable.
+
+   ### Dataset and training
+
+   `relations_v2` was built into `data/relations/relations_v2` from both the
+   synthetic generator and observed Phase A pairs. The v1 dataset was not edited.
+   It contains 1,520 kept pairs (918 train, 294 dev, 308 test); 10 duplicate pairs
+   were rejected. Content hash:
+   `6e39a85276af8136bdfb4b2a5831862bbf85c662d232e29515d68386b3e9a94b`.
+
+   The new run is `runs/phaseB-relations-02/`, trained for the committed 12
+   epochs with the explicit `DIFFERENT_PROVISION` class weight of 10.0. Epoch
+   loss and wall time were:
+
+   | Epoch | Loss | Seconds |
+   |---:|---:|---:|
+   | 1 | 0.5636 | 430.8 |
+   | 2 | 0.2553 | 978.9 |
+   | 3 | 0.1122 | 569.4 |
+   | 4 | 0.0454 | 560.0 |
+   | 5 | 0.0192 | 389.1 |
+   | 6 | 0.0206 | 403.0 |
+   | 7 | 0.0103 | 393.7 |
+   | 8 | 0.0084 | 481.0 |
+   | 9 | 0.0034 | 355.0 |
+   | 10 | 0.0050 | 499.5 |
+   | 11 | 0.0154 | 536.7 |
+   | 12 | 0.0023 | 354.6 |
+
+   Training wall time was 5,980 seconds. The dev-selected merge threshold was
+   `tau=0.05`.
+
+   ### Test metrics and threshold diagnostics
+
+   | Metric | relations_v1 / old | relations_v2 / new |
+   |---|---:|---:|
+   | Macro-F1 | 0.7770 | 0.9942 |
+   | Exact-key baseline macro-F1 | 0.7765 | 0.7941 |
+   | Exact margin | +0.0005 | +0.2001 |
+   | `DIFFERENT_PROVISION` precision | 0.0000 | 1.0000 |
+   | `DIFFERENT_PROVISION` recall | 0.0000 | 0.9726 |
+   | `DIFFERENT_PROVISION` F1 | 0.0000 | 0.9861 |
+
+   The operational argmax merge precision is 0.9706. The separately thresholded
+   merge decision at `tau=0.05` has precision 0.9753 and recall 1.0000. This
+   separation is now recorded explicitly rather than treating the operational
+   argmax as the merge decision.
+
+   ### Gold/trap transition probe
+
+   The probe contains 10 IPC/BNS gold-trap pairs per slice and as-of date, all
+   labelled `DIFFERENT_PROVISION`. Merge rates are reported separately:
+
+   | Slice | 2024-01-01 | 2026-10-01 |
+   |---|---:|---:|
+   | L1 | 0/10 (0.000) | 0/10 (0.000) |
+   | L7 | 1/10 (0.100) | 2/10 (0.200) |
+
+   This is direct evidence that the remaining typed false-merge risk is not zero
+   on the IPC-to-BNS transition, especially for L7. It is a probe, not a
+   replacement for a human-verified relation test set.
+
+   ### E2 rescue criterion and G2
+
+   The new E2 run processed all 200 Phase A items in 644.7 seconds. Changed items
+   are retained as a diagnostic: 1 item changed in total (0 in L1, 1 in L7).
+   The rescue metric is the number of unanimously-wrong exact-key collision items
+   reclassified out of collision; it is 0 in L1 and 0 in L7. Collision AUROC is
+   0.5000; the typed collision populations are 17 in L1 and 16 in L7, with
+   within-slice collision accuracy 0.8824 and 0.0000 respectively.
+
+   Old G2 used `changed_items` as its separation alternative and reported PASS
+   despite zero rescue. The corrected G2 conditions are:
+
+   - merge precision threshold: PASS (`0.9753 >= 0.85`);
+   - macro-F1 above the exact-key baseline: PASS (`0.9942 > 0.7941`);
+   - rescue criterion: FAIL (`L1=0`, `L7=0`);
+   - Phase A untouched: PASS (tree hash unchanged).
+
+   Therefore corrected G2 is **NOT YET**. The model-quality improvement and
+   `DIFFERENT_PROVISION` recall gain are real, but they do not constitute rescue
+   of unanimously-wrong collisions.
 3. **Merge bias.** Every test error is a false merge. If a later phase uses the relation
    model to *decide* collisions in a legal setting, that failure mode is the one to fix
    first — class weighting, or thresholding the merge decision separately from the
@@ -292,3 +408,41 @@ Phase B run of record: dataset `relations_v1`
 conditions. `phaseB-relations-01` is a deliberately kept plumbing baseline (undertrained
 by construction) and is not a result. The checkpoint's `model.pt` (~440 MB) is not tracked
 in git; `meta.json` and the two run reports are.
+
+### Block 6b interpretation and corrected G2 record
+
+The Block 6b rehearsal confirms that macro-F1 `0.9942` is measured on
+rule-generated pairs and is very likely the model reproducing the generator's
+rules. E3 therefore still requires the 1,500-pair human-verified test set;
+`0.9942` must not be reported as evidence of legal-domain competence.
+
+The gold/trap probe remains the residual false-merge risk: L7 had 1/10
+merged pairs at `2024-01-01` and 2/10 merged pairs at `2026-10-01`.
+This probe is not a substitute for the human-verified test set.
+
+G2 is **NOT YET**, with all three criteria stated separately:
+
+1. Rescue criterion: FAIL — rescue is 0.
+2. Collision separation criterion: FAIL — collision AUROC is 0.5000.
+3. L1-L7 unanimous accuracy criterion: FAIL to improve — the unanimous
+   accuracy gap is unchanged at 0.8824.
+
+Per the guide's section 16.4 prescribed response, proceed on the diagnostic
+contribution and rewrite the Phase D and E expectations accordingly. Do not
+re-tune the relation model, the threshold, or the dataset to make the rescue
+criterion fire.
+
+### Why typed clustering cannot differ from exact-key on this instrument
+
+No item co-asserts IPC and BNS within its ten stored samples: 182 items are
+IPC-only, 3 are IPC plus no provision, and 15 are BNS-only. All 10
+`successor_of` rows in `data/relations/crosswalk_v1.jsonl` are IPC -> BNS.
+Across 962 within-item co-occurrence pairs (368 distinct pairs), 0 are
+`successor_of`, 19 are `different_offence`, and 943 (98%) are unknown to the
+crosswalk.
+
+The typed cluster-count distribution is 33/54/39/38/14/13/7/2, while the
+exact-key distribution is 33/53/39/38/15/13/7/2. They therefore match on
+199/200 items. G2's typed-clustering criterion is structurally unsatisfiable
+on this instrument, independent of relation-model quality; it must be recorded
+as such rather than treated as a model-quality failure.
