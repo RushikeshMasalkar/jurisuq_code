@@ -400,6 +400,22 @@ def require_approval(plan: dict, approved_sha: str | None, mode: str = "--run") 
             f"       current : {plan.get('plan_sha256')}")
 
 
+def ensure_fresh_run_dir(path) -> Path:
+    """Refuse to write into a directory that already holds a run.
+
+    A pilot run is never appended to or overwritten, because a partial re-run
+    would silently mix two attempts in one report. This lives here rather than
+    inline so the protection is unit-tested.
+    """
+    path = Path(path)
+    if path.exists() and any(path.iterdir()):
+        raise SystemExit(
+            f"ERROR: {path} already exists and is not empty; a pilot run is never "
+            "overwritten. Change run_id in the config and re-plan, or move the "
+            "existing run aside deliberately.")
+    return path
+
+
 def verify_no_drift(plan: dict, approved: dict) -> None:
     """Compare a stored approved plan against the plan about to run."""
     for field in ("provider", "base_url", "model"):

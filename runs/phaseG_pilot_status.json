@@ -1,0 +1,167 @@
+{
+  "phase": "G",
+  "record": "API pilot status",
+  "status": "ON_HOLD",
+  "updated_utc": "2026-10-24T18:44:25Z",
+  "authority": "This file is the machine-readable record of the pilot's state. The prose record is PHASE-G.md section 'API pilot: ON HOLD'. Neither modifies the approved plan.",
+
+  "headline": "The Phase G API pilot is ON HOLD. This is a resource-driven postponement, not a scientific finding and not evidence of a failed detector.",
+
+  "gates_unchanged": {
+    "G5": "NOT_EVALUABLE",
+    "G6": "NOT_MET",
+    "G7": "NOT_MET"
+  },
+  "gates_note": "No gate definition, threshold or criterion was changed. G7 remains NOT_MET because no target slice exists on which a ranking is defined.",
+
+  "completed": [
+    {
+      "item": "Phase G specification record corrected",
+      "evidence": "PHASE-G.md, configs/phase_g_target.json, README.md; G7 cited from the guide (§12, §21.1-21.3)"
+    },
+    {
+      "item": "§21.2 evaluation matrix implemented and computed offline",
+      "evidence": "jurisuq/evaluation/matrix.py; runs/phaseG_eval_matrix.json; scripts/42_build_eval_matrix.py"
+    },
+    {
+      "item": "§21.3 deployment measurements: stage-1 latency measured, cascade and peak memory reported undefined with reasons",
+      "evidence": "jurisuq/evaluation/deployment.py; runs/phaseG_deployment.json; scripts/43_measure_deployment.py"
+    },
+    {
+      "item": "Target-population readiness audit and yield screen",
+      "evidence": "runs/phaseG_feasibility_audit.json; scripts/40, scripts/41"
+    },
+    {
+      "item": "Approval-gated, cost-capped pilot harness implemented and tested",
+      "evidence": "jurisuq/pilot.py; scripts/44_phase_g_pilot.py; tests/test_pilot_guard.py (53 tests)"
+    },
+    {
+      "item": "Approved DeepSeek pilot plan produced offline, without generation",
+      "evidence": "runs/phaseG_pilot_plan.json"
+    },
+    {
+      "item": "Full test suite passing",
+      "evidence": "476 passed, 1 skipped (torch-gated, pre-existing)"
+    }
+  ],
+
+  "approved_pilot_plan": {
+    "plan_sha256": "eb06ed62db637c89110a4a2a511f65164d3ff990638c66832c1a6aa16e30ecc9",
+    "plan_file": "runs/phaseG_pilot_plan.json",
+    "provider": "DeepSeek",
+    "model": "deepseek-flash",
+    "n_requests": 240,
+    "estimated_max_cost_usd": 0.078048,
+    "status": "UNCHANGED AND UNUSED",
+    "note": "This hash was approved but never exercised by a successful generation. The plan and its hash are preserved byte-for-byte; the pilot record must not be silently re-pointed at a different provider."
+  },
+
+  "attempted_unsuccessful": {
+    "attempt": "DeepSeek smoke check (2 requests)",
+    "run_id": "phaseG-pilot-v1-smoke",
+    "http_status": 402,
+    "http_reason": "Insufficient Balance",
+    "requests_attempted": 2,
+    "requests_succeeded": 0,
+    "generations_obtained": 0,
+    "cost_incurred_usd": 0.0,
+    "observation_source": "reported by the principal investigator from the local console output",
+    "report_location": "runs/phaseG-pilot-v1-smoke/smoke_report.json (practitioner's machine; not present in this repository)",
+    "report_handling": "preserved and not overwritten; it was neither inspected nor modified during this documentation pass, because it is not part of the repository",
+    "conclusion": "No model output, usage, latency or accuracy data was obtained. Nothing from this attempt may be analysed or reported as a result."
+  },
+
+  "on_hold": [
+    {
+      "item": "Two-request smoke check with an alternative free provider",
+      "status": "NOT RUN"
+    },
+    {
+      "item": "Full 240-request API pilot",
+      "status": "NOT RUN"
+    },
+    {
+      "item": "Alternative-provider configuration, plan and approval hash",
+      "status": "NOT IMPLEMENTED",
+      "note": "A free-provider configuration was designed but deliberately not added to the repository. No free-provider code path exists, so no accidental paid fallback and no untested provider branch is present."
+    }
+  ],
+
+  "hold_reason": {
+    "primary": "No confirmed zero-cost API configuration is available that can support the required 240-request experiment.",
+    "evidence": [
+      {
+        "provider": "DeepSeek",
+        "finding": "HTTP 402 Insufficient Balance on the smoke check; the account cannot be funded.",
+        "source": "reported by the principal investigator"
+      },
+      {
+        "provider": "Google Gemini",
+        "finding": "The free-tier quota visible in the principal investigator's AI Studio dashboard for Gemini 2.5 Flash-Lite is 20 requests per day. At that rate 240 requests require 12 days, so the pilot cannot be completed in a single day and resumability would first have to be designed and validated.",
+        "source": "reported by the principal investigator from AI Studio; not independently verifiable from this repository"
+      }
+    ],
+    "secondary_constraints": [
+      "Gemini's OpenAI-compatible endpoint is not documented as supporting request log-probabilities, and Gemini 3.x models cannot disable thinking, whose minimum budget (1,024 tokens) would consume a max_tokens budget of 220. A Gemini arm would therefore be a documented protocol deviation, not a like-for-like replication.",
+      "Groq documents that logprobs and top_logprobs return HTTP 400 and that n must be 1; its published rate table is labelled Developer-plan base limits, not free-tier limits.",
+      "A local model is not an automatic substitute: its knowledge of the July 2024 IPC-to-BNS transition has not been established, and the frozen Phase A run showed a 0-of-1,000 gold-section assertion rate on the L7 slice. Substituting it without validation would produce an incomparable claim."
+    ],
+    "what_this_is_not": [
+      "not a scientific finding",
+      "not evidence that the detector, the judge or the uncertainty method failed",
+      "not a negative result about the legal-aware approach",
+      "not a completed pilot and not a satisfied Phase G research objective"
+    ]
+  },
+
+  "multi_day_option": {
+    "considered": true,
+    "decision": "Deferred, not rejected",
+    "requirement": "Resumability and quota behaviour must be designed and validated before a multi-day run is attempted. The current runner writes one item at a time but has no resume path, no mid-run approval checkpoint and no quota-exhaustion handling.",
+    "not_authorised": true
+  },
+
+  "restart_conditions": [
+    "A suitable zero-cost API tier or funding becomes available",
+    "The exact provider, model and model ID are verified as served on the account that will be used",
+    "Free-tier quotas (RPM, RPD, TPM, TPD) and billing status are confirmed, with no billing account linked if the zero-cost condition must hold",
+    "The experiment configuration is reviewed and a fresh approval hash is issued for that configuration",
+    "A two-request smoke check succeeds (non-empty content, no truncation at max_tokens, usage fields present) before any full run",
+    "For a multi-day run, resumability and quota behaviour are validated first"
+  ],
+
+  "provider_assessment_summary": {
+    "note": "Recorded so the next attempt does not repeat the investigation. Verify each item at its source before relying on it.",
+    "gemini": {
+      "compat_endpoint": "https://generativelanguage.googleapis.com/v1beta/openai/",
+      "free_tier_exists": true,
+      "free_models": "Flash and Flash-Lite class",
+      "published_free_limits": "not published per model on the public rate-limits page; visible in AI Studio for the account",
+      "logprobs": "not documented as supported on the compat endpoint; unconfirmed",
+      "thinking": "cannot be disabled on 3.x; 2.5 models accept reasoning_effort none",
+      "data_handling": "free-tier usage may be used to improve Google products under its terms; verify at source"
+    },
+    "groq": {
+      "free_tier_exists": true,
+      "logprobs": "explicitly unsupported; HTTP 400",
+      "n": "must be 1",
+      "published_limits": "table on the rate-limits page is labelled Developer-plan base limits"
+    },
+    "deepseek": {
+      "status": "unfundable",
+      "logprobs": "supported, but unusable without a funded account"
+    }
+  },
+
+  "frozen_artefacts": {
+    "data/lexuq_slice.jsonl": "89bc1180a4df76287768ce59432aa7ff0aa9d38c16d5f296ed16c3e45449bd53",
+    "data/lexuq_slice_summary.json": "0bd5186d767714b2f0f23d76eddbecb28c0b3ebd0edbe26c3617d914c9e37a84",
+    "note": "Verified unchanged during this documentation pass. No frozen Phase A-F run, dataset, label, threshold or gate was altered."
+  },
+
+  "no_network_during_cleanup": {
+    "api_requests_made": 0,
+    "paid_usage_usd": 0.0,
+    "note": "This documentation and validation pass made no API call of any kind."
+  }
+}

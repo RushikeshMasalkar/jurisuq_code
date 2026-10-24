@@ -133,7 +133,7 @@
     ],
     "generator_arms_missing": [
       "second laptop size or quantisation - deferred, cost and storage review",
-      "one API model at evaluation time - deferred, not approved"
+      "one API model at evaluation time - ON HOLD: the DeepSeek smoke check returned HTTP 402 Insufficient Balance and the account cannot be funded; the free Gemini quota visible to the practitioner is 20 requests/day, insufficient for 240 in one session. No substitute provider was wired in. See runs/phaseG_pilot_status.json"
     ],
     "pooling_policy": "slices are never pooled; pooled_reference raises unless both slices are present and is tagged reference-only",
     "fixed_coverage_for_selective_risk": 0.5,
@@ -212,7 +212,7 @@
       "any merge"
     ],
     "deferred_pending_approval": [
-      "API model at evaluation time",
+      "API model at evaluation time - ON HOLD pending a verified zero-cost tier (see runs/phaseG_pilot_status.json)",
       "external benchmark dataset and licensing",
       "second laptop model or quantisation",
       "Stage 2 generation run"
@@ -221,6 +221,31 @@
       "frozen Phase A-F datasets, runs, splits, thresholds and results",
       "G5 NOT_EVALUABLE",
       "G6 NOT_MET"
+    ]
+  },
+
+  "pilot_status": {
+    "status": "ON_HOLD",
+    "record": "runs/phaseG_pilot_status.json",
+    "approved_plan_sha256": "eb06ed62db637c89110a4a2a511f65164d3ff990638c66832c1a6aa16e30ecc9",
+    "approved_plan_file": "runs/phaseG_pilot_plan.json",
+    "generations_obtained": 0,
+    "requests_succeeded": 0,
+    "cost_incurred_usd": 0.0,
+    "attempted": "DeepSeek smoke check, 2 requests, HTTP 402 Insufficient Balance",
+    "not_run": [
+      "alternative-provider smoke check",
+      "240-request API pilot"
+    ],
+    "reason": "no confirmed zero-cost API configuration can support 240 requests in one session",
+    "is_scientific_finding": false,
+    "restart_conditions": [
+      "a suitable zero-cost API tier or funding becomes available",
+      "the exact provider, model and model ID are verified as served",
+      "free-tier quotas and billing status are confirmed",
+      "the configuration is reviewed and a fresh approval hash is issued",
+      "a two-request smoke check succeeds before any full run",
+      "for a multi-day run, resumability and quota behaviour are validated first"
     ]
   }
 }

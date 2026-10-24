@@ -41,9 +41,9 @@ from jurisuq.cluster import make_clusterer
 from jurisuq.generators import PROMPT_VERSION, OpenAICompatGenerator
 from jurisuq.judge import UNRESOLVED_LABELS, make_judge
 from jurisuq.pilot import (COST_CAP_USD, build_plan, build_smoke_plan, classify_slice,
-                           enforce_cost_cap, estimate_cost, g7_from_pilot, redact_secret,
-                           require_approval, select_items, selection_summary,
-                           verify_frozen_inputs, verify_no_drift)
+                           enforce_cost_cap, ensure_fresh_run_dir, estimate_cost,
+                           g7_from_pilot, redact_secret, require_approval, select_items,
+                           selection_summary, verify_frozen_inputs, verify_no_drift)
 
 DEFAULT_CONFIG = ROOT / "configs" / "phase_g_pilot.json"
 PLAN_PATH = ROOT / "runs" / "phaseG_pilot_plan.json"
@@ -218,9 +218,7 @@ def _smoke(plan: dict, config: dict, args) -> int:
         raise SystemExit(f"ERROR: cannot reach {smoke['base_url']}/models: "
                          f"{redact_secret(str(probe['error']), api_key)}")
 
-    run_dir = ROOT / "runs" / smoke["run_id"]
-    if run_dir.exists() and any(run_dir.iterdir()):
-        raise SystemExit(f"ERROR: {run_dir} already exists; refusing to overwrite")
+    run_dir = ensure_fresh_run_dir(ROOT / "runs" / smoke["run_id"])
     run_dir.mkdir(parents=True, exist_ok=True)
 
     by_id = {i["item_id"]: i for i in _load_items()}
@@ -374,11 +372,7 @@ def _run(plan: dict, config: dict, args) -> int:
         raise SystemExit(f"ERROR: {plan['model']!r} is not served by this endpoint. "
                          f"Available: {probe['model_ids']}")
 
-    run_dir = ROOT / "runs" / plan["run_id"]
-    if run_dir.exists() and any(run_dir.iterdir()):
-        raise SystemExit(f"ERROR: {run_dir} already exists; a pilot run is never overwritten. "
-                         "Change run_id in the config and re-plan.")
-
+    run_dir = ensure_fresh_run_dir(ROOT / "runs" / plan["run_id"])
     run_dir.mkdir(parents=True, exist_ok=True)
     items = _load_items()
     chosen = [i for i in items if i["item_id"] in set(plan["selection"]["item_ids"])]

@@ -20,6 +20,7 @@ from jurisuq.pilot import (
     classify_slice,
     enforce_cost_cap,
     estimate_cost,
+    ensure_fresh_run_dir,
     estimate_plan_cost,
     g7_from_pilot,
     outcome_rules,
@@ -399,3 +400,35 @@ def test_smoke_requires_its_own_approval():
 def test_smoke_plan_states_what_it_is_for():
     assert "thinking" in _smoke()["purpose"]
     assert "logprobs" in _smoke()["purpose"]
+
+
+# ----------------------------------------------------------------------
+# run-directory protection
+# ----------------------------------------------------------------------
+def test_fresh_run_dir_is_created_when_absent(tmp_path):
+    target = tmp_path / "phaseG-pilot-v1"
+    assert ensure_fresh_run_dir(target) == target
+
+
+def test_empty_run_dir_is_accepted(tmp_path):
+    target = tmp_path / "phaseG-pilot-v1"
+    target.mkdir()
+    ensure_fresh_run_dir(target)          # must not raise
+
+
+def test_a_populated_run_dir_is_refused(tmp_path):
+    target = tmp_path / "phaseG-pilot-v1-smoke"
+    target.mkdir()
+    (target / "smoke_report.json").write_text("{}")
+    with pytest.raises(SystemExit, match="never overwritten"):
+        ensure_fresh_run_dir(target)
+
+
+def test_refusal_does_not_delete_the_existing_run(tmp_path):
+    target = tmp_path / "run"
+    target.mkdir()
+    kept = target / "items.jsonl"
+    kept.write_text("precious")
+    with pytest.raises(SystemExit):
+        ensure_fresh_run_dir(target)
+    assert kept.read_text() == "precious", "an existing run must survive the refusal"

@@ -8,6 +8,7 @@ codes, and the numbers printed in `PHASE-G.md` must be the numbers in the JSON.
 """
 from __future__ import annotations
 
+import hashlib
 import json
 import re
 from pathlib import Path
@@ -201,3 +202,147 @@ def test_report_lists_the_missing_evaluation_arms():
     for item in arms["generator"]["missing"] + arms["slices"]["missing"]:
         assert item["status"] == "deferred"
         assert item["reason"]
+
+
+# ----------------------------------------------------------------------
+# the API pilot is on hold — and stays that way until a human decides
+# ----------------------------------------------------------------------
+STATUS = ROOT / "runs" / "phaseG_pilot_status.json"
+
+#: The approved DeepSeek plan, pinned by content hash. It was approved, then
+#: never exercised (HTTP 402). If this changes, an approval was silently reused
+#: or re-pointed at another provider, which is exactly what must not happen.
+PINNED_PLAN_FILE_SHA256 = "77b5ce7c66c785107e532750ee408a54747c7eac4fb0b91936f3f3960b769f24"
+PINNED_PLAN_HASH = "eb06ed62db637c89110a4a2a511f65164d3ff990638c66832c1a6aa16e30ecc9"
+PINNED_CONFIG_SHA256 = "fe77951adea8f0a3b3558ad4303c7412ae5973793c0d03f5df60da285d1c4045"
+
+
+def test_pilot_status_record_exists_and_says_on_hold():
+    status = _load(STATUS)
+    assert status["status"] == "ON_HOLD"
+    assert status["phase"] == "G"
+
+
+def test_hold_is_recorded_as_not_a_scientific_finding():
+    status = _load(STATUS)
+    assert "not a scientific finding" in status["headline"].lower()
+    assert "not evidence of a failed detector" in status["headline"].lower()
+    assert status["no_network_during_cleanup"]["api_requests_made"] == 0
+
+
+def test_gate_verdicts_are_unchanged_by_the_hold():
+    status = _load(STATUS)["gates_unchanged"]
+    assert status == {"G5": "NOT_EVALUABLE", "G6": "NOT_MET", "G7": "NOT_MET"}
+
+
+def test_the_three_states_are_distinguished():
+    status = _load(STATUS)
+    assert status["completed"], "completed work must be enumerated"
+    assert status["attempted_unsuccessful"]["requests_succeeded"] == 0
+    assert status["attempted_unsuccessful"]["generations_obtained"] == 0
+    held = {item["item"] for item in status["on_hold"]}
+    assert any("smoke" in item.lower() for item in held)
+    assert any("240-request" in item for item in held)
+
+
+def test_the_failed_attempt_is_recorded_honestly():
+    attempt = _load(STATUS)["attempted_unsuccessful"]
+    assert attempt["http_status"] == 402
+    assert attempt["requests_attempted"] == 2
+    assert attempt["cost_incurred_usd"] == 0.0
+    assert "reported by the principal investigator" in attempt["observation_source"]
+    # the report is not in the repo; the record must say so rather than imply it was read
+    assert "not present in this repository" in attempt["report_location"]
+
+
+def test_restart_conditions_are_recorded():
+    conditions = _load(STATUS)["restart_conditions"]
+    assert len(conditions) >= 5
+    assert any("zero-cost" in c for c in conditions)
+    assert any("smoke check succeeds" in c for c in conditions)
+    assert any("model ID" in c for c in conditions)
+
+
+def test_hold_reason_names_the_free_tier_shortfall():
+    reason = _load(STATUS)["hold_reason"]
+    evidence = " ".join(str(e["finding"]) for e in reason["evidence"])
+    assert "20 requests per day" in evidence
+    assert "402" in evidence
+
+
+def test_no_substitute_provider_was_wired_in():
+    held = {item["item"]: item["status"] for item in _load(STATUS)["on_hold"]}
+    provider_entry = [v for k, v in held.items() if "configuration" in k][0]
+    assert provider_entry == "NOT IMPLEMENTED"
+    assert not (ROOT / "configs" / "phase_g_pilot_free.json").exists(), \
+        "a free-provider config must not exist while the pilot is on hold"
+
+
+def test_the_approved_deepseek_plan_is_byte_identical():
+    plan = ROOT / "runs" / "phaseG_pilot_plan.json"
+    assert hashlib.sha256(plan.read_bytes()).hexdigest() == PINNED_PLAN_FILE_SHA256
+    assert json.loads(plan.read_text())["plan_sha256"] == PINNED_PLAN_HASH
+
+
+def test_the_deepseek_configuration_is_unmodified_and_still_deepseek():
+    config = _load(ROOT / "configs" / "phase_g_pilot.json")
+    assert hashlib.sha256((ROOT / "configs" / "phase_g_pilot.json").read_bytes()).hexdigest() \
+        == PINNED_CONFIG_SHA256
+    assert config["generator"]["model"] == "deepseek-flash"
+    assert config["generator"]["base_url"] == "https://api.deepseek.com/v1"
+    assert "api_key" not in config["generator"]
+
+
+def test_status_record_and_config_agree_on_the_plan_hash():
+    status = _load(STATUS)["approved_pilot_plan"]
+    config = _load(CONFIG)["pilot_status"]
+    plan = json.loads((ROOT / "runs" / "phaseG_pilot_plan.json").read_text())
+    assert status["plan_sha256"] == config["approved_plan_sha256"] == plan["plan_sha256"]
+
+
+def test_config_status_block_matches_the_status_record():
+    config = _load(CONFIG)["pilot_status"]
+    status = _load(STATUS)
+    assert config["status"] == status["status"] == "ON_HOLD"
+    assert config["generations_obtained"] == status["attempted_unsuccessful"]["generations_obtained"]
+    assert config["is_scientific_finding"] is False
+
+
+# ----------------------------------------------------------------------
+# the documentation must not drift back to claiming a live/completed pilot
+# ----------------------------------------------------------------------
+def test_phase_g_guide_leads_with_the_hold():
+    text = GUIDE.read_text(encoding="utf-8")
+    assert "## API pilot: ON HOLD" in text
+    assert "resource-driven postponement" in text
+    # the retracted no-gate claim must not reappear outside the correction note
+    assert "no gate number" not in text.split("## Specification status")[1]
+
+
+def test_readme_states_the_hold_and_the_gate_position():
+    text = (ROOT / "README.md").read_text(encoding="utf-8")
+    assert "API pilot: ON HOLD" in text
+    assert "HTTP 402" in text
+    assert "No Phase G gate is defined" not in text, "the retracted claim must not reappear"
+
+
+def test_docs_do_not_claim_the_pilot_completed():
+    for path in (GUIDE, ROOT / "README.md", ROOT / "DEPLOYMENT-GUIDE.md"):
+        text = path.read_text(encoding="utf-8").lower()
+        assert "pilot completed" not in text
+        assert "pilot has completed" not in text
+        assert "objectives have been met" not in text
+
+
+def test_deployment_guide_warns_the_paid_paths_are_held():
+    text = (ROOT / "DEPLOYMENT-GUIDE.md").read_text(encoding="utf-8")
+    assert "API pilot is on hold" in text
+    assert "--run" in text and "spend money" in text
+
+
+def test_the_runner_still_refuses_to_overwrite_a_run_directory():
+    source = (ROOT / "scripts" / "44_phase_g_pilot.py").read_text(encoding="utf-8")
+    # both the smoke and the pilot path route through the shared guard
+    assert source.count("ensure_fresh_run_dir(") == 2, "both paid paths must use the guard"
+    # and the runner never falls back to a different provider on failure
+    assert "fallback" not in source.lower()

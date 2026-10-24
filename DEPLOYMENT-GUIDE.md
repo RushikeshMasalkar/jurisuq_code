@@ -230,6 +230,29 @@ Get-FileHash -Algorithm SHA256 runs\phaseA-laptop-v2-rejudged+ctx+warrant\warran
 `generated_utc` timestamp, so only its *content* — not its byte
 hash — is stable across runs.)
 
+### 4.5 Phase G — offline only; the API pilot is on hold
+
+Phase G needs no generation to reproduce its committed results. The audit, the
+evaluation matrix and the deployment report are all offline:
+
+```powershell
+python -X utf8 scripts\40_audit_target_feasibility.py
+python -X utf8 scripts\42_build_eval_matrix.py
+python -X utf8 scripts\43_measure_deployment.py
+```
+
+`python -X utf8 scripts\44_phase_g_pilot.py --plan` is also free: it prints the
+approved configuration and its cost ceiling and sends nothing.
+
+The hosted-model paths are **on hold and are not part of this setup guide**.
+`--smoke` and `--run` spend money, require an explicit approval hash, and will
+refuse to start without one; the approved DeepSeek plan was never exercised
+because the smoke check returned HTTP 402. Do not add an API key to any config
+file, and do not run those flags to "check whether they work". See
+[`PHASE-G.md`](PHASE-G.md#api-pilot-on-hold) and
+[`runs/phaseG_pilot_status.json`](runs/phaseG_pilot_status.json) for the hold,
+its reasons and the restart conditions.
+
 ## 5. What each Phase D artefact is
 
 | Path | What it is |

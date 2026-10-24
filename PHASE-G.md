@@ -1,9 +1,86 @@
 # JURIS-UQ — Phase G: target population and the §21 evaluation matrix
 
-**Status: measurement infrastructure implemented.** The §21.2 evaluation matrix
-and the offline half of the §21.3 deployment report can now be produced from the
-frozen runs. The target population the guide's Gate G7 requires does **not**
-exist, so **G7 is `NOT_MET`**. G5 stays `NOT_EVALUABLE` and G6 stays `NOT_MET`.
+**Status: measurement infrastructure implemented; the API pilot is ON HOLD.**
+The §21.2 evaluation matrix and the offline half of the §21.3 deployment report
+are implemented and computed from the frozen runs. The target population the
+guide's Gate G7 requires does **not** exist, so **G7 is `NOT_MET`**. G5 stays
+`NOT_EVALUABLE` and G6 stays `NOT_MET`. The hosted-model pilot is postponed for
+resource reasons; it has produced no results and none are claimed.
+
+## API pilot: ON HOLD
+
+> **This is a resource-driven postponement, not a scientific finding, and not
+> evidence of a failed detector.** Nothing here is a negative result about the
+> legal-aware method, the judge, or the uncertainty instrument. The pilot has
+> not been completed and no Phase G research objective has been met.
+> Machine-readable record: `runs/phaseG_pilot_status.json`.
+
+**Completed** (all supported by artefacts in this repository)
+
+| Work | Evidence |
+|---|---|
+| Gate G7 and §21.1–21.3 requirements restated from the guide and implemented | this file; `jurisuq/evaluation/matrix.py` |
+| §21.2 evaluation matrix, 9 methods × 2 slices, computed offline | `runs/phaseG_eval_matrix.json` |
+| §21.3 deployment: stage-1 latency measured; cascade and peak memory undefined with reasons | `runs/phaseG_deployment.json` |
+| Target-population audit and candidate-yield screen | `runs/phaseG_feasibility_audit.json` |
+| Approval-gated, cost-capped pilot harness with drift, cap and run-directory guards | `jurisuq/pilot.py`, `scripts/44`, 53 tests |
+| Approved DeepSeek plan, produced offline without generation | `runs/phaseG_pilot_plan.json` |
+
+**Attempted but unsuccessful**
+
+The DeepSeek smoke check — two requests, run id `phaseG-pilot-v1-smoke` — was
+attempted and failed with **HTTP 402 `Insufficient Balance` on both requests**.
+No completion was returned, so no model output, usage, latency or accuracy was
+obtained, and **zero cost was incurred**. The approved 240-request plan has never
+been exercised. The smoke report is preserved at
+`runs/phaseG-pilot-v1-smoke/smoke_report.json` on the practitioner's machine; it
+is not part of this repository, so it was neither inspected nor modified here.
+
+**On hold**
+
+| Item | Status |
+|---|---|
+| Two-request smoke check with an alternative free provider | NOT RUN |
+| Full 240-request API pilot | NOT RUN |
+| Alternative-provider configuration and approval hash | NOT IMPLEMENTED — no free-provider code path exists in this repository |
+
+**Reason for the hold**
+
+No confirmed zero-cost API configuration is currently available that can carry
+the required experiment.
+
+* DeepSeek cannot be funded (HTTP 402).
+* The free-tier quota visible in the practitioner's AI Studio dashboard for
+  Gemini 2.5 Flash-Lite is **20 requests per day**. At that rate 240 requests
+  would need 12 days, so the pilot cannot run in a single session; a multi-day
+  run is deferred rather than rejected, and would first require a validated
+  resume path and quota handling.
+* Two further constraints would make a Gemini arm a documented protocol
+  deviation rather than a replication: its OpenAI-compatible endpoint is not
+  documented as returning request log-probabilities (so `p_true` would remain
+  undefined), and Gemini 3.x cannot disable thinking, whose minimum budget
+  exceeds the pilot's `max_tokens` of 220.
+* A local model is not an automatic substitute: its knowledge of the July 2024
+  IPC→BNS transition has not been established, and the frozen Phase A run showed
+  a 0-of-1,000 gold-section assertion rate on L7. Substituting it without
+  validation would produce an incomparable claim.
+
+**Restart conditions**
+
+1. A suitable zero-cost API tier or funding becomes available.
+2. The exact provider, model and model ID are verified as served on the account
+   that will be billed.
+3. Free-tier quotas and billing status are confirmed (and no billing account is
+   linked, if the zero-cost condition must hold).
+4. The experiment configuration is reviewed and a fresh approval hash is issued
+   for it.
+5. A two-request smoke check succeeds — non-empty content, no truncation at
+   `max_tokens`, usage fields present — before any full run.
+6. For a multi-day run, resumability and quota behaviour are validated first.
+
+The DeepSeek plan and its hash are preserved unchanged and must not be silently
+re-pointed at another provider: a different provider is a different experiment
+requiring its own configuration, plan, hash and smoke check.
 
 ## Specification status — corrected
 
@@ -174,6 +251,10 @@ calls a model, and no frozen artefact is modified.
 | `scripts/43_measure_deployment.py` | builds `runs/phaseG_deployment.json`; offline by default, `--timings` on the laptop |
 | `tests/test_eval_matrix.py` | 39 tests: every metric, the single-class and constant-score traps, every reason code, confidence-quartile edges, the no-pooling guard, G7 on both fixtures, no-NaN |
 | `tests/test_deployment_metrics.py` | 32 tests: percentile convention, empty/single summaries, field skipping, both undefined reasons, the ladder, configuration requirement |
+| `jurisuq/pilot.py` | pilot safeguards: plan construction and hashing, per-million-token cost ceilings, the $0.50 cap, drift detection, deterministic item selection, frozen-dataset verification, and the outcome rules registered before generation |
+| `scripts/44_phase_g_pilot.py` | `--plan` (free, sends nothing), `--smoke` (2 requests), `--run` (240 requests); every paid path requires a matching approval hash |
+| `configs/phase_g_pilot.json` | the approved DeepSeek configuration, provider pricing with sources, and the data-handling statement |
+| `tests/test_pilot_guard.py` | 53 tests: cost arithmetic and the cap, approval-hash matching, drift on provider/model/URL/params/items/count, selection determinism, every pre-registered outcome rule, frozen-input verification, secret redaction, and run-directory protection (a populated run is refused and survives the refusal) |
 | `tests/test_phase_g_docs.py` | 15 tests: the corrected specification status, config/report/module agreement on the G7 verdict and the reason codes, the published table against the JSON, provenance, no pooling, no silent nulls |
 
 ### Gate G7, measured
@@ -240,8 +321,13 @@ estimated for them.
 | §21.2 arm | Status | Why |
 |---|---|---|
 | second laptop model or quantisation | deferred | cost and storage review; the guide's two-arm generator axis is 1 of 2 |
-| one API model at evaluation time | deferred | not approved; no spend or generation authorised in this stage |
+| one API model at evaluation time | **ON HOLD** | the DeepSeek smoke check returned HTTP 402 and the account cannot be funded; the free Gemini quota visible to the practitioner is 20 requests/day, insufficient for 240 in one session. See "API pilot: ON HOLD" above |
 | external benchmark slice | deferred | dataset selection and licensing need separate approval; no benchmark data is in the repository |
+
+No arm above was replaced by an unvalidated substitute. In particular the free
+alternative providers were assessed but deliberately not wired into the code:
+adding an unexercised provider branch would create an untested path and invite a
+silent paid fallback.
 
 ### The readiness conditions
 
@@ -279,9 +365,28 @@ python -X utf8 scripts\42_build_eval_matrix.py
 # the deployment report (§21.3), offline half
 python -X utf8 scripts\43_measure_deployment.py
 
+# the approved pilot plan, offline: prints the configuration, the cost ceiling
+# and the plan hash. Sends nothing and spends nothing.
+python -X utf8 scripts\44_phase_g_pilot.py --plan
+
 # focused tests
-python -X utf8 -m pytest tests\test_target_population.py tests\test_target_screen.py tests\test_eval_matrix.py tests\test_deployment_metrics.py -q
+python -X utf8 -m pytest tests\test_target_population.py tests\test_target_screen.py tests\test_eval_matrix.py tests\test_deployment_metrics.py tests\test_phase_g_docs.py tests\test_pilot_guard.py -q
 ```
+
+The paid paths are **on hold** and are guarded, not merely documented:
+
+```
+python scripts\44_phase_g_pilot.py --run           -> refuses: no approval hash
+python scripts\44_phase_g_pilot.py --run --approve <wrong>  -> refuses: hash mismatch
+python scripts\44_phase_g_pilot.py --plan           -> free; the only safe command today
+```
+
+`--smoke` and `--run` also refuse when the provider, model, base URL, request
+configuration, item list or request count has drifted from the approved plan,
+when the projected cost exceeds the cap, when the API-key environment variable
+is unset, when the endpoint does not serve the requested model, or when the
+target run directory already exists. Any of those is a hard stop, never a
+fallback.
 
 The screen **refuses** to run against a real backend unless `--allow-generation`
 is passed; the default config points at LM Studio, so the guard fires
@@ -300,7 +405,9 @@ ERROR: this script calls a model when provider != 'mock'.
 | After Phase G population infrastructure | 320 passed, 1 skipped |
 | After the §21 matrix and deployment tooling | 391 passed, 1 skipped |
 | After the documentation guard tests | 406 passed, 1 skipped |
-| New tests | 136 (34 population + 16 screen + 39 matrix + 32 deployment + 15 doc guards) |
+| After the pilot harness | 455 passed, 1 skipped |
+| After the hold documentation and its guards | 476 passed, 1 skipped |
+| New tests | 206 (34 population + 16 screen + 39 matrix + 32 deployment + 32 doc guards + 53 pilot guards) |
 | Skipped | `tests/test_relations.py:236` — `torch not installed`; pre-existing |
 | User's Windows environment | torch present, so the skip runs there (271 passed at baseline) |
 
@@ -339,23 +446,29 @@ ERROR: this script calls a model when provider != 'mock'.
   sense. The observation is a hypothesis with a plausible mechanism, not an
   attribution.
 
-## Remaining work and the pending checkpoint
+## Remaining work: all of it blocked on the pilot
 
-Stage 1 (this work) is offline and stops here. The steps below are Stage 2 and
-need explicit approval before any of them is run. The first is the only one that
-can move G7, and it requires generation:
+Everything that remains would require model generation, and generation is on
+hold. The engineering work is complete to the limit of the available evidence;
+what is missing is data, not code.
 
-1. **Author an approved candidate item set** — new post-transition items in the
-   Phase A schema, with `verified: false` provenance, covering more than the ten
-   frozen offences if the specification allows it.
-2. **Run the screen** (~24 items × 10 samples ≈ 20 minutes, `scripts/41`).
-3. **Decide from the measured yield** whether a full run is affordable, using
-   `items_needed` from the same report.
-4. **Only then** run full generation, assemble the population, and re-run the
-   existing chain under a new run id (`phaseG-target-v1…`).
+| Remaining step | Blocked by |
+|---|---|
+| A two-request smoke check with any provider | no usable zero-cost provider; see "API pilot: ON HOLD" |
+| The 240-request pilot that would characterise a new generator's class balance | the smoke check above |
+| A target population with both correctness classes, and therefore G7 | the pilot, plus an approved candidate item set |
+| The external benchmark slice | dataset selection and licensing approval |
+| The second laptop arm and the full-cascade timings | a local run under the approved ladder |
+
+Stage 2, when it is authorised, would proceed as: author an approved candidate
+item set in the Phase A schema with `verified: false` provenance; run the yield
+screen (`scripts/41`, ~24 items × 10 samples); decide from the measured
+`items_needed` whether a full run is affordable; and only then run full
+generation under a new run id (`phaseG-target-v1…`).
 
 No step here may change `ace_max = 0.05`, `c_verify = 0.15`, `c_abstain = 0.35`,
-the 0.80 conformal target, the `phaseE-v1` split, or any frozen run.
+the 0.80 conformal target, the `phaseE-v1` split, or any frozen run. None of
+them has been changed.
 
 ## Known limitations
 
@@ -373,7 +486,11 @@ the 0.80 conformal target, the `phaseE-v1` split, or any frozen run.
 4. **`items_needed` is a planning projection.** It assumes independent items at a
    constant rate; real yield varies by topic, which is why the report is
    per-topic.
-5. **Detector states are coarse.** `W = 1` and `W = 0` are treated as the two
+5. **The pilot is unfinished, so no empirical claim about a hosted generator
+   exists.** Not a single completion was obtained from any hosted model. The
+   report is therefore silent on whether a different generator can produce both
+   correctness classes on L7 — the open question the pilot was built to answer.
+6. **Detector states are coarse.** `W = 1` and `W = 0` are treated as the two
    documented states, and interior values are reported separately rather than
    assigned to either. If the guide defines "fires" differently, the
    classification needs revisiting.
