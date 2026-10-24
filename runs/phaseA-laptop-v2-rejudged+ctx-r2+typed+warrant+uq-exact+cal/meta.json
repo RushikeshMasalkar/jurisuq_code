@@ -1,0 +1,53 @@
+{
+  "phase": "F",
+  "modules": [
+    "M9",
+    "M10"
+  ],
+  "run_id": "phaseA-laptop-v2-rejudged+ctx-r2+typed+warrant+uq-exact+cal",
+  "source_run_id": "phaseA-laptop-v2-rejudged+ctx-r2+typed+warrant+uq-exact",
+  "source_tree_sha256_before": "2f753a3d6f6101f9f497cff2046d7eb4a39b467d812b2a00468fc241d9a2d329",
+  "source_tree_sha256_after": "2f753a3d6f6101f9f497cff2046d7eb4a39b467d812b2a00468fc241d9a2d329",
+  "source_unchanged": true,
+  "generated_utc": "2026-10-24T14:28:14Z",
+  "n_items": 200,
+  "query_fields_read": [
+    "item_id",
+    "slice",
+    "topic",
+    "uq_uncertainty",
+    "uq_components",
+    "warrant_common_mode_flags",
+    "warrant_as_of"
+  ],
+  "correctness_labels_used_by_scoring_path": false,
+  "calibration_status_census": {
+    "calibrated": 100,
+    "undefined_stratum_not_calibrated": 100
+  },
+  "actions": {
+    "answer": 17,
+    "verify": 101,
+    "abstain": 82
+  },
+  "policy": {
+    "verify_cost": 0.15,
+    "abstain_cost": 0.35,
+    "on_undefined": "verify",
+    "harm_weights": {
+      "both": 3.0,
+      "custodial": 5.0,
+      "definition": 1.5,
+      "procedural": 1.0,
+      "unknown": 5.0
+    },
+    "rule": "answer if (1-p)*h <= verify_cost; verify if <= abstain_cost; else abstain"
+  },
+  "harm_rule": "max",
+  "harm_class_census": {
+    "custodial": 200
+  },
+  "model_path": "runs/phaseF_calibration_model.json",
+  "model_sha256": "f1095036d5f016c05656b80bf972f85f2bb01b114f724bf39e865182422b969a",
+  "calibration_semantics": "p_reliable estimates P(returned majority answer correct) under the fitting population; not a guarantee"
+}
