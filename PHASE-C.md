@@ -96,7 +96,12 @@ Test per-class F1 was:
 | adapted | 0.9391 | 0.9420 | 1.0000 | 1.0000 | 0.8889 |
 
 The 20-row gold/trap probe was evaluated by the existing transition probe,
-with ten cross-code pair rows per slice/date grouping. Merge counts were:
+with ten cross-code pair rows per slice/date grouping. The evaluator records
+one relation decision for each pair: `answer_a` is the gold provision and
+`answer_b` is the trap provision. It does not emit independent predictions for
+the two component rows. Consequently, the saved reports cannot be
+decomposed into gold merges/gold recall and trap merges/trap false-merge rate;
+the pair-level merge counts below must not be relabelled as either quantity:
 
 | Arm | L1 / 2024-01-01 | L1 / 2026-10-01 | L7 / 2024-01-01 | L7 / 2026-10-01 |
 |---|---:|---:|---:|---:|
@@ -104,21 +109,44 @@ with ten cross-code pair rows per slice/date grouping. Merge counts were:
 | legal | 0/10 | 0/10 | 0/10 | 0/10 |
 | adapted | 3/10 | 2/10 | 9/10 | 9/10 |
 
-These are gold/trap cross-code rows (the gold provision paired with its trap
+These are gold/trap cross-code pairs (the gold provision paired with its trap
 provision); the evaluator preserves that orientation for each slice and
 as-of date. The probe contains 14 distinct cross-code pair identities across
-the 20-row diagnostic set; counts above are reported separately for the gold
-and trap slice/date rows as specified by the probe.
+the 20-row diagnostic set. Independent gold recall and trap false-merge rate
+are therefore **not available** from this run, and no claim about which
+component row caused a pair merge is valid. In particular, the adapted arm's
+9/10 L7 result at both dates is nine merged gold/trap pairs, not nine merges
+assignable to gold rows or to trap rows.
 
-G3 is **NOT MET**. The adapted encoder has a +0.0384 test macro-F1 gain over
-the legal encoder, but it introduces materially worse gold/trap merging
-(including 9/10 on both L7 dates), whereas the legal arm merges 0/10 in every
-group. The adapted representation therefore gives no acceptable measurable
-gain for the representation-safety criterion, and the legal encoder is
-retained. The source-tree hash before this Block 7b documentation update was
-`d530d41a4e69be181cf7dba1e0fb36b7aa6899152d4270d1df97a250152e559f`; after
-the documentation update it was
-`91e22574e7be66ba222193feae5647a28c42e6ab73b2b6377fd3326cbe88ca69`.
+The requested row-level decomposition is consequently:
+
+| Arm / slice / date | Gold merges / recall | Trap merges / false-merge rate |
+|---|---|---|
+| generic / each of L1-2024-01-01, L1-2026-10-01, L7-2024-01-01, L7-2026-10-01 | not identifiable | not identifiable |
+| legal / each of L1-2024-01-01, L1-2026-10-01, L7-2024-01-01, L7-2026-10-01 | not identifiable | not identifiable |
+| adapted / each of L1-2024-01-01, L1-2026-10-01, L7-2024-01-01, L7-2026-10-01 | not identifiable | not identifiable |
+
+G3 remains **NOT MET**. The earlier statement that the legal arm had zero
+gold merges must be qualified: the pair-level probe shows zero merged pairs,
+but it does not establish zero gold recall because it never tests the
+gold-side relation independently. Conversely, the adapted arm's higher
+macro-F1 (+0.0384 over legal) is accompanied by nine merged pairs out of ten
+in each L7 group, but those merges cannot be assigned to gold or trap rows.
+Neither side of the required safety/correctness tradeoff is measured
+independently, so no encoder earns a passing G3 representation-safety claim.
+The legal encoder is retained as the conservative operational choice, with
+zero pair merges accepted as the safer failure mode than the adapted arm's
+large pair-level cross-code merge rate; this is not evidence of legal
+equivalence detection or gold recall.
+
+The generic and adapted encoders merge nearly everything while the legal
+encoder merges nothing; neither behavior is correct, and this instrument
+cannot distinguish legal equivalence from non-equivalence for these encoders.
+
+The Block 7b implementation recorded the source-tree transition from
+`d530d41a4e69be181cf7dba1e0fb36b7aa6899152d4270d1df97a250152e559f` to
+`91e22574e7be66ba222193feae5647a28c42e6ab73b2b6377fd3326cbe88ca69`; this
+follow-up changes documentation only.
 
 ## Current legal-source review (2026-10-21)
 
