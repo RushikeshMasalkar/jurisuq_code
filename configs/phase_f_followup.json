@@ -1,0 +1,67 @@
+{
+  "phase": "F",
+  "description": "Phase F follow-up experiments (conformal correction, within-slice refit, calibration-method comparison, uncertainty reporting)",
+  "baseline_run_ids": {
+    "phase_e": "phaseA-laptop-v2-rejudged+ctx-r2+typed+warrant+uq-exact",
+    "phase_f_superseded": "phaseA-laptop-v2-rejudged+ctx-r2+typed+warrant+uq-exact+cal",
+    "phase_f_corrected": "phaseA-laptop-v2-rejudged+ctx-r2+typed+warrant+uq-exact+cal-r2"
+  },
+
+  "split": {
+    "seed": "phaseE-v1",
+    "test_fraction": 0.2,
+    "note": "identical to Phase E; Phase F never re-splits"
+  },
+
+  "folds": 5,
+
+  "calibration_method_for_downstream": "isotonic",
+
+  "preregistered_small_sample_rule": {
+    "rule": "use platt when n_development < n_threshold OR reliability_input_range < range_threshold; otherwise isotonic",
+    "n_threshold": 100,
+    "range_threshold": 0.15,
+    "small_sample_method": "platt",
+    "default_method": "isotonic",
+    "status": "frozen before evaluation",
+    "rationale": "isotonic needs observations at the extremes of the reliability input to place its end knots; with a narrow range and few rows the end knots are supported by a handful of items and the map jumps to 0 or 1 on noise. Platt assumes a sigmoid shape and borrows strength across the range.",
+    "note": "the thresholds are proposed hyperparameters, not tuned values; they are chosen from the observed design (n=78, range 0.0795) and are not selected on holdout performance"
+  },
+
+  "experiment_2": {
+    "slice": "L1",
+    "provision_entropy_variant": "exact",
+    "comparison": "stored pooled Phase E model vs the same estimator refitted on L1 development records only",
+    "eligibility": "feature-complete for the legal head; both arms must produce a finite score; rule does not use correctness labels"
+  },
+
+  "uncertainty": {
+    "primary_unit": "topic",
+    "secondary_unit": "item",
+    "bootstrap_reps": 4000,
+    "bootstrap_seed": 20261024,
+    "confidence": 0.95,
+    "note": "items within an offence topic share legal facts and are matched L1/L7 pairs, so the topic is the sampling unit; item-level resampling is reported as a secondary, optimistic figure"
+  },
+
+  "gates": {
+    "ace_max": 0.05,
+    "selective_coverage": 0.5,
+    "min_stratum_n": 30,
+    "conformal_target_coverage": 0.8,
+    "note": "unchanged from the merged Phase F configuration; no follow-up experiment alters a gate"
+  },
+
+  "policy": {
+    "verify_cost": 0.15,
+    "abstain_cost": 0.35,
+    "on_undefined": "verify",
+    "harm_weights": {
+      "custodial": 5.0,
+      "both": 3.0,
+      "definition": 1.5,
+      "procedural": 1.0,
+      "unknown": 5.0
+    }
+  }
+}
