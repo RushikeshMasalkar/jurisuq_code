@@ -1,0 +1,324 @@
+{
+  "experiment": "E5d",
+  "question": "are the Phase F point estimates resolvable at this sample size once topic-level dependence is respected?",
+  "stratum": "L1",
+  "source_run_id": "phaseA-laptop-v2-rejudged+ctx-r2+typed+warrant+uq-exact",
+  "calibration_run_id": "phaseA-laptop-v2-rejudged+ctx-r2+typed+warrant+uq-exact+cal-r2",
+  "source_tree_sha256": "2f753a3d6f6101f9f497cff2046d7eb4a39b467d812b2a00468fc241d9a2d329",
+  "calibration_tree_sha256": "27e6305937de54e0891c8473f753d6d9ddba1a823476fcc3693a0e1707c26872",
+  "n_development": 78,
+  "n_holdout": 22,
+  "n_development_topics": 10,
+  "n_holdout_topics": 8,
+  "bootstrap": {
+    "reps": 4000,
+    "seed": 20261024,
+    "confidence": 0.95,
+    "primary_unit": "topic",
+    "secondary_unit": "item"
+  },
+  "point_estimates": {
+    "development_ace_5bin": 0.27969827988395934,
+    "development_brier": 0.2975528450183965,
+    "development_log_loss": 1.1062127028510138,
+    "holdout_ace_5bin": 0.2796623011975103,
+    "holdout_brier": 0.2993423164200025,
+    "holdout_log_loss": 1.5375030577218178,
+    "holdout_auroc_error_ranking": 0.6523809523809524,
+    "development_selective_risk_calibrated": 0.41025641025641024,
+    "development_selective_risk_raw": 0.4358974358974359,
+    "development_selective_risk_gap_to_raw": -0.02564102564102566,
+    "development_selective_risk_sample_only": 0.38461538461538464,
+    "development_selective_risk_gap_to_sample_only": 0.025641025641025605,
+    "conformal_coverage": 0.6818181818181818
+  },
+  "intervals": {
+    "development_ace_5bin_cluster": {
+      "estimate_interval": [
+        0.12488244623598496,
+        0.4597600184820656
+      ],
+      "bootstrap_mean": 0.288935428534931,
+      "standard_error": 0.08605327765528348,
+      "n_resamples_used": 4000,
+      "n_resamples_requested": 4000,
+      "unit": "topic (cluster)",
+      "n_clusters": 10,
+      "seed": 20261024,
+      "confidence": 0.95,
+      "method": "percentile bootstrap",
+      "excludes_zero": true,
+      "resample_failures": [],
+      "caveat": "10 clusters is few for a percentile bootstrap; read the interval as an indication of precision, not an exact coverage claim"
+    },
+    "development_brier_cluster": {
+      "estimate_interval": [
+        0.17016141994187645,
+        0.41832150774634996
+      ],
+      "bootstrap_mean": 0.29551637169306744,
+      "standard_error": 0.06427508082537682,
+      "n_resamples_used": 4000,
+      "n_resamples_requested": 4000,
+      "unit": "topic (cluster)",
+      "n_clusters": 10,
+      "seed": 20261025,
+      "confidence": 0.95,
+      "method": "percentile bootstrap",
+      "excludes_zero": true,
+      "resample_failures": [],
+      "caveat": "10 clusters is few for a percentile bootstrap; read the interval as an indication of precision, not an exact coverage claim"
+    },
+    "development_ace_5bin_item": {
+      "estimate_interval": [
+        0.18668234503180897,
+        0.38665523454256573
+      ],
+      "bootstrap_mean": 0.2837974272780958,
+      "standard_error": 0.05138528277394623,
+      "n_resamples_used": 4000,
+      "n_resamples_requested": 4000,
+      "unit": "item",
+      "n_clusters": 10,
+      "seed": 20261024,
+      "confidence": 0.95,
+      "method": "percentile bootstrap",
+      "excludes_zero": true,
+      "resample_failures": [],
+      "caveat": "10 clusters is few for a percentile bootstrap; read the interval as an indication of precision, not an exact coverage claim"
+    },
+    "development_brier_item": {
+      "estimate_interval": [
+        0.23850708876086288,
+        0.3623434795229162
+      ],
+      "bootstrap_mean": 0.29748481030766977,
+      "standard_error": 0.031652394084621824,
+      "n_resamples_used": 4000,
+      "n_resamples_requested": 4000,
+      "unit": "item",
+      "n_clusters": 10,
+      "seed": 20261025,
+      "confidence": 0.95,
+      "method": "percentile bootstrap",
+      "excludes_zero": true,
+      "resample_failures": [],
+      "caveat": "10 clusters is few for a percentile bootstrap; read the interval as an indication of precision, not an exact coverage claim"
+    },
+    "holdout_ace_5bin_cluster": {
+      "estimate_interval": [
+        0.15615664301069343,
+        0.5301527752482594
+      ],
+      "bootstrap_mean": 0.3309954491642723,
+      "standard_error": 0.10041741233161312,
+      "n_resamples_used": 3980,
+      "n_resamples_requested": 4000,
+      "unit": "topic (cluster)",
+      "n_clusters": 8,
+      "seed": 20261026,
+      "confidence": 0.95,
+      "method": "percentile bootstrap",
+      "excludes_zero": true,
+      "resample_failures": [],
+      "caveat": "8 clusters is few for a percentile bootstrap; read the interval as an indication of precision, not an exact coverage claim"
+    },
+    "holdout_brier_cluster": {
+      "estimate_interval": [
+        0.23533215630073032,
+        0.3908604334738301
+      ],
+      "bootstrap_mean": 0.30063543478233506,
+      "standard_error": 0.039139283344948095,
+      "n_resamples_used": 3986,
+      "n_resamples_requested": 4000,
+      "unit": "topic (cluster)",
+      "n_clusters": 8,
+      "seed": 20261028,
+      "confidence": 0.95,
+      "method": "percentile bootstrap",
+      "excludes_zero": true,
+      "resample_failures": [],
+      "caveat": "8 clusters is few for a percentile bootstrap; read the interval as an indication of precision, not an exact coverage claim"
+    },
+    "holdout_ace_5bin_item": {
+      "estimate_interval": [
+        0.16729576538961738,
+        0.4923840567768521
+      ],
+      "bootstrap_mean": 0.3345445797884259,
+      "standard_error": 0.08262911255935868,
+      "n_resamples_used": 3998,
+      "n_resamples_requested": 4000,
+      "unit": "item",
+      "n_clusters": 8,
+      "seed": 20261026,
+      "confidence": 0.95,
+      "method": "percentile bootstrap",
+      "excludes_zero": true,
+      "resample_failures": [],
+      "caveat": "8 clusters is few for a percentile bootstrap; read the interval as an indication of precision, not an exact coverage claim"
+    },
+    "holdout_brier_item": {
+      "estimate_interval": [
+        0.2086011521520807,
+        0.4120880247472011
+      ],
+      "bootstrap_mean": 0.3001571198951423,
+      "standard_error": 0.05277196493558604,
+      "n_resamples_used": 3999,
+      "n_resamples_requested": 4000,
+      "unit": "item",
+      "n_clusters": 8,
+      "seed": 20261028,
+      "confidence": 0.95,
+      "method": "percentile bootstrap",
+      "excludes_zero": true,
+      "resample_failures": [],
+      "caveat": "8 clusters is few for a percentile bootstrap; read the interval as an indication of precision, not an exact coverage claim"
+    },
+    "development_selective_risk_gap_to_raw_cluster": {
+      "estimate_interval": [
+        -0.19047619047619047,
+        0.08333333333333337
+      ],
+      "bootstrap_mean": -0.032147128736369726,
+      "standard_error": 0.07277032507918131,
+      "n_resamples_used": 4000,
+      "n_resamples_requested": 4000,
+      "unit": "topic (cluster)",
+      "n_clusters": 10,
+      "seed": 20261027,
+      "confidence": 0.95,
+      "method": "percentile bootstrap",
+      "excludes_zero": false,
+      "resample_failures": [],
+      "caveat": "10 clusters is few for a percentile bootstrap; read the interval as an indication of precision, not an exact coverage claim"
+    },
+    "development_selective_risk_gap_to_raw_item": {
+      "estimate_interval": [
+        -0.1538461538461538,
+        0.07692307692307693
+      ],
+      "bootstrap_mean": -0.023121794871795553,
+      "standard_error": 0.06016344878120105,
+      "n_resamples_used": 4000,
+      "n_resamples_requested": 4000,
+      "unit": "item",
+      "n_clusters": 10,
+      "seed": 20261027,
+      "confidence": 0.95,
+      "method": "percentile bootstrap",
+      "excludes_zero": false,
+      "resample_failures": [],
+      "caveat": "10 clusters is few for a percentile bootstrap; read the interval as an indication of precision, not an exact coverage claim"
+    },
+    "development_selective_risk_gap_to_sample_only_cluster": {
+      "estimate_interval": [
+        -0.17647058823529416,
+        0.17500000000000004
+      ],
+      "bootstrap_mean": 0.013605715395886972,
+      "standard_error": 0.08970670932980065,
+      "n_resamples_used": 4000,
+      "n_resamples_requested": 4000,
+      "unit": "topic (cluster)",
+      "n_clusters": 10,
+      "seed": 20261027,
+      "confidence": 0.95,
+      "method": "percentile bootstrap",
+      "excludes_zero": false,
+      "resample_failures": [],
+      "caveat": "10 clusters is few for a percentile bootstrap; read the interval as an indication of precision, not an exact coverage claim"
+    },
+    "development_selective_risk_gap_to_sample_only_item": {
+      "estimate_interval": [
+        -0.10256410256410259,
+        0.1538461538461538
+      ],
+      "bootstrap_mean": 0.020775641025641313,
+      "standard_error": 0.06359689208796564,
+      "n_resamples_used": 4000,
+      "n_resamples_requested": 4000,
+      "unit": "item",
+      "n_clusters": 10,
+      "seed": 20261027,
+      "confidence": 0.95,
+      "method": "percentile bootstrap",
+      "excludes_zero": false,
+      "resample_failures": [],
+      "caveat": "10 clusters is few for a percentile bootstrap; read the interval as an indication of precision, not an exact coverage claim"
+    }
+  },
+  "gate_stability_at_ace_max": {
+    "development_ace_5bin (topic-clustered)": {
+      "threshold": 0.05,
+      "interval": [
+        0.12488244623598496,
+        0.4597600184820656
+      ],
+      "status": "stable_fail",
+      "note": "the whole interval is on one side of the threshold"
+    },
+    "development_ace_5bin (item-level)": {
+      "threshold": 0.05,
+      "interval": [
+        0.18668234503180897,
+        0.38665523454256573
+      ],
+      "status": "stable_fail",
+      "note": "the whole interval is on one side of the threshold"
+    },
+    "holdout_ace_5bin (topic-clustered)": {
+      "threshold": 0.05,
+      "interval": [
+        0.15615664301069343,
+        0.5301527752482594
+      ],
+      "status": "stable_fail",
+      "note": "the whole interval is on one side of the threshold"
+    },
+    "holdout_ace_5bin (item-level)": {
+      "threshold": 0.05,
+      "interval": [
+        0.16729576538961738,
+        0.4923840567768521
+      ],
+      "status": "stable_fail",
+      "note": "the whole interval is on one side of the threshold"
+    }
+  },
+  "conformal_coverage": {
+    "n_calibration": 78,
+    "n_holdout": 22,
+    "n_covered": 15,
+    "coverage": 0.6818181818181818,
+    "target": 0.8,
+    "wilson": {
+      "method": "wilson",
+      "estimate": 0.6818181818181818,
+      "n": 22,
+      "successes": 15,
+      "lo": 0.47318597724591815,
+      "hi": 0.8363940682767423,
+      "confidence": 0.95
+    },
+    "clopper_pearson_lower": 0.48454325739157134,
+    "threshold": 0.4701737460586592,
+    "wald_criterion_floor": 0.6328506383772015,
+    "within_tolerance": true,
+    "exact_bound_reaches_target": false,
+    "source": "phaseA-laptop-v2-rejudged+ctx-r2+typed+warrant+uq-exact+cal-r2/calibration_report.json"
+  },
+  "split": {
+    "seed": "phaseE-v1",
+    "test_fraction": 0.2,
+    "source": "stored in the Phase E model and verified against the slice"
+  },
+  "generated_utc": "2026-10-24T16:15:53Z",
+  "inputs": {
+    "items_sha256": "19ab7c59a1b1e185fb816cb253c5fa4bca49423d830f770972a34b5b05674f12",
+    "calibration_model_sha256": "f1095036d5f016c05656b80bf972f85f2bb01b114f724bf39e865182422b969a"
+  },
+  "git_commit": "d6a493ba40f37f64835f93b86ab0cc9b8b4ef5f1"
+}
