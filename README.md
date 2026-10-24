@@ -350,9 +350,10 @@ Phase G: stored runs -> population readiness audit; candidate-item yield screen
 
 Primary modules are in [`jurisuq/`](jurisuq/): core pipeline and metrics,
 `relations/` for Phase B, `context/` for Phase C, `warrant/` for Phase D,
-`uncertainty/` for Phase E, `calibration/` for Phase F, and `target/` for Phase G.
+`uncertainty/` for Phase E, `calibration/` for Phase F, and `target/` and
+`evaluation/` for Phase G.
 Scripts are numbered by phase: `00`–`06` (A), `10`–`13` (B), `20`–`22` (C),
-`23`–`27` (D/E), `29`–`31` (F, with follow-up experiments `32`–`34`) and `40`–`41` (G).
+`23`–`27` (D/E), `29`–`31` (F, with follow-up experiments `32`–`34`) and `40`–`44` (G).
 
 ## Requirements and installation
 
