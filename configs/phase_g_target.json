@@ -1,0 +1,47 @@
+{
+  "phase": "G",
+  "title": "Target-population construction for G5 and the L7 half of G6",
+  "modules": [],
+
+  "specification_status": {
+    "gate_defined_here": false,
+    "statement": "The repository contains no Phase G specification and no gate number. PHASE-F.md cites 'master-guide §21.1' for a target slice with both correctness classes, but that guide is not in this repository. Phase G therefore implements only the documented prerequisite and defines no new gate, threshold, or acceptance table. Any numeric gate for Phase G requires an approved specification first.",
+    "documented_sources": [
+      "PHASE-E.md §7.4 - build a target population containing both classes before claiming target-slice AUROC or the complete G5 criterion",
+      "PHASE-E.md structural G5 finding - a slice with both correctness classes on which the detector both fires and stays silent",
+      "PHASE-F.md §12.1 - build a target slice with both correctness classes so the L7 stratum is evaluable"
+    ]
+  },
+
+  "audit": {
+    "run_id": "phaseA-laptop-v2-rejudged+ctx-r2+typed+warrant+uq-exact",
+    "note": "read-only; the detector fields come from Phase D and the scores from Phase E, both stored in this run",
+    "warrant_field": "warrant_warranted_agreement",
+    "correctness_field": "majority_correct",
+    "score_field": "uq_uncertainty"
+  },
+
+  "screen": {
+    "data": "data/lexuq_target_candidates_v1.jsonl",
+    "items": 24,
+    "samples": 10,
+    "temperature": 0.7,
+    "expectation_note": "24 items x 10 samples is the size of the Phase A pilot (scripts/06_pilot.py), which is the project's own precedent for a go/no-go screen",
+    "allow_generation": false
+  },
+
+  "yield_planning": {
+    "note": "PLANNING parameters for a cost estimate, not gates. They are passed explicitly to jurisuq.target.items_needed so the assumption is visible in the report.",
+    "needed_correct": 15,
+    "confidence": 0.95,
+    "basis": "a usable two-class evaluation population needs enough correct items for an AUROC interval to be meaningful; 15 is the planning floor used for the Phase G cost estimate and is NOT a threshold from the engineering guide"
+  },
+
+  "forbidden_operations": {
+    "note": "recorded so a future run cannot quietly violate them",
+    "retune_gate_constants": ["ace_max = 0.05", "c_verify = 0.15", "c_abstain = 0.35",
+                              "conformal target 0.80", "phaseE-v1 split"],
+    "regenerate_frozen_runs": ["+uq-exact", "+uq-typed", "+cal", "+cal-r2"],
+    "edit_frozen_data": ["data/lexuq_slice.jsonl", "data/statutes/", "data/relations/"]
+  }
+}
