@@ -2,6 +2,24 @@
 
 Phase E turns the Phase A sample statistics and stored Phase D warrant outputs into a per-answer uncertainty score. It is an incremental, label-separated stage: fitting is supervised on a development partition; scoring is a separate label-blind command; validation reads correctness labels only after scores have been written.
 
+## Compute and cost
+
+Inference runs locally through LM Studio on this machine. No accelerator is
+used: PyTorch reports `2.9.1+cpu`, with CUDA, MPS, and XPU unavailable, so
+inference and relation-model training run on CPU. The project spent nothing:
+there were no paid API calls, subscriptions, or billing. The primary Phase A
+run remains the frozen `qwen2.5-7b-instruct` run. Qwen3-14B Q4_K_M was a
+local screen only (reasoning on and off); it answered IPC 379 to a
+post-1-July-2024 theft question and scored 0% on L7. Gemini 2.5-flash was
+unavailable, 3.8-flash returned 503, and 3.6-flash hit the free-tier daily
+quota (HTTP 429), so no API model was used.
+
+Under this zero-cost local-compute constraint L7 has no correct items. G5
+remains **NOT_EVALUABLE**, and the L1-L7 comparison cannot be made. Per
+master-guide section 16.4, the failed G2 directs the project to its
+diagnostic contribution: Phase A plus the Phase D temporal detector. This is
+a finding about the model class under test, not a defect in the instrument.
+
 ## Field and script registry
 
 | Field | Type | Producer | Consumer | Status |
@@ -12,7 +30,7 @@ Phase E turns the Phase A sample statistics and stored Phase D warrant outputs i
 | `relation_scores` | `list[list[float]]` | `scripts/13_attach_typed.py` | audit / figures | registered |
 | `typed_stats` | object | `scripts/13_attach_typed.py` | Phase E (`u_prov`) | registered |
 | `scripts/13_attach_typed.py` | CLI script | Phase B | Phase D, E | registered |
-| `scripts/23_detect_warrant.py --cluster-source {auto,exact,typed}` | CLI flag; default `auto` | Phase D | Phase D evaluation | registered; pending Block 4 |
+| `scripts/23_detect_warrant.py --cluster-source {auto,exact,typed}` | CLI flag; default `auto` | Phase D | Phase D evaluation | registered; implemented and evaluated |
 | `scripts/23_detect_warrant.py --contradiction-source {auto,rule,model,none}` | CLI flag; default `auto` | Phase D | Phase D evaluation | registered; Block 4 |
 
 Alias decision: retain the shipped fields

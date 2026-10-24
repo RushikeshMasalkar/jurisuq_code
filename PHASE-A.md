@@ -5,6 +5,22 @@ slice, samples answers from an OpenAI-compatible local model, extracts asserted
 provisions, resolves correctness, computes sample-only uncertainty statistics,
 and evaluates the E1 common-mode premise.
 
+## Compute and cost
+
+Inference runs locally through LM Studio on this machine. No accelerator is
+used: PyTorch reports `2.9.1+cpu`, with CUDA, MPS, and XPU unavailable, so
+inference and relation-model training run on CPU. The project spent nothing:
+there were no paid API calls, subscriptions, or billing.
+
+The primary frozen Phase A run remains `qwen2.5-7b-instruct`; all Phase A
+results and every Phase B-E number derive from its frozen `p2-structured`
+prompt and 2,000 stored samples. `Qwen3-14B Q4_K_M` (about 9 GB) was screened
+locally with reasoning on and off: it answered IPC 379 to a post-1-July-2024
+theft question and scored 0% on L7. It is a screen only; no slice was
+regenerated with it. Gemini API screening found 2.5-flash unavailable,
+3.8-flash returning 503, and 3.6-flash exhausting the free-tier daily quota
+(HTTP 429), so no API model was used under the zero-cost constraint.
+
 ## Components and data
 
 - `jurisuq/generators.py`: mock and OpenAI-compatible local generators.

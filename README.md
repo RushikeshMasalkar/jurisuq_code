@@ -34,6 +34,40 @@ The five phases are cumulative:
 The phases are deliberately separated: Phase C/D/E write sibling runs and
 leave their source runs unchanged. Phase E never recomputes Phase D outputs.
 
+## Compute and cost
+
+All inference runs locally through LM Studio on this machine. No accelerator is
+used: PyTorch reports `2.9.1+cpu`, with CUDA, MPS, and XPU unavailable.
+Inference and relation-model training therefore run on CPU. The project spent
+nothing: no paid API calls, subscriptions, or billing.
+
+The primary Phase A run remains `qwen2.5-7b-instruct`, with the frozen
+`p2-structured` prompt; it is the source of the 2,000 Phase A samples and all
+Phase B-E numbers. `Qwen3-14B Q4_K_M` (about 9 GB) was screened locally with
+reasoning on and off: it answered IPC 379 to a post-1-July-2024 theft question
+and scored 0% on L7. It is a screen only; no slice was regenerated with it.
+Gemini API screening found 2.5-flash unavailable, 3.8-flash returning 503,
+and 3.6-flash exhausting the free-tier daily quota (HTTP 429). Under the
+zero-cost constraint no API model was used.
+
+Under this constraint L7 has no correct items, so G5 remains
+**NOT_EVALUABLE** and the L1-L7 comparison cannot be made. Per master-guide
+section 16.4, the failed G2 directs the project to its diagnostic
+contribution: Phase A plus the Phase D temporal detector. This is a finding
+about the model class under test, not a defect in the instrument.
+
+### Registry status through Block 8
+
+| Registry | Status |
+|---|---|
+| Files, fields, configs, scripts, and experiment outputs from Blocks 1-8 | registered in the phase guides and run metadata |
+| E5 / G5 | implemented and recorded as **NOT_EVALUABLE**, not “TO IMPLEMENT” |
+| Frozen dataset / statute / link digests | verified in every new context, warrant, typed, and uncertainty run metadata |
+| Aborted API/debug runs | deleted; no API-key patterns remain in `runs/**/meta.json` |
+
+The full repository suite was run in this environment with
+`python -m pytest -q`: **160 passed**.
+
 ## Current status
 
 | Phase | Status | Run or record of reference |

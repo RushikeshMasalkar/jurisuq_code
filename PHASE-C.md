@@ -7,6 +7,19 @@ record under the registered field `record['context']`. Nothing in it learns.
 Implements the engineering specification v2, section 15 (interfaces, schema
 and acceptance tests are exactly as specified there).
 
+## Compute and cost
+
+Inference runs locally through LM Studio on this machine. No accelerator is
+used: PyTorch reports `2.9.1+cpu`, with CUDA, MPS, and XPU unavailable, so
+inference and relation-model training run on CPU. The project spent nothing:
+there were no paid API calls, subscriptions, or billing. The primary Phase A
+input remains the frozen `qwen2.5-7b-instruct` run. Qwen3-14B Q4_K_M was
+screened locally with reasoning on and off, answered IPC 379 to a
+post-1-July-2024 theft question, and scored 0% on L7; it was not used to
+regenerate a slice. Gemini 2.5-flash was unavailable, 3.8-flash returned
+503, and 3.6-flash hit the free-tier daily quota (HTTP 429), so no API model
+was used.
+
 ---
 
 ## 0. What is in this drop
@@ -38,8 +51,8 @@ PHASE-C.md                    # this file
 | `relation_scores` | `list[list[float]]` | `scripts/13_attach_typed.py` | audit / figures | registered |
 | `typed_stats` | object | `scripts/13_attach_typed.py` | Phase E (`u_prov`) | registered |
 | `scripts/13_attach_typed.py` | `--run-id`, `--out-suffix`, `--checkpoint`, `--config`, `--limit`, `--force`, `--progress` | Phase B | Phase D, E | registered |
-| `scripts/23_detect_warrant.py --cluster-source {auto,exact,typed}` | CLI flag; default `auto` | Phase D | Phase D evaluation | registered; pending Block 4 |
-| `scripts/28_adapt_encoder.py` | continued masked-LM adaptation; `--encoder`, `--out-dir`, `--epochs`, `--batch-size`, `--max-length`, `--learning-rate` | Phase C | Phase B relation experiments | registered; Block 7a |
+| `scripts/23_detect_warrant.py --cluster-source {auto,exact,typed}` | CLI flag; default `auto` | Phase D | Phase D evaluation | registered; implemented and evaluated |
+| `scripts/28_adapt_encoder.py` | continued masked-LM adaptation; `--encoder`, `--out-dir`, `--epochs`, `--batch-size`, `--max-length`, `--learning-rate` | Phase C | Phase B relation experiments | registered; Block 7a recorded |
 
 The authoritative frozen dataset sha256 for every new context run is
 `89bc1180a4df76287768ce59432aa7ff0aa9d38c16d5f296ed16c3e45449bd53`.

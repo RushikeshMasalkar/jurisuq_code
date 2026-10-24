@@ -5,6 +5,18 @@ typed clustering. It builds a deterministic relation dataset, trains/evaluates
 an InLegalBERT classifier, and re-clusters the frozen Phase A answers
 read-only.
 
+## Compute and cost
+
+Inference runs locally through LM Studio on this machine. No accelerator is
+used: PyTorch reports `2.9.1+cpu`, with CUDA, MPS, and XPU unavailable.
+Inference and relation-model training therefore run on CPU. The project spent
+nothing: no paid API calls, subscriptions, or billing were used. The Phase A
+input remains the frozen `qwen2.5-7b-instruct` run; the Qwen3-14B Q4_K_M
+screen (reasoning on and off) answered IPC 379 to a post-1-July-2024 theft
+question and scored 0% on L7, so it was not used to regenerate a slice.
+Gemini 2.5-flash was unavailable, 3.8-flash returned 503, and 3.6-flash hit
+the free-tier daily quota (HTTP 429); no API model was used.
+
 ## Components and data
 
 - `jurisuq/relations/`: pair schema, synthetic strata, model, typed clustering,
@@ -22,11 +34,11 @@ read-only.
 
 | Field or script | Type / interface | Producer | Consumer | Status |
 |---|---|---|---|---|
-| `clusters` | `list[int]` | `scripts/13_attach_typed.py` | Phase D, E | registered; pending typed run |
-| `cluster_provisions` | `list[str]` | `scripts/13_attach_typed.py` | Phase D | registered; pending typed run |
-| `relation_matrix` | `list[list[str]]` | `scripts/13_attach_typed.py` | Phase D (K) | registered; pending typed run |
-| `relation_scores` | `list[list[float]]` | `scripts/13_attach_typed.py` | audit / figures | registered; pending typed run |
-| `typed_stats` | object | `scripts/13_attach_typed.py` | Phase E (`u_prov`) | registered; pending typed run |
+| `clusters` | `list[int]` | `scripts/13_attach_typed.py` | Phase D, E | registered; produced in typed runs |
+| `cluster_provisions` | `list[str]` | `scripts/13_attach_typed.py` | Phase D | registered; produced in typed runs |
+| `relation_matrix` | `list[list[str]]` | `scripts/13_attach_typed.py` | Phase D (K) | registered; produced in typed runs |
+| `relation_scores` | `list[list[float]]` | `scripts/13_attach_typed.py` | audit / figures | registered; produced in typed runs |
+| `typed_stats` | object | `scripts/13_attach_typed.py` | Phase E (`u_prov`) | registered; produced in typed runs |
 | `typed_stats.n_clusters, counts, entropy, entropy_norm, top_share, agreement, all_same, canonical, contradiction_mass, merges_applied, merges_skipped, forced_unions, flags` | object keys | `scripts/13_attach_typed.py` | Phase E / audit | registered; exact `jurisuq.relations.stats.typed_stats` keys |
 | `scripts/13_attach_typed.py` | CLI script; `--run-id`, `--out-suffix`, `--checkpoint`, `--config`, `--limit`, `--force`, `--progress` | Phase B | Phase D, E | registered; implementation in progress |
 
