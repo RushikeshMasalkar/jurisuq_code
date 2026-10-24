@@ -1,0 +1,2948 @@
+{
+  "phase": "G",
+  "report": "evaluation matrix",
+  "guide_sections": [
+    "§12 (gate table, G7)",
+    "§21.1",
+    "§21.2",
+    "§21.3"
+  ],
+  "generated_by": "scripts/42_build_eval_matrix.py",
+  "generated_utc": "2026-10-24T17:46:26Z",
+  "git_commit": "e9ee09ac71ce1565d4e9723bbed220a9463dcf76",
+  "source_run_id": "phaseA-laptop-v2-rejudged+ctx-r2+typed+warrant+uq-exact",
+  "calibration_run_id": "phaseA-laptop-v2-rejudged+ctx-r2+typed+warrant+uq-exact+cal-r2",
+  "inputs": {
+    "source_tree_sha256": "2f753a3d6f6101f9f497cff2046d7eb4a39b467d812b2a00468fc241d9a2d329",
+    "calibration_tree_sha256": "27e6305937de54e0891c8473f753d6d9ddba1a823476fcc3693a0e1707c26872",
+    "source_items_sha256": "19ab7c59a1b1e185fb816cb253c5fa4bca49423d830f770972a34b5b05674f12",
+    "dataset_sha256": "89bc1180a4df76287768ce59432aa7ff0aa9d38c16d5f296ed16c3e45449bd53",
+    "sources_unchanged_during_report": true
+  },
+  "split": {
+    "seed": "phaseE-v1",
+    "test_fraction": 0.2,
+    "n_evaluation": 44,
+    "n_development": 156,
+    "verified_against_stored_split": true
+  },
+  "phase_f_join": {
+    "items_joined": 200,
+    "items_missing": 0,
+    "join_key": "item_id",
+    "fields": [
+      "p_reliable",
+      "harm_class",
+      "action"
+    ]
+  },
+  "phase_f_calibration_coverage": {
+    "per_slice": {
+      "L7": {
+        "n_items": 100,
+        "n_with_p_reliable": 0,
+        "n_with_harm_class": 100,
+        "p_reliable_fraction": 0.0
+      },
+      "L1": {
+        "n_items": 100,
+        "n_with_p_reliable": 100,
+        "n_with_harm_class": 100,
+        "p_reliable_fraction": 1.0
+      }
+    },
+    "consequence": "legal_aware is defined only where p_reliable exists; on a slice with none it is reported as undefined rather than silently dropped"
+  },
+  "methods_declared": [
+    {
+      "key": "exact_agreement",
+      "guide_name": "exact agreement",
+      "implemented": true,
+      "note": "larger = less agreement = more uncertain"
+    },
+    {
+      "key": "lexical_similarity",
+      "guide_name": "lexical similarity",
+      "implemented": false,
+      "note": "the lexical proxy is the *entailment backend* behind standard semantic entropy and is recorded there; it is not a separate uncertainty score in this codebase"
+    },
+    {
+      "key": "discrete_semantic_entropy",
+      "guide_name": "discrete semantic entropy",
+      "implemented": true,
+      "note": ""
+    },
+    {
+      "key": "standard_semantic_entropy",
+      "guide_name": "standard semantic entropy",
+      "implemented": true,
+      "note": ""
+    },
+    {
+      "key": "selfcheck",
+      "guide_name": "SelfCheck-style",
+      "implemented": true,
+      "note": ""
+    },
+    {
+      "key": "p_true",
+      "guide_name": "p_true where available",
+      "implemented": true,
+      "note": "requires server logprobs; absent on the frozen run"
+    },
+    {
+      "key": "provision_agreement",
+      "guide_name": "provision-level agreement",
+      "implemented": true,
+      "note": ""
+    },
+    {
+      "key": "legal_aware",
+      "guide_name": "legal-aware score (this work)",
+      "implemented": true,
+      "note": "the calibrated form; equals 1 - uq_uncertainty where p_reliable is null"
+    },
+    {
+      "key": "legal_aware_uncalibrated",
+      "guide_name": "legal-aware score without calibration",
+      "implemented": true,
+      "note": ""
+    }
+  ],
+  "headline_matrix": {
+    "phase": "G",
+    "section": "21.2 evaluation matrix",
+    "coverage_for_selective_risk": 0.5,
+    "bins": {
+      "ace": 5,
+      "ece": 10,
+      "reliability": 5
+    },
+    "slices_evaluated": [
+      "L1",
+      "L7"
+    ],
+    "slices_present_in_data": [
+      "L1",
+      "L7"
+    ],
+    "slices_absent": [],
+    "pooled": null,
+    "pooling_note": "no pooled block is computed; §21.1 requires slices to be reported separately. See pooled_reference() if one is needed for reference.",
+    "blocks": {
+      "L1": {
+        "slice": "L1",
+        "present": true,
+        "n_items": 22,
+        "judge_coverage": {
+          "n_items": 22,
+          "n_items_resolved": 22,
+          "item_coverage": 1.0,
+          "n_samples": 220,
+          "n_samples_resolved": 220,
+          "sample_coverage": 1.0,
+          "definition": "item coverage = resolved correctness labels / items"
+        },
+        "label_counts": {
+          "correct": 7,
+          "incorrect": 15,
+          "unresolved": 0
+        },
+        "cells": {
+          "exact_agreement": {
+            "method": "exact_agreement",
+            "guide_name": "exact agreement",
+            "source": "methods.agreement = 1 - top discrete-cluster probability",
+            "note": "larger = less agreement = more uncertain",
+            "n_items": 22,
+            "n_scored": 22,
+            "judge_coverage": {
+              "n_items": 22,
+              "n_items_resolved": 22,
+              "item_coverage": 1.0,
+              "n_samples": 220,
+              "n_samples_resolved": 220,
+              "sample_coverage": 1.0,
+              "definition": "item coverage = resolved correctness labels / items"
+            },
+            "metrics": {
+              "base_error_rate": 0.6818181818181818,
+              "auroc": 0.5714285714285714,
+              "auprc": 0.712882599856284,
+              "normalized_aurc": 0.3358299534306789,
+              "selective_risk_at_fixed_coverage": 0.5454545454545454,
+              "risk_coverage_at_fixed": {
+                "coverage": 0.5
+              },
+              "ace_5bin": 0.20909090909090905,
+              "ece_10bin": 0.20909090909090905,
+              "brier": 0.24999999999999992,
+              "reliability_5bin": [
+                {
+                  "bin": 0,
+                  "lo": 0.0,
+                  "hi": 0.2,
+                  "n": 21,
+                  "mean_p": 0.10000000000000002,
+                  "accuracy": 0.2857142857142857
+                },
+                {
+                  "bin": 1,
+                  "lo": 0.2,
+                  "hi": 0.4,
+                  "n": 1,
+                  "mean_p": 0.30000000000000004,
+                  "accuracy": 1.0
+                },
+                {
+                  "bin": 2,
+                  "lo": 0.4,
+                  "hi": 0.6,
+                  "n": 0,
+                  "mean_p": null,
+                  "accuracy": null
+                },
+                {
+                  "bin": 3,
+                  "lo": 0.6,
+                  "hi": 0.8,
+                  "n": 0,
+                  "mean_p": null,
+                  "accuracy": null
+                },
+                {
+                  "bin": 4,
+                  "lo": 0.8,
+                  "hi": 1.0,
+                  "n": 0,
+                  "mean_p": null,
+                  "accuracy": null
+                }
+              ],
+              "harm_weighted_risk_at_fixed_coverage": 0.5454545454545454,
+              "harm_weight_variation_present": false,
+              "confident_wrong": {
+                "n": 22,
+                "n_confident": 22,
+                "n_confident_wrong": 15,
+                "rate": 0.6818181818181818,
+                "threshold": 0.9,
+                "definition": "wrong and uncertainty <= the 25th percentile of the evaluated population",
+                "undefined": null
+              },
+              "label_counts": {
+                "correct": 7,
+                "incorrect": 15
+              },
+              "score_range": {
+                "min": 0.7,
+                "max": 0.9
+              }
+            },
+            "undefined": {},
+            "harm_classes": [
+              "custodial"
+            ]
+          },
+          "lexical_similarity": {
+            "method": "lexical_similarity",
+            "guide_name": "lexical similarity",
+            "source": "not implemented as a standalone score",
+            "note": "the lexical proxy is the *entailment backend* behind standard semantic entropy and is recorded there; it is not a separate uncertainty score in this codebase",
+            "n_items": 22,
+            "n_scored": 0,
+            "judge_coverage": {
+              "n_items": 22,
+              "n_items_resolved": 22,
+              "item_coverage": 1.0,
+              "n_samples": 220,
+              "n_samples_resolved": 220,
+              "sample_coverage": 1.0,
+              "definition": "item coverage = resolved correctness labels / items"
+            },
+            "metrics": {
+              "auroc": null,
+              "auprc": null,
+              "normalized_aurc": null,
+              "selective_risk_at_fixed_coverage": null,
+              "ace_5bin": null,
+              "ece_10bin": null,
+              "brier": null,
+              "reliability_5bin": null,
+              "harm_weighted_risk_at_fixed_coverage": null,
+              "confident_wrong": null,
+              "label_counts": null,
+              "risk_coverage_at_fixed": null,
+              "score_range": null,
+              "base_error_rate": null
+            },
+            "undefined": {
+              "all": "method_not_implemented"
+            }
+          },
+          "discrete_semantic_entropy": {
+            "method": "discrete_semantic_entropy",
+            "guide_name": "discrete semantic entropy",
+            "source": "methods.disc_se (bits)",
+            "note": "",
+            "n_items": 22,
+            "n_scored": 22,
+            "judge_coverage": {
+              "n_items": 22,
+              "n_items_resolved": 22,
+              "item_coverage": 1.0,
+              "n_samples": 220,
+              "n_samples_resolved": 220,
+              "sample_coverage": 1.0,
+              "definition": "item coverage = resolved correctness labels / items"
+            },
+            "metrics": {
+              "base_error_rate": 0.6818181818181818,
+              "auroc": 0.5714285714285714,
+              "auprc": 0.712882599856284,
+              "normalized_aurc": 0.3358299534306789,
+              "selective_risk_at_fixed_coverage": 0.5454545454545454,
+              "risk_coverage_at_fixed": {
+                "coverage": 0.5
+              },
+              "ace_5bin": null,
+              "ece_10bin": null,
+              "brier": null,
+              "reliability_5bin": null,
+              "harm_weighted_risk_at_fixed_coverage": null,
+              "confident_wrong": {
+                "n": 22,
+                "n_confident": 22,
+                "n_confident_wrong": 15,
+                "rate": 0.6818181818181818,
+                "threshold": 3.3219280948873626,
+                "definition": "wrong and uncertainty <= the 25th percentile of the evaluated population",
+                "undefined": null
+              },
+              "label_counts": {
+                "correct": 7,
+                "incorrect": 15
+              },
+              "score_range": {
+                "min": 2.6464393446710157,
+                "max": 3.3219280948873626
+              }
+            },
+            "undefined": {
+              "ace_5bin": "score_outside_unit_interval",
+              "ece_10bin": "score_outside_unit_interval",
+              "brier": "score_outside_unit_interval",
+              "reliability_5bin": "score_outside_unit_interval",
+              "harm_weighted_risk_at_fixed_coverage": "score_outside_unit_interval"
+            }
+          },
+          "standard_semantic_entropy": {
+            "method": "standard_semantic_entropy",
+            "guide_name": "standard semantic entropy",
+            "source": "methods.se (bits)",
+            "note": "",
+            "n_items": 22,
+            "n_scored": 22,
+            "judge_coverage": {
+              "n_items": 22,
+              "n_items_resolved": 22,
+              "item_coverage": 1.0,
+              "n_samples": 220,
+              "n_samples_resolved": 220,
+              "sample_coverage": 1.0,
+              "definition": "item coverage = resolved correctness labels / items"
+            },
+            "metrics": {
+              "base_error_rate": 0.6818181818181818,
+              "auroc": 0.4857142857142857,
+              "auprc": 0.7117684852127576,
+              "normalized_aurc": 0.10243102489798485,
+              "selective_risk_at_fixed_coverage": 0.6363636363636364,
+              "risk_coverage_at_fixed": {
+                "coverage": 0.5
+              },
+              "ace_5bin": null,
+              "ece_10bin": null,
+              "brier": null,
+              "reliability_5bin": null,
+              "harm_weighted_risk_at_fixed_coverage": null,
+              "confident_wrong": {
+                "n": 22,
+                "n_confident": 6,
+                "n_confident_wrong": 4,
+                "rate": 0.6666666666666666,
+                "threshold": 2.715311532225102,
+                "definition": "wrong and uncertainty <= the 25th percentile of the evaluated population",
+                "undefined": null
+              },
+              "label_counts": {
+                "correct": 7,
+                "incorrect": 15
+              },
+              "score_range": {
+                "min": 1.5709505944546687,
+                "max": 3.3219280948873626
+              }
+            },
+            "undefined": {
+              "ace_5bin": "score_outside_unit_interval",
+              "ece_10bin": "score_outside_unit_interval",
+              "brier": "score_outside_unit_interval",
+              "reliability_5bin": "score_outside_unit_interval",
+              "harm_weighted_risk_at_fixed_coverage": "score_outside_unit_interval"
+            }
+          },
+          "selfcheck": {
+            "method": "selfcheck",
+            "guide_name": "SelfCheck-style",
+            "source": "methods.selfcheck (contradiction mass)",
+            "note": "",
+            "n_items": 22,
+            "n_scored": 22,
+            "judge_coverage": {
+              "n_items": 22,
+              "n_items_resolved": 22,
+              "item_coverage": 1.0,
+              "n_samples": 220,
+              "n_samples_resolved": 220,
+              "sample_coverage": 1.0,
+              "definition": "item coverage = resolved correctness labels / items"
+            },
+            "metrics": {
+              "base_error_rate": 0.6818181818181818,
+              "auroc": 0.5904761904761905,
+              "auprc": 0.7370066729509452,
+              "normalized_aurc": 0.21435958113209846,
+              "selective_risk_at_fixed_coverage": 0.5454545454545454,
+              "risk_coverage_at_fixed": {
+                "coverage": 0.5
+              },
+              "ace_5bin": 0.44276721289917204,
+              "ece_10bin": 0.442767212899172,
+              "brier": 0.38311254107035014,
+              "reliability_5bin": [
+                {
+                  "bin": 0,
+                  "lo": 0.0,
+                  "hi": 0.2,
+                  "n": 0,
+                  "mean_p": null,
+                  "accuracy": null
+                },
+                {
+                  "bin": 1,
+                  "lo": 0.2,
+                  "hi": 0.4,
+                  "n": 0,
+                  "mean_p": null,
+                  "accuracy": null
+                },
+                {
+                  "bin": 2,
+                  "lo": 0.4,
+                  "hi": 0.6,
+                  "n": 1,
+                  "mean_p": 0.5928400798989034,
+                  "accuracy": 1.0
+                },
+                {
+                  "bin": 3,
+                  "lo": 0.6,
+                  "hi": 0.8,
+                  "n": 18,
+                  "mean_p": 0.7065628481463122,
+                  "accuracy": 0.2777777777777778
+                },
+                {
+                  "bin": 4,
+                  "lo": 0.8,
+                  "hi": 1.0,
+                  "n": 3,
+                  "mean_p": 0.8718624990156895,
+                  "accuracy": 0.3333333333333333
+                }
+              ],
+              "harm_weighted_risk_at_fixed_coverage": 0.5454545454545454,
+              "harm_weight_variation_present": false,
+              "confident_wrong": {
+                "n": 22,
+                "n_confident": 6,
+                "n_confident_wrong": 4,
+                "rate": 0.6666666666666666,
+                "threshold": 0.2510448282524431,
+                "definition": "wrong and uncertainty <= the 25th percentile of the evaluated population",
+                "undefined": null
+              },
+              "label_counts": {
+                "correct": 7,
+                "incorrect": 15
+              },
+              "score_range": {
+                "min": 0.11836812144212523,
+                "max": 0.4071599201010966
+              }
+            },
+            "undefined": {},
+            "harm_classes": [
+              "custodial"
+            ]
+          },
+          "p_true": {
+            "method": "p_true",
+            "guide_name": "p_true where available",
+            "source": "methods.p_true, stored as 1 - length-normalised sequence probability",
+            "note": "requires server logprobs; absent on the frozen run",
+            "n_items": 22,
+            "n_scored": 0,
+            "judge_coverage": {
+              "n_items": 22,
+              "n_items_resolved": 22,
+              "item_coverage": 1.0,
+              "n_samples": 220,
+              "n_samples_resolved": 220,
+              "sample_coverage": 1.0,
+              "definition": "item coverage = resolved correctness labels / items"
+            },
+            "metrics": {
+              "auroc": null,
+              "auprc": null,
+              "normalized_aurc": null,
+              "selective_risk_at_fixed_coverage": null,
+              "ace_5bin": null,
+              "ece_10bin": null,
+              "brier": null,
+              "reliability_5bin": null,
+              "harm_weighted_risk_at_fixed_coverage": null,
+              "confident_wrong": null,
+              "label_counts": null,
+              "risk_coverage_at_fixed": null,
+              "score_range": null,
+              "base_error_rate": null
+            },
+            "undefined": {
+              "all": "logprobs_absent"
+            }
+          },
+          "provision_agreement": {
+            "method": "provision_agreement",
+            "guide_name": "provision-level agreement",
+            "source": "methods.prov_agreement = 1 - provision top share",
+            "note": "",
+            "n_items": 22,
+            "n_scored": 22,
+            "judge_coverage": {
+              "n_items": 22,
+              "n_items_resolved": 22,
+              "item_coverage": 1.0,
+              "n_samples": 220,
+              "n_samples_resolved": 220,
+              "sample_coverage": 1.0,
+              "definition": "item coverage = resolved correctness labels / items"
+            },
+            "metrics": {
+              "base_error_rate": 0.6818181818181818,
+              "auroc": 0.8333333333333334,
+              "auprc": 0.9105355755355755,
+              "normalized_aurc": 0.64074986792313,
+              "selective_risk_at_fixed_coverage": 0.45454545454545453,
+              "risk_coverage_at_fixed": {
+                "coverage": 0.5
+              },
+              "ace_5bin": 0.23636363636363636,
+              "ece_10bin": 0.3454545454545455,
+              "brier": 0.2072727272727273,
+              "reliability_5bin": [
+                {
+                  "bin": 0,
+                  "lo": 0.0,
+                  "hi": 0.2,
+                  "n": 1,
+                  "mean_p": 0.19999999999999996,
+                  "accuracy": 0.0
+                },
+                {
+                  "bin": 1,
+                  "lo": 0.2,
+                  "hi": 0.4,
+                  "n": 8,
+                  "mean_p": 0.3625,
+                  "accuracy": 0.125
+                },
+                {
+                  "bin": 2,
+                  "lo": 0.4,
+                  "hi": 0.6,
+                  "n": 6,
+                  "mean_p": 0.5166666666666667,
+                  "accuracy": 0.16666666666666666
+                },
+                {
+                  "bin": 3,
+                  "lo": 0.6,
+                  "hi": 0.8,
+                  "n": 3,
+                  "mean_p": 0.7333333333333334,
+                  "accuracy": 0.6666666666666666
+                },
+                {
+                  "bin": 4,
+                  "lo": 0.8,
+                  "hi": 1.0,
+                  "n": 4,
+                  "mean_p": 0.95,
+                  "accuracy": 0.75
+                }
+              ],
+              "harm_weighted_risk_at_fixed_coverage": 0.45454545454545453,
+              "harm_weight_variation_present": false,
+              "confident_wrong": {
+                "n": 22,
+                "n_confident": 7,
+                "n_confident_wrong": 2,
+                "rate": 0.2857142857142857,
+                "threshold": 0.30000000000000004,
+                "definition": "wrong and uncertainty <= the 25th percentile of the evaluated population",
+                "undefined": null
+              },
+              "label_counts": {
+                "correct": 7,
+                "incorrect": 15
+              },
+              "score_range": {
+                "min": 0.0,
+                "max": 0.8
+              }
+            },
+            "undefined": {},
+            "harm_classes": [
+              "custodial"
+            ]
+          },
+          "legal_aware": {
+            "method": "legal_aware",
+            "guide_name": "legal-aware score (this work)",
+            "source": "1 - p_reliable from the Phase F calibration run",
+            "note": "the calibrated form; equals 1 - uq_uncertainty where p_reliable is null",
+            "n_items": 22,
+            "n_scored": 22,
+            "judge_coverage": {
+              "n_items": 22,
+              "n_items_resolved": 22,
+              "item_coverage": 1.0,
+              "n_samples": 220,
+              "n_samples_resolved": 220,
+              "sample_coverage": 1.0,
+              "definition": "item coverage = resolved correctness labels / items"
+            },
+            "metrics": {
+              "base_error_rate": 0.6818181818181818,
+              "auroc": 0.6523809523809524,
+              "auprc": 0.7516351241351241,
+              "normalized_aurc": 0.26240287972388227,
+              "selective_risk_at_fixed_coverage": 0.5454545454545454,
+              "risk_coverage_at_fixed": {
+                "coverage": 0.5
+              },
+              "ace_5bin": 0.2796623011975103,
+              "ece_10bin": 0.2796623011975103,
+              "brier": 0.2993423164200025,
+              "reliability_5bin": [
+                {
+                  "bin": 0,
+                  "lo": 0.0,
+                  "hi": 0.2,
+                  "n": 0,
+                  "mean_p": null,
+                  "accuracy": null
+                },
+                {
+                  "bin": 1,
+                  "lo": 0.2,
+                  "hi": 0.4,
+                  "n": 4,
+                  "mean_p": 0.35974892791167457,
+                  "accuracy": 0.25
+                },
+                {
+                  "bin": 2,
+                  "lo": 0.4,
+                  "hi": 0.6,
+                  "n": 9,
+                  "mean_p": 0.5085413055086557,
+                  "accuracy": 0.1111111111111111
+                },
+                {
+                  "bin": 3,
+                  "lo": 0.6,
+                  "hi": 0.8,
+                  "n": 6,
+                  "mean_p": 0.6436275845061347,
+                  "accuracy": 0.6666666666666666
+                },
+                {
+                  "bin": 4,
+                  "lo": 0.8,
+                  "hi": 1.0,
+                  "n": 3,
+                  "mean_p": 0.9994895573858114,
+                  "accuracy": 0.3333333333333333
+                }
+              ],
+              "harm_weighted_risk_at_fixed_coverage": 0.5454545454545454,
+              "harm_weight_variation_present": false,
+              "confident_wrong": {
+                "n": 22,
+                "n_confident": 6,
+                "n_confident_wrong": 2,
+                "rate": 0.3333333333333333,
+                "threshold": 0.3554206627159974,
+                "definition": "wrong and uncertainty <= the 25th percentile of the evaluated population",
+                "undefined": null
+              },
+              "label_counts": {
+                "correct": 7,
+                "incorrect": 15
+              },
+              "score_range": {
+                "min": 0.0,
+                "max": 0.6777571874200203
+              }
+            },
+            "undefined": {},
+            "harm_classes": [
+              "custodial"
+            ]
+          },
+          "legal_aware_uncalibrated": {
+            "method": "legal_aware_uncalibrated",
+            "guide_name": "legal-aware score without calibration",
+            "source": "uq_uncertainty (Phase E, uncalibrated_monotone_risk_score)",
+            "note": "",
+            "n_items": 22,
+            "n_scored": 22,
+            "judge_coverage": {
+              "n_items": 22,
+              "n_items_resolved": 22,
+              "item_coverage": 1.0,
+              "n_samples": 220,
+              "n_samples_resolved": 220,
+              "sample_coverage": 1.0,
+              "definition": "item coverage = resolved correctness labels / items"
+            },
+            "metrics": {
+              "base_error_rate": 0.6818181818181818,
+              "auroc": 0.6523809523809524,
+              "auprc": 0.7516351241351241,
+              "normalized_aurc": 0.26240287972388227,
+              "selective_risk_at_fixed_coverage": 0.5454545454545454,
+              "risk_coverage_at_fixed": {
+                "coverage": 0.5
+              },
+              "ace_5bin": 0.055549194936080466,
+              "ece_10bin": 0.15117753677138213,
+              "brier": 0.21770364407849188,
+              "reliability_5bin": [
+                {
+                  "bin": 0,
+                  "lo": 0.0,
+                  "hi": 0.2,
+                  "n": 0,
+                  "mean_p": null,
+                  "accuracy": null
+                },
+                {
+                  "bin": 1,
+                  "lo": 0.2,
+                  "hi": 0.4,
+                  "n": 21,
+                  "mean_p": 0.2975149862780872,
+                  "accuracy": 0.3333333333333333
+                },
+                {
+                  "bin": 2,
+                  "lo": 0.4,
+                  "hi": 0.6,
+                  "n": 1,
+                  "mean_p": 0.46989700043360183,
+                  "accuracy": 0.0
+                },
+                {
+                  "bin": 3,
+                  "lo": 0.6,
+                  "hi": 0.8,
+                  "n": 0,
+                  "mean_p": null,
+                  "accuracy": null
+                },
+                {
+                  "bin": 4,
+                  "lo": 0.8,
+                  "hi": 1.0,
+                  "n": 0,
+                  "mean_p": null,
+                  "accuracy": null
+                }
+              ],
+              "harm_weighted_risk_at_fixed_coverage": 0.5454545454545454,
+              "harm_weight_variation_present": false,
+              "confident_wrong": {
+                "n": 22,
+                "n_confident": 6,
+                "n_confident_wrong": 2,
+                "rate": 0.3333333333333333,
+                "threshold": 0.6797002692599289,
+                "definition": "wrong and uncertainty <= the 25th percentile of the evaluated population",
+                "undefined": null
+              },
+              "label_counts": {
+                "correct": 7,
+                "incorrect": 15
+              },
+              "score_range": {
+                "min": 0.5301029995663982,
+                "max": 0.7478160139309752
+              }
+            },
+            "undefined": {},
+            "harm_classes": [
+              "custodial"
+            ]
+          }
+        }
+      },
+      "L7": {
+        "slice": "L7",
+        "present": true,
+        "n_items": 22,
+        "judge_coverage": {
+          "n_items": 22,
+          "n_items_resolved": 22,
+          "item_coverage": 1.0,
+          "n_samples": 220,
+          "n_samples_resolved": 220,
+          "sample_coverage": 1.0,
+          "definition": "item coverage = resolved correctness labels / items"
+        },
+        "label_counts": {
+          "correct": 0,
+          "incorrect": 22,
+          "unresolved": 0
+        },
+        "cells": {
+          "exact_agreement": {
+            "method": "exact_agreement",
+            "guide_name": "exact agreement",
+            "source": "methods.agreement = 1 - top discrete-cluster probability",
+            "note": "larger = less agreement = more uncertain",
+            "n_items": 22,
+            "n_scored": 22,
+            "judge_coverage": {
+              "n_items": 22,
+              "n_items_resolved": 22,
+              "item_coverage": 1.0,
+              "n_samples": 220,
+              "n_samples_resolved": 220,
+              "sample_coverage": 1.0,
+              "definition": "item coverage = resolved correctness labels / items"
+            },
+            "metrics": {
+              "base_error_rate": 1.0,
+              "auroc": null,
+              "auprc": null,
+              "normalized_aurc": null,
+              "selective_risk_at_fixed_coverage": null,
+              "risk_coverage_at_fixed": null,
+              "ace_5bin": null,
+              "ece_10bin": null,
+              "brier": null,
+              "harm_weighted_risk_at_fixed_coverage": null,
+              "reliability_5bin": [
+                {
+                  "bin": 0,
+                  "lo": 0.0,
+                  "hi": 0.2,
+                  "n": 22,
+                  "mean_p": 0.10909090909090911,
+                  "accuracy": 0.0
+                },
+                {
+                  "bin": 1,
+                  "lo": 0.2,
+                  "hi": 0.4,
+                  "n": 0,
+                  "mean_p": null,
+                  "accuracy": null
+                },
+                {
+                  "bin": 2,
+                  "lo": 0.4,
+                  "hi": 0.6,
+                  "n": 0,
+                  "mean_p": null,
+                  "accuracy": null
+                },
+                {
+                  "bin": 3,
+                  "lo": 0.6,
+                  "hi": 0.8,
+                  "n": 0,
+                  "mean_p": null,
+                  "accuracy": null
+                },
+                {
+                  "bin": 4,
+                  "lo": 0.8,
+                  "hi": 1.0,
+                  "n": 0,
+                  "mean_p": null,
+                  "accuracy": null
+                }
+              ],
+              "confident_wrong": {
+                "n": 22,
+                "n_confident": 22,
+                "n_confident_wrong": 22,
+                "rate": 1.0,
+                "threshold": 0.9,
+                "definition": "wrong and uncertainty <= the 25th percentile of the evaluated population",
+                "undefined": null
+              },
+              "label_counts": {
+                "correct": 0,
+                "incorrect": 22
+              },
+              "score_range": {
+                "min": 0.8,
+                "max": 0.9
+              }
+            },
+            "undefined": {
+              "auroc": "single_correctness_class",
+              "auprc": "single_correctness_class",
+              "normalized_aurc": "single_correctness_class",
+              "selective_risk_at_fixed_coverage": "single_correctness_class",
+              "risk_coverage_at_fixed": "single_correctness_class",
+              "ace_5bin": "single_correctness_class",
+              "ece_10bin": "single_correctness_class",
+              "brier": "single_correctness_class",
+              "harm_weighted_risk_at_fixed_coverage": "single_correctness_class"
+            }
+          },
+          "lexical_similarity": {
+            "method": "lexical_similarity",
+            "guide_name": "lexical similarity",
+            "source": "not implemented as a standalone score",
+            "note": "the lexical proxy is the *entailment backend* behind standard semantic entropy and is recorded there; it is not a separate uncertainty score in this codebase",
+            "n_items": 22,
+            "n_scored": 0,
+            "judge_coverage": {
+              "n_items": 22,
+              "n_items_resolved": 22,
+              "item_coverage": 1.0,
+              "n_samples": 220,
+              "n_samples_resolved": 220,
+              "sample_coverage": 1.0,
+              "definition": "item coverage = resolved correctness labels / items"
+            },
+            "metrics": {
+              "auroc": null,
+              "auprc": null,
+              "normalized_aurc": null,
+              "selective_risk_at_fixed_coverage": null,
+              "ace_5bin": null,
+              "ece_10bin": null,
+              "brier": null,
+              "reliability_5bin": null,
+              "harm_weighted_risk_at_fixed_coverage": null,
+              "confident_wrong": null,
+              "label_counts": null,
+              "risk_coverage_at_fixed": null,
+              "score_range": null,
+              "base_error_rate": null
+            },
+            "undefined": {
+              "all": "method_not_implemented"
+            }
+          },
+          "discrete_semantic_entropy": {
+            "method": "discrete_semantic_entropy",
+            "guide_name": "discrete semantic entropy",
+            "source": "methods.disc_se (bits)",
+            "note": "",
+            "n_items": 22,
+            "n_scored": 22,
+            "judge_coverage": {
+              "n_items": 22,
+              "n_items_resolved": 22,
+              "item_coverage": 1.0,
+              "n_samples": 220,
+              "n_samples_resolved": 220,
+              "sample_coverage": 1.0,
+              "definition": "item coverage = resolved correctness labels / items"
+            },
+            "metrics": {
+              "base_error_rate": 1.0,
+              "auroc": null,
+              "auprc": null,
+              "normalized_aurc": null,
+              "selective_risk_at_fixed_coverage": null,
+              "risk_coverage_at_fixed": null,
+              "ace_5bin": null,
+              "ece_10bin": null,
+              "brier": null,
+              "reliability_5bin": null,
+              "harm_weighted_risk_at_fixed_coverage": null,
+              "confident_wrong": {
+                "n": 22,
+                "n_confident": 22,
+                "n_confident_wrong": 22,
+                "rate": 1.0,
+                "threshold": 3.3219280948873626,
+                "definition": "wrong and uncertainty <= the 25th percentile of the evaluated population",
+                "undefined": null
+              },
+              "label_counts": {
+                "correct": 0,
+                "incorrect": 22
+              },
+              "score_range": {
+                "min": 2.9219280948873623,
+                "max": 3.3219280948873626
+              }
+            },
+            "undefined": {
+              "auroc": "single_correctness_class",
+              "auprc": "single_correctness_class",
+              "normalized_aurc": "single_correctness_class",
+              "selective_risk_at_fixed_coverage": "single_correctness_class",
+              "risk_coverage_at_fixed": "single_correctness_class",
+              "ace_5bin": "score_outside_unit_interval",
+              "ece_10bin": "score_outside_unit_interval",
+              "brier": "score_outside_unit_interval",
+              "reliability_5bin": "score_outside_unit_interval",
+              "harm_weighted_risk_at_fixed_coverage": "score_outside_unit_interval"
+            }
+          },
+          "standard_semantic_entropy": {
+            "method": "standard_semantic_entropy",
+            "guide_name": "standard semantic entropy",
+            "source": "methods.se (bits)",
+            "note": "",
+            "n_items": 22,
+            "n_scored": 22,
+            "judge_coverage": {
+              "n_items": 22,
+              "n_items_resolved": 22,
+              "item_coverage": 1.0,
+              "n_samples": 220,
+              "n_samples_resolved": 220,
+              "sample_coverage": 1.0,
+              "definition": "item coverage = resolved correctness labels / items"
+            },
+            "metrics": {
+              "base_error_rate": 1.0,
+              "auroc": null,
+              "auprc": null,
+              "normalized_aurc": null,
+              "selective_risk_at_fixed_coverage": null,
+              "risk_coverage_at_fixed": null,
+              "ace_5bin": null,
+              "ece_10bin": null,
+              "brier": null,
+              "reliability_5bin": null,
+              "harm_weighted_risk_at_fixed_coverage": null,
+              "confident_wrong": {
+                "n": 22,
+                "n_confident": 7,
+                "n_confident_wrong": 7,
+                "rate": 1.0,
+                "threshold": 2.8464393446710154,
+                "definition": "wrong and uncertainty <= the 25th percentile of the evaluated population",
+                "undefined": null
+              },
+              "label_counts": {
+                "correct": 0,
+                "incorrect": 22
+              },
+              "score_range": {
+                "min": 1.3567796494470397,
+                "max": 3.3219280948873626
+              }
+            },
+            "undefined": {
+              "auroc": "single_correctness_class",
+              "auprc": "single_correctness_class",
+              "normalized_aurc": "single_correctness_class",
+              "selective_risk_at_fixed_coverage": "single_correctness_class",
+              "risk_coverage_at_fixed": "single_correctness_class",
+              "ace_5bin": "score_outside_unit_interval",
+              "ece_10bin": "score_outside_unit_interval",
+              "brier": "score_outside_unit_interval",
+              "reliability_5bin": "score_outside_unit_interval",
+              "harm_weighted_risk_at_fixed_coverage": "score_outside_unit_interval"
+            }
+          },
+          "selfcheck": {
+            "method": "selfcheck",
+            "guide_name": "SelfCheck-style",
+            "source": "methods.selfcheck (contradiction mass)",
+            "note": "",
+            "n_items": 22,
+            "n_scored": 22,
+            "judge_coverage": {
+              "n_items": 22,
+              "n_items_resolved": 22,
+              "item_coverage": 1.0,
+              "n_samples": 220,
+              "n_samples_resolved": 220,
+              "sample_coverage": 1.0,
+              "definition": "item coverage = resolved correctness labels / items"
+            },
+            "metrics": {
+              "base_error_rate": 1.0,
+              "auroc": null,
+              "auprc": null,
+              "normalized_aurc": null,
+              "selective_risk_at_fixed_coverage": null,
+              "risk_coverage_at_fixed": null,
+              "ace_5bin": null,
+              "ece_10bin": null,
+              "brier": null,
+              "harm_weighted_risk_at_fixed_coverage": null,
+              "reliability_5bin": [
+                {
+                  "bin": 0,
+                  "lo": 0.0,
+                  "hi": 0.2,
+                  "n": 0,
+                  "mean_p": null,
+                  "accuracy": null
+                },
+                {
+                  "bin": 1,
+                  "lo": 0.2,
+                  "hi": 0.4,
+                  "n": 0,
+                  "mean_p": null,
+                  "accuracy": null
+                },
+                {
+                  "bin": 2,
+                  "lo": 0.4,
+                  "hi": 0.6,
+                  "n": 2,
+                  "mean_p": 0.5697750939931172,
+                  "accuracy": 0.0
+                },
+                {
+                  "bin": 3,
+                  "lo": 0.6,
+                  "hi": 0.8,
+                  "n": 15,
+                  "mean_p": 0.6798684987717569,
+                  "accuracy": 0.0
+                },
+                {
+                  "bin": 4,
+                  "lo": 0.8,
+                  "hi": 1.0,
+                  "n": 5,
+                  "mean_p": 0.8484848201977234,
+                  "accuracy": 0.0
+                }
+              ],
+              "confident_wrong": {
+                "n": 22,
+                "n_confident": 6,
+                "n_confident_wrong": 6,
+                "rate": 1.0,
+                "threshold": 0.23264534021086442,
+                "definition": "wrong and uncertainty <= the 25th percentile of the evaluated population",
+                "undefined": null
+              },
+              "label_counts": {
+                "correct": 0,
+                "incorrect": 22
+              },
+              "score_range": {
+                "min": 0.11832194501827428,
+                "max": 0.4495203110842646
+              }
+            },
+            "undefined": {
+              "auroc": "single_correctness_class",
+              "auprc": "single_correctness_class",
+              "normalized_aurc": "single_correctness_class",
+              "selective_risk_at_fixed_coverage": "single_correctness_class",
+              "risk_coverage_at_fixed": "single_correctness_class",
+              "ace_5bin": "single_correctness_class",
+              "ece_10bin": "single_correctness_class",
+              "brier": "single_correctness_class",
+              "harm_weighted_risk_at_fixed_coverage": "single_correctness_class"
+            }
+          },
+          "p_true": {
+            "method": "p_true",
+            "guide_name": "p_true where available",
+            "source": "methods.p_true, stored as 1 - length-normalised sequence probability",
+            "note": "requires server logprobs; absent on the frozen run",
+            "n_items": 22,
+            "n_scored": 0,
+            "judge_coverage": {
+              "n_items": 22,
+              "n_items_resolved": 22,
+              "item_coverage": 1.0,
+              "n_samples": 220,
+              "n_samples_resolved": 220,
+              "sample_coverage": 1.0,
+              "definition": "item coverage = resolved correctness labels / items"
+            },
+            "metrics": {
+              "auroc": null,
+              "auprc": null,
+              "normalized_aurc": null,
+              "selective_risk_at_fixed_coverage": null,
+              "ace_5bin": null,
+              "ece_10bin": null,
+              "brier": null,
+              "reliability_5bin": null,
+              "harm_weighted_risk_at_fixed_coverage": null,
+              "confident_wrong": null,
+              "label_counts": null,
+              "risk_coverage_at_fixed": null,
+              "score_range": null,
+              "base_error_rate": null
+            },
+            "undefined": {
+              "all": "logprobs_absent"
+            }
+          },
+          "provision_agreement": {
+            "method": "provision_agreement",
+            "guide_name": "provision-level agreement",
+            "source": "methods.prov_agreement = 1 - provision top share",
+            "note": "",
+            "n_items": 22,
+            "n_scored": 22,
+            "judge_coverage": {
+              "n_items": 22,
+              "n_items_resolved": 22,
+              "item_coverage": 1.0,
+              "n_samples": 220,
+              "n_samples_resolved": 220,
+              "sample_coverage": 1.0,
+              "definition": "item coverage = resolved correctness labels / items"
+            },
+            "metrics": {
+              "base_error_rate": 1.0,
+              "auroc": null,
+              "auprc": null,
+              "normalized_aurc": null,
+              "selective_risk_at_fixed_coverage": null,
+              "risk_coverage_at_fixed": null,
+              "ace_5bin": null,
+              "ece_10bin": null,
+              "brier": null,
+              "harm_weighted_risk_at_fixed_coverage": null,
+              "reliability_5bin": [
+                {
+                  "bin": 0,
+                  "lo": 0.0,
+                  "hi": 0.2,
+                  "n": 1,
+                  "mean_p": 0.19999999999999996,
+                  "accuracy": 0.0
+                },
+                {
+                  "bin": 1,
+                  "lo": 0.2,
+                  "hi": 0.4,
+                  "n": 8,
+                  "mean_p": 0.325,
+                  "accuracy": 0.0
+                },
+                {
+                  "bin": 2,
+                  "lo": 0.4,
+                  "hi": 0.6,
+                  "n": 6,
+                  "mean_p": 0.55,
+                  "accuracy": 0.0
+                },
+                {
+                  "bin": 3,
+                  "lo": 0.6,
+                  "hi": 0.8,
+                  "n": 5,
+                  "mean_p": 0.7200000000000001,
+                  "accuracy": 0.0
+                },
+                {
+                  "bin": 4,
+                  "lo": 0.8,
+                  "hi": 1.0,
+                  "n": 2,
+                  "mean_p": 0.95,
+                  "accuracy": 0.0
+                }
+              ],
+              "confident_wrong": {
+                "n": 22,
+                "n_confident": 7,
+                "n_confident_wrong": 7,
+                "rate": 1.0,
+                "threshold": 0.30000000000000004,
+                "definition": "wrong and uncertainty <= the 25th percentile of the evaluated population",
+                "undefined": null
+              },
+              "label_counts": {
+                "correct": 0,
+                "incorrect": 22
+              },
+              "score_range": {
+                "min": 0.0,
+                "max": 0.8
+              }
+            },
+            "undefined": {
+              "auroc": "single_correctness_class",
+              "auprc": "single_correctness_class",
+              "normalized_aurc": "single_correctness_class",
+              "selective_risk_at_fixed_coverage": "single_correctness_class",
+              "risk_coverage_at_fixed": "single_correctness_class",
+              "ace_5bin": "single_correctness_class",
+              "ece_10bin": "single_correctness_class",
+              "brier": "single_correctness_class",
+              "harm_weighted_risk_at_fixed_coverage": "single_correctness_class"
+            }
+          },
+          "legal_aware": {
+            "method": "legal_aware",
+            "guide_name": "legal-aware score (this work)",
+            "source": "1 - p_reliable from the Phase F calibration run",
+            "note": "the calibrated form; equals 1 - uq_uncertainty where p_reliable is null",
+            "n_items": 22,
+            "n_scored": 0,
+            "judge_coverage": {
+              "n_items": 22,
+              "n_items_resolved": 22,
+              "item_coverage": 1.0,
+              "n_samples": 220,
+              "n_samples_resolved": 220,
+              "sample_coverage": 1.0,
+              "definition": "item coverage = resolved correctness labels / items"
+            },
+            "metrics": {
+              "auroc": null,
+              "auprc": null,
+              "normalized_aurc": null,
+              "selective_risk_at_fixed_coverage": null,
+              "ace_5bin": null,
+              "ece_10bin": null,
+              "brier": null,
+              "reliability_5bin": null,
+              "harm_weighted_risk_at_fixed_coverage": null,
+              "confident_wrong": null,
+              "label_counts": null,
+              "risk_coverage_at_fixed": null,
+              "score_range": null,
+              "base_error_rate": null
+            },
+            "undefined": {
+              "all": "no_items_with_a_score_and_a_label"
+            }
+          },
+          "legal_aware_uncalibrated": {
+            "method": "legal_aware_uncalibrated",
+            "guide_name": "legal-aware score without calibration",
+            "source": "uq_uncertainty (Phase E, uncalibrated_monotone_risk_score)",
+            "note": "",
+            "n_items": 22,
+            "n_scored": 22,
+            "judge_coverage": {
+              "n_items": 22,
+              "n_items_resolved": 22,
+              "item_coverage": 1.0,
+              "n_samples": 220,
+              "n_samples_resolved": 220,
+              "sample_coverage": 1.0,
+              "definition": "item coverage = resolved correctness labels / items"
+            },
+            "metrics": {
+              "base_error_rate": 1.0,
+              "auroc": null,
+              "auprc": null,
+              "normalized_aurc": null,
+              "selective_risk_at_fixed_coverage": null,
+              "risk_coverage_at_fixed": null,
+              "ace_5bin": null,
+              "ece_10bin": null,
+              "brier": null,
+              "harm_weighted_risk_at_fixed_coverage": null,
+              "reliability_5bin": [
+                {
+                  "bin": 0,
+                  "lo": 0.0,
+                  "hi": 0.2,
+                  "n": 16,
+                  "mean_p": 0.1556755880330431,
+                  "accuracy": 0.0
+                },
+                {
+                  "bin": 1,
+                  "lo": 0.2,
+                  "hi": 0.4,
+                  "n": 3,
+                  "mean_p": 0.27187011534082717,
+                  "accuracy": 0.0
+                },
+                {
+                  "bin": 2,
+                  "lo": 0.4,
+                  "hi": 0.6,
+                  "n": 2,
+                  "mean_p": 0.5587028740310884,
+                  "accuracy": 0.0
+                },
+                {
+                  "bin": 3,
+                  "lo": 0.6,
+                  "hi": 0.8,
+                  "n": 1,
+                  "mean_p": 0.651774627142776,
+                  "accuracy": 0.0
+                },
+                {
+                  "bin": 4,
+                  "lo": 0.8,
+                  "hi": 1.0,
+                  "n": 0,
+                  "mean_p": null,
+                  "accuracy": null
+                }
+              ],
+              "confident_wrong": {
+                "n": 22,
+                "n_confident": 6,
+                "n_confident_wrong": 6,
+                "rate": 1.0,
+                "threshold": 0.7725964404113497,
+                "definition": "wrong and uncertainty <= the 25th percentile of the evaluated population",
+                "undefined": null
+              },
+              "label_counts": {
+                "correct": 0,
+                "incorrect": 22
+              },
+              "score_range": {
+                "min": 0.348225372857224,
+                "max": 0.8739154631096027
+              }
+            },
+            "undefined": {
+              "auroc": "single_correctness_class",
+              "auprc": "single_correctness_class",
+              "normalized_aurc": "single_correctness_class",
+              "selective_risk_at_fixed_coverage": "single_correctness_class",
+              "risk_coverage_at_fixed": "single_correctness_class",
+              "ace_5bin": "single_correctness_class",
+              "ece_10bin": "single_correctness_class",
+              "brier": "single_correctness_class",
+              "harm_weighted_risk_at_fixed_coverage": "single_correctness_class"
+            }
+          }
+        }
+      }
+    },
+    "method_order": [
+      "exact_agreement",
+      "lexical_similarity",
+      "discrete_semantic_entropy",
+      "standard_semantic_entropy",
+      "selfcheck",
+      "p_true",
+      "provision_agreement",
+      "legal_aware",
+      "legal_aware_uncalibrated"
+    ],
+    "partition": "evaluation (frozen pair-grouped holdout, never refitted here)",
+    "out_of_sample_for_every_method": true
+  },
+  "descriptive_matrix_all_items": {
+    "phase": "G",
+    "section": "21.2 evaluation matrix",
+    "coverage_for_selective_risk": 0.5,
+    "bins": {
+      "ace": 5,
+      "ece": 10,
+      "reliability": 5
+    },
+    "slices_evaluated": [
+      "L1",
+      "L7"
+    ],
+    "slices_present_in_data": [
+      "L1",
+      "L7"
+    ],
+    "slices_absent": [],
+    "pooled": null,
+    "pooling_note": "no pooled block is computed; §21.1 requires slices to be reported separately. See pooled_reference() if one is needed for reference.",
+    "blocks": {
+      "L1": {
+        "slice": "L1",
+        "present": true,
+        "n_items": 100,
+        "judge_coverage": {
+          "n_items": 100,
+          "n_items_resolved": 100,
+          "item_coverage": 1.0,
+          "n_samples": 1000,
+          "n_samples_resolved": 1000,
+          "sample_coverage": 1.0,
+          "definition": "item coverage = resolved correctness labels / items"
+        },
+        "label_counts": {
+          "correct": 43,
+          "incorrect": 57,
+          "unresolved": 0
+        },
+        "cells": {
+          "exact_agreement": {
+            "method": "exact_agreement",
+            "guide_name": "exact agreement",
+            "source": "methods.agreement = 1 - top discrete-cluster probability",
+            "note": "larger = less agreement = more uncertain",
+            "n_items": 100,
+            "n_scored": 100,
+            "judge_coverage": {
+              "n_items": 100,
+              "n_items_resolved": 100,
+              "item_coverage": 1.0,
+              "n_samples": 1000,
+              "n_samples_resolved": 1000,
+              "sample_coverage": 1.0,
+              "definition": "item coverage = resolved correctness labels / items"
+            },
+            "metrics": {
+              "base_error_rate": 0.57,
+              "auroc": 0.5432476540187678,
+              "auprc": 0.6390159956335014,
+              "normalized_aurc": 0.08108840607089444,
+              "selective_risk_at_fixed_coverage": 0.62,
+              "risk_coverage_at_fixed": {
+                "coverage": 0.5
+              },
+              "ace_5bin": 0.31600000000000017,
+              "ece_10bin": 0.3160000000000002,
+              "brier": 0.34159999999999996,
+              "reliability_5bin": [
+                {
+                  "bin": 0,
+                  "lo": 0.0,
+                  "hi": 0.2,
+                  "n": 97,
+                  "mean_p": 0.10618556701030911,
+                  "accuracy": 0.422680412371134
+                },
+                {
+                  "bin": 1,
+                  "lo": 0.2,
+                  "hi": 0.4,
+                  "n": 3,
+                  "mean_p": 0.3666666666666667,
+                  "accuracy": 0.6666666666666666
+                },
+                {
+                  "bin": 2,
+                  "lo": 0.4,
+                  "hi": 0.6,
+                  "n": 0,
+                  "mean_p": null,
+                  "accuracy": null
+                },
+                {
+                  "bin": 3,
+                  "lo": 0.6,
+                  "hi": 0.8,
+                  "n": 0,
+                  "mean_p": null,
+                  "accuracy": null
+                },
+                {
+                  "bin": 4,
+                  "lo": 0.8,
+                  "hi": 1.0,
+                  "n": 0,
+                  "mean_p": null,
+                  "accuracy": null
+                }
+              ],
+              "harm_weighted_risk_at_fixed_coverage": 0.62,
+              "harm_weight_variation_present": false,
+              "confident_wrong": {
+                "n": 100,
+                "n_confident": 100,
+                "n_confident_wrong": 57,
+                "rate": 0.57,
+                "threshold": 0.9,
+                "definition": "wrong and uncertainty <= the 25th percentile of the evaluated population",
+                "undefined": null
+              },
+              "label_counts": {
+                "correct": 43,
+                "incorrect": 57
+              },
+              "score_range": {
+                "min": 0.6,
+                "max": 0.9
+              }
+            },
+            "undefined": {},
+            "harm_classes": [
+              "custodial"
+            ]
+          },
+          "lexical_similarity": {
+            "method": "lexical_similarity",
+            "guide_name": "lexical similarity",
+            "source": "not implemented as a standalone score",
+            "note": "the lexical proxy is the *entailment backend* behind standard semantic entropy and is recorded there; it is not a separate uncertainty score in this codebase",
+            "n_items": 100,
+            "n_scored": 0,
+            "judge_coverage": {
+              "n_items": 100,
+              "n_items_resolved": 100,
+              "item_coverage": 1.0,
+              "n_samples": 1000,
+              "n_samples_resolved": 1000,
+              "sample_coverage": 1.0,
+              "definition": "item coverage = resolved correctness labels / items"
+            },
+            "metrics": {
+              "auroc": null,
+              "auprc": null,
+              "normalized_aurc": null,
+              "selective_risk_at_fixed_coverage": null,
+              "ace_5bin": null,
+              "ece_10bin": null,
+              "brier": null,
+              "reliability_5bin": null,
+              "harm_weighted_risk_at_fixed_coverage": null,
+              "confident_wrong": null,
+              "label_counts": null,
+              "risk_coverage_at_fixed": null,
+              "score_range": null,
+              "base_error_rate": null
+            },
+            "undefined": {
+              "all": "method_not_implemented"
+            }
+          },
+          "discrete_semantic_entropy": {
+            "method": "discrete_semantic_entropy",
+            "guide_name": "discrete semantic entropy",
+            "source": "methods.disc_se (bits)",
+            "note": "",
+            "n_items": 100,
+            "n_scored": 100,
+            "judge_coverage": {
+              "n_items": 100,
+              "n_items_resolved": 100,
+              "item_coverage": 1.0,
+              "n_samples": 1000,
+              "n_samples_resolved": 1000,
+              "sample_coverage": 1.0,
+              "definition": "item coverage = resolved correctness labels / items"
+            },
+            "metrics": {
+              "base_error_rate": 0.57,
+              "auroc": 0.5436556507547939,
+              "auprc": 0.6392387892148118,
+              "normalized_aurc": 0.08108840607089444,
+              "selective_risk_at_fixed_coverage": 0.62,
+              "risk_coverage_at_fixed": {
+                "coverage": 0.5
+              },
+              "ace_5bin": null,
+              "ece_10bin": null,
+              "brier": null,
+              "reliability_5bin": null,
+              "harm_weighted_risk_at_fixed_coverage": null,
+              "confident_wrong": {
+                "n": 100,
+                "n_confident": 100,
+                "n_confident_wrong": 57,
+                "rate": 0.57,
+                "threshold": 3.3219280948873626,
+                "definition": "wrong and uncertainty <= the 25th percentile of the evaluated population",
+                "undefined": null
+              },
+              "label_counts": {
+                "correct": 43,
+                "incorrect": 57
+              },
+              "score_range": {
+                "min": 2.5219280948873624,
+                "max": 3.3219280948873626
+              }
+            },
+            "undefined": {
+              "ace_5bin": "score_outside_unit_interval",
+              "ece_10bin": "score_outside_unit_interval",
+              "brier": "score_outside_unit_interval",
+              "reliability_5bin": "score_outside_unit_interval",
+              "harm_weighted_risk_at_fixed_coverage": "score_outside_unit_interval"
+            }
+          },
+          "standard_semantic_entropy": {
+            "method": "standard_semantic_entropy",
+            "guide_name": "standard semantic entropy",
+            "source": "methods.se (bits)",
+            "note": "",
+            "n_items": 100,
+            "n_scored": 100,
+            "judge_coverage": {
+              "n_items": 100,
+              "n_items_resolved": 100,
+              "item_coverage": 1.0,
+              "n_samples": 1000,
+              "n_samples_resolved": 1000,
+              "sample_coverage": 1.0,
+              "definition": "item coverage = resolved correctness labels / items"
+            },
+            "metrics": {
+              "base_error_rate": 0.57,
+              "auroc": 0.45124439004487965,
+              "auprc": 0.5592359192042791,
+              "normalized_aurc": -0.07596735042831944,
+              "selective_risk_at_fixed_coverage": 0.62,
+              "risk_coverage_at_fixed": {
+                "coverage": 0.5
+              },
+              "ace_5bin": null,
+              "ece_10bin": null,
+              "brier": null,
+              "reliability_5bin": null,
+              "harm_weighted_risk_at_fixed_coverage": null,
+              "confident_wrong": {
+                "n": 100,
+                "n_confident": 27,
+                "n_confident_wrong": 18,
+                "rate": 0.6666666666666666,
+                "threshold": 2.8464393446710154,
+                "definition": "wrong and uncertainty <= the 25th percentile of the evaluated population",
+                "undefined": null
+              },
+              "label_counts": {
+                "correct": 43,
+                "incorrect": 57
+              },
+              "score_range": {
+                "min": 0.9219280948873623,
+                "max": 3.3219280948873626
+              }
+            },
+            "undefined": {
+              "ace_5bin": "score_outside_unit_interval",
+              "ece_10bin": "score_outside_unit_interval",
+              "brier": "score_outside_unit_interval",
+              "reliability_5bin": "score_outside_unit_interval",
+              "harm_weighted_risk_at_fixed_coverage": "score_outside_unit_interval"
+            }
+          },
+          "selfcheck": {
+            "method": "selfcheck",
+            "guide_name": "SelfCheck-style",
+            "source": "methods.selfcheck (contradiction mass)",
+            "note": "",
+            "n_items": 100,
+            "n_scored": 100,
+            "judge_coverage": {
+              "n_items": 100,
+              "n_items_resolved": 100,
+              "item_coverage": 1.0,
+              "n_samples": 1000,
+              "n_samples_resolved": 1000,
+              "sample_coverage": 1.0,
+              "definition": "item coverage = resolved correctness labels / items"
+            },
+            "metrics": {
+              "base_error_rate": 0.57,
+              "auroc": 0.4749082007343941,
+              "auprc": 0.5569823469317038,
+              "normalized_aurc": -0.051963267629165394,
+              "selective_risk_at_fixed_coverage": 0.58,
+              "risk_coverage_at_fixed": {
+                "coverage": 0.5
+              },
+              "ace_5bin": 0.30060442710229374,
+              "ece_10bin": 0.30060442710229385,
+              "brier": 0.3391250846962919,
+              "reliability_5bin": [
+                {
+                  "bin": 0,
+                  "lo": 0.0,
+                  "hi": 0.2,
+                  "n": 0,
+                  "mean_p": null,
+                  "accuracy": null
+                },
+                {
+                  "bin": 1,
+                  "lo": 0.2,
+                  "hi": 0.4,
+                  "n": 0,
+                  "mean_p": null,
+                  "accuracy": null
+                },
+                {
+                  "bin": 2,
+                  "lo": 0.4,
+                  "hi": 0.6,
+                  "n": 4,
+                  "mean_p": 0.5763430178122382,
+                  "accuracy": 0.75
+                },
+                {
+                  "bin": 3,
+                  "lo": 0.6,
+                  "hi": 0.8,
+                  "n": 82,
+                  "mean_p": 0.6995253848984434,
+                  "accuracy": 0.43902439024390244
+                },
+                {
+                  "bin": 4,
+                  "lo": 0.8,
+                  "hi": 1.0,
+                  "n": 14,
+                  "mean_p": 0.8574809442718551,
+                  "accuracy": 0.2857142857142857
+                }
+              ],
+              "harm_weighted_risk_at_fixed_coverage": 0.58,
+              "harm_weight_variation_present": false,
+              "confident_wrong": {
+                "n": 100,
+                "n_confident": 25,
+                "n_confident_wrong": 15,
+                "rate": 0.6,
+                "threshold": 0.2495762592360855,
+                "definition": "wrong and uncertainty <= the 25th percentile of the evaluated population",
+                "undefined": null
+              },
+              "label_counts": {
+                "correct": 43,
+                "incorrect": 57
+              },
+              "score_range": {
+                "min": 0.08431308155446085,
+                "max": 0.44608169608169607
+              }
+            },
+            "undefined": {},
+            "harm_classes": [
+              "custodial"
+            ]
+          },
+          "p_true": {
+            "method": "p_true",
+            "guide_name": "p_true where available",
+            "source": "methods.p_true, stored as 1 - length-normalised sequence probability",
+            "note": "requires server logprobs; absent on the frozen run",
+            "n_items": 100,
+            "n_scored": 0,
+            "judge_coverage": {
+              "n_items": 100,
+              "n_items_resolved": 100,
+              "item_coverage": 1.0,
+              "n_samples": 1000,
+              "n_samples_resolved": 1000,
+              "sample_coverage": 1.0,
+              "definition": "item coverage = resolved correctness labels / items"
+            },
+            "metrics": {
+              "auroc": null,
+              "auprc": null,
+              "normalized_aurc": null,
+              "selective_risk_at_fixed_coverage": null,
+              "ace_5bin": null,
+              "ece_10bin": null,
+              "brier": null,
+              "reliability_5bin": null,
+              "harm_weighted_risk_at_fixed_coverage": null,
+              "confident_wrong": null,
+              "label_counts": null,
+              "risk_coverage_at_fixed": null,
+              "score_range": null,
+              "base_error_rate": null
+            },
+            "undefined": {
+              "all": "logprobs_absent"
+            }
+          },
+          "provision_agreement": {
+            "method": "provision_agreement",
+            "guide_name": "provision-level agreement",
+            "source": "methods.prov_agreement = 1 - provision top share",
+            "note": "",
+            "n_items": 100,
+            "n_scored": 100,
+            "judge_coverage": {
+              "n_items": 100,
+              "n_items_resolved": 100,
+              "item_coverage": 1.0,
+              "n_samples": 1000,
+              "n_samples_resolved": 1000,
+              "sample_coverage": 1.0,
+              "definition": "item coverage = resolved correctness labels / items"
+            },
+            "metrics": {
+              "base_error_rate": 0.57,
+              "auroc": 0.7327621379028968,
+              "auprc": 0.7691778019961535,
+              "normalized_aurc": 0.5498000128415494,
+              "selective_risk_at_fixed_coverage": 0.4,
+              "risk_coverage_at_fixed": {
+                "coverage": 0.5
+              },
+              "ace_5bin": 0.22199999999999998,
+              "ece_10bin": 0.22200000000000006,
+              "brier": 0.2546,
+              "reliability_5bin": [
+                {
+                  "bin": 0,
+                  "lo": 0.0,
+                  "hi": 0.2,
+                  "n": 1,
+                  "mean_p": 0.19999999999999996,
+                  "accuracy": 0.0
+                },
+                {
+                  "bin": 1,
+                  "lo": 0.2,
+                  "hi": 0.4,
+                  "n": 22,
+                  "mean_p": 0.34090909090909094,
+                  "accuracy": 0.18181818181818182
+                },
+                {
+                  "bin": 2,
+                  "lo": 0.4,
+                  "hi": 0.6,
+                  "n": 28,
+                  "mean_p": 0.5499999999999999,
+                  "accuracy": 0.35714285714285715
+                },
+                {
+                  "bin": 3,
+                  "lo": 0.6,
+                  "hi": 0.8,
+                  "n": 25,
+                  "mean_p": 0.752,
+                  "accuracy": 0.36
+                },
+                {
+                  "bin": 4,
+                  "lo": 0.8,
+                  "hi": 1.0,
+                  "n": 24,
+                  "mean_p": 0.9708333333333332,
+                  "accuracy": 0.8333333333333334
+                }
+              ],
+              "harm_weighted_risk_at_fixed_coverage": 0.4,
+              "harm_weight_variation_present": false,
+              "confident_wrong": {
+                "n": 100,
+                "n_confident": 37,
+                "n_confident_wrong": 16,
+                "rate": 0.43243243243243246,
+                "threshold": 0.19999999999999996,
+                "definition": "wrong and uncertainty <= the 25th percentile of the evaluated population",
+                "undefined": null
+              },
+              "label_counts": {
+                "correct": 43,
+                "incorrect": 57
+              },
+              "score_range": {
+                "min": 0.0,
+                "max": 0.8
+              }
+            },
+            "undefined": {},
+            "harm_classes": [
+              "custodial"
+            ]
+          },
+          "legal_aware": {
+            "method": "legal_aware",
+            "guide_name": "legal-aware score (this work)",
+            "source": "1 - p_reliable from the Phase F calibration run",
+            "note": "the calibrated form; equals 1 - uq_uncertainty where p_reliable is null",
+            "n_items": 100,
+            "n_scored": 100,
+            "judge_coverage": {
+              "n_items": 100,
+              "n_items_resolved": 100,
+              "item_coverage": 1.0,
+              "n_samples": 1000,
+              "n_samples_resolved": 1000,
+              "sample_coverage": 1.0,
+              "definition": "item coverage = resolved correctness labels / items"
+            },
+            "metrics": {
+              "base_error_rate": 0.57,
+              "auroc": 0.6383108935128519,
+              "auprc": 0.6179564150348793,
+              "normalized_aurc": 0.4128959758311778,
+              "selective_risk_at_fixed_coverage": 0.44,
+              "risk_coverage_at_fixed": {
+                "coverage": 0.5
+              },
+              "ace_5bin": 0.2432603260530981,
+              "ece_10bin": 0.24326032605309816,
+              "brier": 0.26504151253552827,
+              "reliability_5bin": [
+                {
+                  "bin": 0,
+                  "lo": 0.0,
+                  "hi": 0.2,
+                  "n": 0,
+                  "mean_p": null,
+                  "accuracy": null
+                },
+                {
+                  "bin": 1,
+                  "lo": 0.2,
+                  "hi": 0.4,
+                  "n": 11,
+                  "mean_p": 0.3552568044765602,
+                  "accuracy": 0.5454545454545454
+                },
+                {
+                  "bin": 2,
+                  "lo": 0.4,
+                  "hi": 0.6,
+                  "n": 34,
+                  "mean_p": 0.5084433217014377,
+                  "accuracy": 0.2647058823529412
+                },
+                {
+                  "bin": 3,
+                  "lo": 0.6,
+                  "hi": 0.8,
+                  "n": 36,
+                  "mean_p": 0.6397138346375253,
+                  "accuracy": 0.3333333333333333
+                },
+                {
+                  "bin": 4,
+                  "lo": 0.8,
+                  "hi": 1.0,
+                  "n": 19,
+                  "mean_p": 0.995636129986957,
+                  "accuracy": 0.8421052631578947
+                }
+              ],
+              "harm_weighted_risk_at_fixed_coverage": 0.44,
+              "harm_weight_variation_present": false,
+              "confident_wrong": {
+                "n": 100,
+                "n_confident": 32,
+                "n_confident_wrong": 11,
+                "rate": 0.34375,
+                "threshold": 0.3496389800213109,
+                "definition": "wrong and uncertainty <= the 25th percentile of the evaluated population",
+                "undefined": null
+              },
+              "label_counts": {
+                "correct": 43,
+                "incorrect": 57
+              },
+              "score_range": {
+                "min": 0.0,
+                "max": 0.6779661016949152
+              }
+            },
+            "undefined": {},
+            "harm_classes": [
+              "custodial"
+            ]
+          },
+          "legal_aware_uncalibrated": {
+            "method": "legal_aware_uncalibrated",
+            "guide_name": "legal-aware score without calibration",
+            "source": "uq_uncertainty (Phase E, uncalibrated_monotone_risk_score)",
+            "note": "",
+            "n_items": 100,
+            "n_scored": 100,
+            "judge_coverage": {
+              "n_items": 100,
+              "n_items_resolved": 100,
+              "item_coverage": 1.0,
+              "n_samples": 1000,
+              "n_samples_resolved": 1000,
+              "sample_coverage": 1.0,
+              "definition": "item coverage = resolved correctness labels / items"
+            },
+            "metrics": {
+              "base_error_rate": 0.57,
+              "auroc": 0.6379028967768258,
+              "auprc": 0.6178554049338691,
+              "normalized_aurc": 0.3851238238988145,
+              "selective_risk_at_fixed_coverage": 0.44,
+              "risk_coverage_at_fixed": {
+                "coverage": 0.5
+              },
+              "ace_5bin": 0.13253808171045617,
+              "ece_10bin": 0.13253808171045608,
+              "brier": 0.25934074610725494,
+              "reliability_5bin": [
+                {
+                  "bin": 0,
+                  "lo": 0.0,
+                  "hi": 0.2,
+                  "n": 0,
+                  "mean_p": null,
+                  "accuracy": null
+                },
+                {
+                  "bin": 1,
+                  "lo": 0.2,
+                  "hi": 0.4,
+                  "n": 99,
+                  "mean_p": 0.30521301847866655,
+                  "accuracy": 0.43434343434343436
+                },
+                {
+                  "bin": 2,
+                  "lo": 0.4,
+                  "hi": 0.6,
+                  "n": 1,
+                  "mean_p": 0.46989700043360183,
+                  "accuracy": 0.0
+                },
+                {
+                  "bin": 3,
+                  "lo": 0.6,
+                  "hi": 0.8,
+                  "n": 0,
+                  "mean_p": null,
+                  "accuracy": null
+                },
+                {
+                  "bin": 4,
+                  "lo": 0.8,
+                  "hi": 1.0,
+                  "n": 0,
+                  "mean_p": null,
+                  "accuracy": null
+                }
+              ],
+              "harm_weighted_risk_at_fixed_coverage": 0.44,
+              "harm_weight_variation_present": false,
+              "confident_wrong": {
+                "n": 100,
+                "n_confident": 32,
+                "n_confident_wrong": 11,
+                "rate": 0.34375,
+                "threshold": 0.6784784914221182,
+                "definition": "wrong and uncertainty <= the 25th percentile of the evaluated population",
+                "undefined": null
+              },
+              "label_counts": {
+                "correct": 43,
+                "incorrect": 57
+              },
+              "score_range": {
+                "min": 0.5301029995663982,
+                "max": 0.7478601614299902
+              }
+            },
+            "undefined": {},
+            "harm_classes": [
+              "custodial"
+            ]
+          }
+        }
+      },
+      "L7": {
+        "slice": "L7",
+        "present": true,
+        "n_items": 100,
+        "judge_coverage": {
+          "n_items": 100,
+          "n_items_resolved": 100,
+          "item_coverage": 1.0,
+          "n_samples": 1000,
+          "n_samples_resolved": 1000,
+          "sample_coverage": 1.0,
+          "definition": "item coverage = resolved correctness labels / items"
+        },
+        "label_counts": {
+          "correct": 0,
+          "incorrect": 100,
+          "unresolved": 0
+        },
+        "cells": {
+          "exact_agreement": {
+            "method": "exact_agreement",
+            "guide_name": "exact agreement",
+            "source": "methods.agreement = 1 - top discrete-cluster probability",
+            "note": "larger = less agreement = more uncertain",
+            "n_items": 100,
+            "n_scored": 100,
+            "judge_coverage": {
+              "n_items": 100,
+              "n_items_resolved": 100,
+              "item_coverage": 1.0,
+              "n_samples": 1000,
+              "n_samples_resolved": 1000,
+              "sample_coverage": 1.0,
+              "definition": "item coverage = resolved correctness labels / items"
+            },
+            "metrics": {
+              "base_error_rate": 1.0,
+              "auroc": null,
+              "auprc": null,
+              "normalized_aurc": null,
+              "selective_risk_at_fixed_coverage": null,
+              "risk_coverage_at_fixed": null,
+              "ace_5bin": null,
+              "ece_10bin": null,
+              "brier": null,
+              "harm_weighted_risk_at_fixed_coverage": null,
+              "reliability_5bin": [
+                {
+                  "bin": 0,
+                  "lo": 0.0,
+                  "hi": 0.2,
+                  "n": 100,
+                  "mean_p": 0.1069999999999998,
+                  "accuracy": 0.0
+                },
+                {
+                  "bin": 1,
+                  "lo": 0.2,
+                  "hi": 0.4,
+                  "n": 0,
+                  "mean_p": null,
+                  "accuracy": null
+                },
+                {
+                  "bin": 2,
+                  "lo": 0.4,
+                  "hi": 0.6,
+                  "n": 0,
+                  "mean_p": null,
+                  "accuracy": null
+                },
+                {
+                  "bin": 3,
+                  "lo": 0.6,
+                  "hi": 0.8,
+                  "n": 0,
+                  "mean_p": null,
+                  "accuracy": null
+                },
+                {
+                  "bin": 4,
+                  "lo": 0.8,
+                  "hi": 1.0,
+                  "n": 0,
+                  "mean_p": null,
+                  "accuracy": null
+                }
+              ],
+              "confident_wrong": {
+                "n": 100,
+                "n_confident": 100,
+                "n_confident_wrong": 100,
+                "rate": 1.0,
+                "threshold": 0.9,
+                "definition": "wrong and uncertainty <= the 25th percentile of the evaluated population",
+                "undefined": null
+              },
+              "label_counts": {
+                "correct": 0,
+                "incorrect": 100
+              },
+              "score_range": {
+                "min": 0.8,
+                "max": 0.9
+              }
+            },
+            "undefined": {
+              "auroc": "single_correctness_class",
+              "auprc": "single_correctness_class",
+              "normalized_aurc": "single_correctness_class",
+              "selective_risk_at_fixed_coverage": "single_correctness_class",
+              "risk_coverage_at_fixed": "single_correctness_class",
+              "ace_5bin": "single_correctness_class",
+              "ece_10bin": "single_correctness_class",
+              "brier": "single_correctness_class",
+              "harm_weighted_risk_at_fixed_coverage": "single_correctness_class"
+            }
+          },
+          "lexical_similarity": {
+            "method": "lexical_similarity",
+            "guide_name": "lexical similarity",
+            "source": "not implemented as a standalone score",
+            "note": "the lexical proxy is the *entailment backend* behind standard semantic entropy and is recorded there; it is not a separate uncertainty score in this codebase",
+            "n_items": 100,
+            "n_scored": 0,
+            "judge_coverage": {
+              "n_items": 100,
+              "n_items_resolved": 100,
+              "item_coverage": 1.0,
+              "n_samples": 1000,
+              "n_samples_resolved": 1000,
+              "sample_coverage": 1.0,
+              "definition": "item coverage = resolved correctness labels / items"
+            },
+            "metrics": {
+              "auroc": null,
+              "auprc": null,
+              "normalized_aurc": null,
+              "selective_risk_at_fixed_coverage": null,
+              "ace_5bin": null,
+              "ece_10bin": null,
+              "brier": null,
+              "reliability_5bin": null,
+              "harm_weighted_risk_at_fixed_coverage": null,
+              "confident_wrong": null,
+              "label_counts": null,
+              "risk_coverage_at_fixed": null,
+              "score_range": null,
+              "base_error_rate": null
+            },
+            "undefined": {
+              "all": "method_not_implemented"
+            }
+          },
+          "discrete_semantic_entropy": {
+            "method": "discrete_semantic_entropy",
+            "guide_name": "discrete semantic entropy",
+            "source": "methods.disc_se (bits)",
+            "note": "",
+            "n_items": 100,
+            "n_scored": 100,
+            "judge_coverage": {
+              "n_items": 100,
+              "n_items_resolved": 100,
+              "item_coverage": 1.0,
+              "n_samples": 1000,
+              "n_samples_resolved": 1000,
+              "sample_coverage": 1.0,
+              "definition": "item coverage = resolved correctness labels / items"
+            },
+            "metrics": {
+              "base_error_rate": 1.0,
+              "auroc": null,
+              "auprc": null,
+              "normalized_aurc": null,
+              "selective_risk_at_fixed_coverage": null,
+              "risk_coverage_at_fixed": null,
+              "ace_5bin": null,
+              "ece_10bin": null,
+              "brier": null,
+              "reliability_5bin": null,
+              "harm_weighted_risk_at_fixed_coverage": null,
+              "confident_wrong": {
+                "n": 100,
+                "n_confident": 100,
+                "n_confident_wrong": 100,
+                "rate": 1.0,
+                "threshold": 3.3219280948873626,
+                "definition": "wrong and uncertainty <= the 25th percentile of the evaluated population",
+                "undefined": null
+              },
+              "label_counts": {
+                "correct": 0,
+                "incorrect": 100
+              },
+              "score_range": {
+                "min": 2.9219280948873623,
+                "max": 3.3219280948873626
+              }
+            },
+            "undefined": {
+              "auroc": "single_correctness_class",
+              "auprc": "single_correctness_class",
+              "normalized_aurc": "single_correctness_class",
+              "selective_risk_at_fixed_coverage": "single_correctness_class",
+              "risk_coverage_at_fixed": "single_correctness_class",
+              "ace_5bin": "score_outside_unit_interval",
+              "ece_10bin": "score_outside_unit_interval",
+              "brier": "score_outside_unit_interval",
+              "reliability_5bin": "score_outside_unit_interval",
+              "harm_weighted_risk_at_fixed_coverage": "score_outside_unit_interval"
+            }
+          },
+          "standard_semantic_entropy": {
+            "method": "standard_semantic_entropy",
+            "guide_name": "standard semantic entropy",
+            "source": "methods.se (bits)",
+            "note": "",
+            "n_items": 100,
+            "n_scored": 100,
+            "judge_coverage": {
+              "n_items": 100,
+              "n_items_resolved": 100,
+              "item_coverage": 1.0,
+              "n_samples": 1000,
+              "n_samples_resolved": 1000,
+              "sample_coverage": 1.0,
+              "definition": "item coverage = resolved correctness labels / items"
+            },
+            "metrics": {
+              "base_error_rate": 1.0,
+              "auroc": null,
+              "auprc": null,
+              "normalized_aurc": null,
+              "selective_risk_at_fixed_coverage": null,
+              "risk_coverage_at_fixed": null,
+              "ace_5bin": null,
+              "ece_10bin": null,
+              "brier": null,
+              "reliability_5bin": null,
+              "harm_weighted_risk_at_fixed_coverage": null,
+              "confident_wrong": {
+                "n": 100,
+                "n_confident": 27,
+                "n_confident_wrong": 27,
+                "rate": 1.0,
+                "threshold": 2.8464393446710154,
+                "definition": "wrong and uncertainty <= the 25th percentile of the evaluated population",
+                "undefined": null
+              },
+              "label_counts": {
+                "correct": 0,
+                "incorrect": 100
+              },
+              "score_range": {
+                "min": 1.3567796494470397,
+                "max": 3.3219280948873626
+              }
+            },
+            "undefined": {
+              "auroc": "single_correctness_class",
+              "auprc": "single_correctness_class",
+              "normalized_aurc": "single_correctness_class",
+              "selective_risk_at_fixed_coverage": "single_correctness_class",
+              "risk_coverage_at_fixed": "single_correctness_class",
+              "ace_5bin": "score_outside_unit_interval",
+              "ece_10bin": "score_outside_unit_interval",
+              "brier": "score_outside_unit_interval",
+              "reliability_5bin": "score_outside_unit_interval",
+              "harm_weighted_risk_at_fixed_coverage": "score_outside_unit_interval"
+            }
+          },
+          "selfcheck": {
+            "method": "selfcheck",
+            "guide_name": "SelfCheck-style",
+            "source": "methods.selfcheck (contradiction mass)",
+            "note": "",
+            "n_items": 100,
+            "n_scored": 100,
+            "judge_coverage": {
+              "n_items": 100,
+              "n_items_resolved": 100,
+              "item_coverage": 1.0,
+              "n_samples": 1000,
+              "n_samples_resolved": 1000,
+              "sample_coverage": 1.0,
+              "definition": "item coverage = resolved correctness labels / items"
+            },
+            "metrics": {
+              "base_error_rate": 1.0,
+              "auroc": null,
+              "auprc": null,
+              "normalized_aurc": null,
+              "selective_risk_at_fixed_coverage": null,
+              "risk_coverage_at_fixed": null,
+              "ace_5bin": null,
+              "ece_10bin": null,
+              "brier": null,
+              "harm_weighted_risk_at_fixed_coverage": null,
+              "reliability_5bin": [
+                {
+                  "bin": 0,
+                  "lo": 0.0,
+                  "hi": 0.2,
+                  "n": 0,
+                  "mean_p": null,
+                  "accuracy": null
+                },
+                {
+                  "bin": 1,
+                  "lo": 0.2,
+                  "hi": 0.4,
+                  "n": 0,
+                  "mean_p": null,
+                  "accuracy": null
+                },
+                {
+                  "bin": 2,
+                  "lo": 0.4,
+                  "hi": 0.6,
+                  "n": 3,
+                  "mean_p": 0.5665326380946536,
+                  "accuracy": 0.0
+                },
+                {
+                  "bin": 3,
+                  "lo": 0.6,
+                  "hi": 0.8,
+                  "n": 83,
+                  "mean_p": 0.7056560045961398,
+                  "accuracy": 0.0
+                },
+                {
+                  "bin": 4,
+                  "lo": 0.8,
+                  "hi": 1.0,
+                  "n": 14,
+                  "mean_p": 0.8409657740811908,
+                  "accuracy": 0.0
+                }
+              ],
+              "confident_wrong": {
+                "n": 100,
+                "n_confident": 25,
+                "n_confident_wrong": 25,
+                "rate": 1.0,
+                "threshold": 0.2422448031888755,
+                "definition": "wrong and uncertainty <= the 25th percentile of the evaluated population",
+                "undefined": null
+              },
+              "label_counts": {
+                "correct": 0,
+                "incorrect": 100
+              },
+              "score_range": {
+                "min": 0.10527034395515715,
+                "max": 0.4495203110842646
+              }
+            },
+            "undefined": {
+              "auroc": "single_correctness_class",
+              "auprc": "single_correctness_class",
+              "normalized_aurc": "single_correctness_class",
+              "selective_risk_at_fixed_coverage": "single_correctness_class",
+              "risk_coverage_at_fixed": "single_correctness_class",
+              "ace_5bin": "single_correctness_class",
+              "ece_10bin": "single_correctness_class",
+              "brier": "single_correctness_class",
+              "harm_weighted_risk_at_fixed_coverage": "single_correctness_class"
+            }
+          },
+          "p_true": {
+            "method": "p_true",
+            "guide_name": "p_true where available",
+            "source": "methods.p_true, stored as 1 - length-normalised sequence probability",
+            "note": "requires server logprobs; absent on the frozen run",
+            "n_items": 100,
+            "n_scored": 0,
+            "judge_coverage": {
+              "n_items": 100,
+              "n_items_resolved": 100,
+              "item_coverage": 1.0,
+              "n_samples": 1000,
+              "n_samples_resolved": 1000,
+              "sample_coverage": 1.0,
+              "definition": "item coverage = resolved correctness labels / items"
+            },
+            "metrics": {
+              "auroc": null,
+              "auprc": null,
+              "normalized_aurc": null,
+              "selective_risk_at_fixed_coverage": null,
+              "ace_5bin": null,
+              "ece_10bin": null,
+              "brier": null,
+              "reliability_5bin": null,
+              "harm_weighted_risk_at_fixed_coverage": null,
+              "confident_wrong": null,
+              "label_counts": null,
+              "risk_coverage_at_fixed": null,
+              "score_range": null,
+              "base_error_rate": null
+            },
+            "undefined": {
+              "all": "logprobs_absent"
+            }
+          },
+          "provision_agreement": {
+            "method": "provision_agreement",
+            "guide_name": "provision-level agreement",
+            "source": "methods.prov_agreement = 1 - provision top share",
+            "note": "",
+            "n_items": 100,
+            "n_scored": 100,
+            "judge_coverage": {
+              "n_items": 100,
+              "n_items_resolved": 100,
+              "item_coverage": 1.0,
+              "n_samples": 1000,
+              "n_samples_resolved": 1000,
+              "sample_coverage": 1.0,
+              "definition": "item coverage = resolved correctness labels / items"
+            },
+            "metrics": {
+              "base_error_rate": 1.0,
+              "auroc": null,
+              "auprc": null,
+              "normalized_aurc": null,
+              "selective_risk_at_fixed_coverage": null,
+              "risk_coverage_at_fixed": null,
+              "ace_5bin": null,
+              "ece_10bin": null,
+              "brier": null,
+              "harm_weighted_risk_at_fixed_coverage": null,
+              "reliability_5bin": [
+                {
+                  "bin": 0,
+                  "lo": 0.0,
+                  "hi": 0.2,
+                  "n": 5,
+                  "mean_p": 0.19999999999999996,
+                  "accuracy": 0.0
+                },
+                {
+                  "bin": 1,
+                  "lo": 0.2,
+                  "hi": 0.4,
+                  "n": 21,
+                  "mean_p": 0.3333333333333333,
+                  "accuracy": 0.0
+                },
+                {
+                  "bin": 2,
+                  "lo": 0.4,
+                  "hi": 0.6,
+                  "n": 22,
+                  "mean_p": 0.5409090909090909,
+                  "accuracy": 0.0
+                },
+                {
+                  "bin": 3,
+                  "lo": 0.6,
+                  "hi": 0.8,
+                  "n": 31,
+                  "mean_p": 0.7354838709677419,
+                  "accuracy": 0.0
+                },
+                {
+                  "bin": 4,
+                  "lo": 0.8,
+                  "hi": 1.0,
+                  "n": 21,
+                  "mean_p": 0.9761904761904762,
+                  "accuracy": 0.0
+                }
+              ],
+              "confident_wrong": {
+                "n": 100,
+                "n_confident": 32,
+                "n_confident_wrong": 32,
+                "rate": 1.0,
+                "threshold": 0.19999999999999996,
+                "definition": "wrong and uncertainty <= the 25th percentile of the evaluated population",
+                "undefined": null
+              },
+              "label_counts": {
+                "correct": 0,
+                "incorrect": 100
+              },
+              "score_range": {
+                "min": 0.0,
+                "max": 0.8
+              }
+            },
+            "undefined": {
+              "auroc": "single_correctness_class",
+              "auprc": "single_correctness_class",
+              "normalized_aurc": "single_correctness_class",
+              "selective_risk_at_fixed_coverage": "single_correctness_class",
+              "risk_coverage_at_fixed": "single_correctness_class",
+              "ace_5bin": "single_correctness_class",
+              "ece_10bin": "single_correctness_class",
+              "brier": "single_correctness_class",
+              "harm_weighted_risk_at_fixed_coverage": "single_correctness_class"
+            }
+          },
+          "legal_aware": {
+            "method": "legal_aware",
+            "guide_name": "legal-aware score (this work)",
+            "source": "1 - p_reliable from the Phase F calibration run",
+            "note": "the calibrated form; equals 1 - uq_uncertainty where p_reliable is null",
+            "n_items": 100,
+            "n_scored": 0,
+            "judge_coverage": {
+              "n_items": 100,
+              "n_items_resolved": 100,
+              "item_coverage": 1.0,
+              "n_samples": 1000,
+              "n_samples_resolved": 1000,
+              "sample_coverage": 1.0,
+              "definition": "item coverage = resolved correctness labels / items"
+            },
+            "metrics": {
+              "auroc": null,
+              "auprc": null,
+              "normalized_aurc": null,
+              "selective_risk_at_fixed_coverage": null,
+              "ace_5bin": null,
+              "ece_10bin": null,
+              "brier": null,
+              "reliability_5bin": null,
+              "harm_weighted_risk_at_fixed_coverage": null,
+              "confident_wrong": null,
+              "label_counts": null,
+              "risk_coverage_at_fixed": null,
+              "score_range": null,
+              "base_error_rate": null
+            },
+            "undefined": {
+              "all": "no_items_with_a_score_and_a_label"
+            }
+          },
+          "legal_aware_uncalibrated": {
+            "method": "legal_aware_uncalibrated",
+            "guide_name": "legal-aware score without calibration",
+            "source": "uq_uncertainty (Phase E, uncalibrated_monotone_risk_score)",
+            "note": "",
+            "n_items": 100,
+            "n_scored": 100,
+            "judge_coverage": {
+              "n_items": 100,
+              "n_items_resolved": 100,
+              "item_coverage": 1.0,
+              "n_samples": 1000,
+              "n_samples_resolved": 1000,
+              "sample_coverage": 1.0,
+              "definition": "item coverage = resolved correctness labels / items"
+            },
+            "metrics": {
+              "base_error_rate": 1.0,
+              "auroc": null,
+              "auprc": null,
+              "normalized_aurc": null,
+              "selective_risk_at_fixed_coverage": null,
+              "risk_coverage_at_fixed": null,
+              "ace_5bin": null,
+              "ece_10bin": null,
+              "brier": null,
+              "harm_weighted_risk_at_fixed_coverage": null,
+              "reliability_5bin": [
+                {
+                  "bin": 0,
+                  "lo": 0.0,
+                  "hi": 0.2,
+                  "n": 83,
+                  "mean_p": 0.1551390888480048,
+                  "accuracy": 0.0
+                },
+                {
+                  "bin": 1,
+                  "lo": 0.2,
+                  "hi": 0.4,
+                  "n": 10,
+                  "mean_p": 0.2882790453648515,
+                  "accuracy": 0.0
+                },
+                {
+                  "bin": 2,
+                  "lo": 0.4,
+                  "hi": 0.6,
+                  "n": 4,
+                  "mean_p": 0.5748208436928377,
+                  "accuracy": 0.0
+                },
+                {
+                  "bin": 3,
+                  "lo": 0.6,
+                  "hi": 0.8,
+                  "n": 2,
+                  "mean_p": 0.651774627142776,
+                  "accuracy": 0.0
+                },
+                {
+                  "bin": 4,
+                  "lo": 0.8,
+                  "hi": 1.0,
+                  "n": 1,
+                  "mean_p": 1.0,
+                  "accuracy": 0.0
+                }
+              ],
+              "confident_wrong": {
+                "n": 100,
+                "n_confident": 26,
+                "n_confident_wrong": 26,
+                "rate": 1.0,
+                "threshold": 0.8258950413444279,
+                "definition": "wrong and uncertainty <= the 25th percentile of the evaluated population",
+                "undefined": null
+              },
+              "label_counts": {
+                "correct": 0,
+                "incorrect": 100
+              },
+              "score_range": {
+                "min": 0.0,
+                "max": 0.8739154631096027
+              }
+            },
+            "undefined": {
+              "auroc": "single_correctness_class",
+              "auprc": "single_correctness_class",
+              "normalized_aurc": "single_correctness_class",
+              "selective_risk_at_fixed_coverage": "single_correctness_class",
+              "risk_coverage_at_fixed": "single_correctness_class",
+              "ace_5bin": "single_correctness_class",
+              "ece_10bin": "single_correctness_class",
+              "brier": "single_correctness_class",
+              "harm_weighted_risk_at_fixed_coverage": "single_correctness_class"
+            }
+          }
+        }
+      }
+    },
+    "method_order": [
+      "exact_agreement",
+      "lexical_similarity",
+      "discrete_semantic_entropy",
+      "standard_semantic_entropy",
+      "selfcheck",
+      "p_true",
+      "provision_agreement",
+      "legal_aware",
+      "legal_aware_uncalibrated"
+    ],
+    "partition": "all items (development + evaluation)",
+    "out_of_sample_for_every_method": false,
+    "caveat": "the calibrated legal-aware method was fitted on the development partition, so its rows are in-sample here; use the evaluation-partition matrix for claims",
+    "development_item_count": 156
+  },
+  "gate_g7": {
+    "gate": "G7",
+    "status": "NOT_MET",
+    "guide_text": "G7: the target slice carries both correctness classes and the headline comparison is computable",
+    "guide_fail_condition": "no target slice exists on which a ranking is defined",
+    "conditions": {
+      "both_classes_on_every_evaluated_slice": {
+        "met": false,
+        "detail": {
+          "L1": true,
+          "L7": false
+        },
+        "source": "guide §21.1 and §12 (G7); PHASE-E §7.4"
+      },
+      "headline_comparison_computable": {
+        "met": false,
+        "detail": {
+          "L1": true,
+          "L7": false
+        },
+        "source": "guide §12 (G7), operationalised as: a legal-aware method and a baseline both have a defined AUROC on that slice"
+      },
+      "judge_coverage_reported_per_slice": {
+        "met": true,
+        "detail": {
+          "L1": 1.0,
+          "L7": 1.0
+        },
+        "source": "guide §21.1"
+      },
+      "undefined_values_stated_with_reason": {
+        "met": true,
+        "detail": "every undefined AUROC carries a reason code",
+        "source": "guide §21.1"
+      }
+    },
+    "per_slice": {
+      "L1": {
+        "correct": 7,
+        "incorrect": 15,
+        "unresolved": 0,
+        "both_classes": true,
+        "legal_aware_methods_with_auroc": [
+          "legal_aware",
+          "legal_aware_uncalibrated"
+        ],
+        "baseline_methods_with_auroc": [
+          "exact_agreement",
+          "discrete_semantic_entropy",
+          "standard_semantic_entropy",
+          "selfcheck",
+          "provision_agreement"
+        ],
+        "headline_comparison_computable": true,
+        "reason": null
+      },
+      "L7": {
+        "correct": 0,
+        "incorrect": 22,
+        "unresolved": 0,
+        "both_classes": false,
+        "legal_aware_methods_with_auroc": [],
+        "baseline_methods_with_auroc": [],
+        "headline_comparison_computable": false,
+        "reason": "single_correctness_class"
+      }
+    },
+    "reason": "slice(s) with a single correctness class: ['L7'] (this is the guide's stated fail condition); no computable legal-aware vs baseline comparison on: ['L7']"
+  },
+  "decision_layer": {
+    "counts": {
+      "verify": 101,
+      "answer": 17,
+      "abstain": 82
+    },
+    "n_decided": 200,
+    "abstention_rate": 0.41,
+    "note": "abstention is a decision-layer quantity, not a property of an uncertainty score, so it is reported once here rather than per method row"
+  },
+  "evaluation_arms": {
+    "generator": {
+      "present": [
+        "qwen2.5-7b-instruct (p2-structured, M=10) — frozen Phase A arm"
+      ],
+      "missing": [
+        {
+          "arm": "second laptop model / second quantisation",
+          "status": "deferred",
+          "reason": "requires a cost and storage review; no second arm has been run, so the guide's two-size/four-bit axis is 1 of 2"
+        },
+        {
+          "arm": "one API model at evaluation time",
+          "status": "deferred",
+          "reason": "not approved; no generation or spend authorised in Stage 1"
+        }
+      ]
+    },
+    "slices": {
+      "present": [
+        "L1 control",
+        "L7 target"
+      ],
+      "missing": [
+        {
+          "arm": "external benchmark task",
+          "status": "deferred",
+          "reason": "dataset selection and licensing require separate approval; no benchmark data is present in the repository"
+        }
+      ]
+    },
+    "note": "a missing arm is reported here and left out of the tables; nothing is estimated for it"
+  },
+  "stage2_pending": {
+    "deployment_measurements": "see scripts/43_measure_deployment.py (laptop only)",
+    "generation": "no generation run was performed for this report"
+  }
+}

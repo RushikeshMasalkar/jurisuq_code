@@ -1,0 +1,158 @@
+{
+  "phase": "G",
+  "kind": "limited pilot (approval-gated)",
+  "run_id": "phaseG-pilot-v1",
+  "provider": "openai",
+  "base_url": "https://api.deepseek.com/v1",
+  "model": "deepseek-flash",
+  "request_configuration": {
+    "temperature": 1.0,
+    "top_p": 1.0,
+    "max_tokens": 220,
+    "n_samples": 10,
+    "seed": 20261024,
+    "prompt_version": "p2-structured",
+    "stream": false,
+    "logprobs_requested": true
+  },
+  "judge": {
+    "method": "provision",
+    "scope": "representatives",
+    "deterministic": true,
+    "note": "rule-based provision judge; no model call, no judge cost"
+  },
+  "selection": {
+    "n_items": 24,
+    "by_slice": {
+      "L1": 12,
+      "L7": 12
+    },
+    "topics_by_slice": {
+      "L1": [
+        "attempt_to_murder",
+        "cheating",
+        "criminal_breach_of_trust",
+        "cruelty_by_husband",
+        "theft",
+        "theft_in_dwelling",
+        "wrongful_restraint"
+      ],
+      "L7": [
+        "cheating",
+        "criminal_breach_of_trust",
+        "culpable_homicide",
+        "murder",
+        "theft",
+        "wrongful_restraint"
+      ]
+    },
+    "item_ids": [
+      "L1-attempt_to_murder-058",
+      "L1-attempt_to_murder-088",
+      "L1-cheating-014",
+      "L1-criminal_breach_of_trust-024",
+      "L1-criminal_breach_of_trust-035",
+      "L1-cruelty_by_husband-005",
+      "L1-theft-038",
+      "L1-theft_in_dwelling-007",
+      "L1-theft_in_dwelling-077",
+      "L1-wrongful_restraint-044",
+      "L1-wrongful_restraint-050",
+      "L1-wrongful_restraint-064",
+      "L7-cheating-014",
+      "L7-criminal_breach_of_trust-052",
+      "L7-criminal_breach_of_trust-086",
+      "L7-culpable_homicide-004",
+      "L7-culpable_homicide-021",
+      "L7-culpable_homicide-063",
+      "L7-culpable_homicide-081",
+      "L7-murder-003",
+      "L7-theft-089",
+      "L7-wrongful_restraint-011",
+      "L7-wrongful_restraint-044",
+      "L7-wrongful_restraint-093"
+    ]
+  },
+  "n_requests": 240,
+  "pricing": {
+    "rates_used": {
+      "input_per_mtok": 0.3,
+      "output_per_mtok": 1.2
+    },
+    "rate_basis": "peak (the higher of the provider's published rates)",
+    "retrieved_utc": "2026-10-24",
+    "source_urls": {
+      "deepseek": "https://api-docs.deepseek.com/quick_start/pricing/",
+      "openai": "https://developers.openai.com/api/docs/pricing"
+    },
+    "currency": "USD",
+    "unit": "per 1M tokens"
+  },
+  "cost_estimate": {
+    "prompt_tokens": 48960,
+    "completion_tokens": 52800,
+    "input_cost_usd": 0.014688,
+    "output_cost_usd": 0.06336,
+    "total_cost_usd": 0.078048,
+    "n_requests": 240,
+    "prompt_tokens_per_request": 204,
+    "max_tokens_per_request": 220,
+    "basis": "upper bound: the measured prompt length for every request and max_tokens for every completion"
+  },
+  "prompt_token_estimate": {
+    "max_per_request": 204,
+    "mean_per_request": 184,
+    "method": "ceil(len(system_prompt + question) / 4), max taken for the ceiling"
+  },
+  "cost_cap_usd": 0.5,
+  "dataset_sha256": {
+    "data/lexuq_slice.jsonl": "89bc1180a4df76287768ce59432aa7ff0aa9d38c16d5f296ed16c3e45449bd53",
+    "data/lexuq_slice_summary.json": "0bd5186d767714b2f0f23d76eddbecb28c0b3ebd0edbe26c3617d914c9e37a84"
+  },
+  "outcome_rules": {
+    "registered_before_generation": true,
+    "on_zero_correct_in_L7": {
+      "g7": "NOT_MET",
+      "ranking": "undefined on L7",
+      "wording": "report the zero, do not describe it as a comparator artefact"
+    },
+    "on_all_correct_in_L7": {
+      "g7": "NOT_MET",
+      "ranking": "undefined on L7",
+      "wording": "report the absence of the incorrect class"
+    },
+    "on_both_classes_in_L7": {
+      "g7": "not automatically met",
+      "action": "report the counts, the uncertainty and the interval; a sparse class must be stated explicitly and no gate is claimed"
+    },
+    "on_sparse_class": {
+      "threshold_items": 5,
+      "action": "flag as sparse and refuse to present the AUROC as a ranking"
+    },
+    "slices": "L1 and L7 reported separately; pooled AUROC never presented as detector or method performance",
+    "gates_unchanged": [
+      "G5 NOT_EVALUABLE",
+      "G6 NOT_MET"
+    ]
+  },
+  "invariants": {
+    "writes_new_run_only": true,
+    "modifies_frozen_runs": false,
+    "modifies_frozen_datasets": false,
+    "changes_gate_constants": false,
+    "changes_thresholds": false,
+    "pools_slices": false
+  },
+  "plan_sha256": "eb06ed62db637c89110a4a2a511f65164d3ff990638c66832c1a6aa16e30ecc9",
+  "privacy": {
+    "what_is_sent": "the system prompt and one synthetic legal question per request, plus the model's own replies",
+    "what_is_not_sent": [
+      "no client data, no case files, no personal data",
+      "no frozen run artefacts, no scores, no labels",
+      "no repository contents other than the prompt text"
+    ],
+    "data_origin": "synthetic items generated from the published IPC/BNS successor mapping; the slice is flagged verified=false",
+    "provider_retention": "governed by the chosen provider's API terms; DeepSeek and OpenAI both retain request data for abuse monitoring under their standard terms unless a zero-retention arrangement is in place",
+    "residual_risk": "the questions themselves are not confidential, but they would leave the machine; the legal caveat is that the dataset is unverified, so the answers are not legal advice and must not be published as such"
+  }
+}

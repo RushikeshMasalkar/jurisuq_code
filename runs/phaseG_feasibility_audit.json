@@ -1,0 +1,227 @@
+{
+  "phase": "G",
+  "experiment": "target-population feasibility (read-only)",
+  "question": "does any population in the frozen artefacts satisfy the documented prerequisite for evaluating G5 and the L7 half of G6?",
+  "source_run_id": "phaseA-laptop-v2-rejudged+ctx-r2+typed+warrant+uq-exact",
+  "source_tree_sha256": "2f753a3d6f6101f9f497cff2046d7eb4a39b467d812b2a00468fc241d9a2d329",
+  "source_unchanged": true,
+  "split": {
+    "seed": "phaseE-v1",
+    "test_fraction": 0.2,
+    "seed_source": "stored in the Phase E model, recomputed and checked",
+    "matches_stored": true
+  },
+  "per_slice": {
+    "L1": {
+      "slice": "L1",
+      "slices_present": [
+        "L1"
+      ],
+      "counts": {
+        "total": 100,
+        "correct": 43,
+        "incorrect": 57,
+        "unlabelled": 0
+      },
+      "detector_census": {
+        "silent": 61,
+        "fired": 0,
+        "partial": 37,
+        "missing": 2,
+        "invalid": 0
+      },
+      "detector_auroc": 0.489,
+      "score_auroc": 0.3621,
+      "partitions": {
+        "development": {
+          "n": 78,
+          "correct": 36,
+          "incorrect": 42
+        },
+        "evaluation": {
+          "n": 22,
+          "correct": 7,
+          "incorrect": 15
+        }
+      },
+      "conditions": {
+        "both_correctness_classes": {
+          "met": true,
+          "detail": "43 correct, 57 incorrect",
+          "source": "PHASE-E.md §7.4; PHASE-F.md §12.1"
+        },
+        "detector_fires_and_stays_silent": {
+          "met": false,
+          "detail": "fired 0, silent 61, partial 37",
+          "source": "PHASE-E.md, structural G5 finding"
+        },
+        "both_classes_in_every_partition": {
+          "met": true,
+          "detail": "both partitions hold both classes",
+          "source": "PHASE-E.md §6; PHASE-F.md §7"
+        },
+        "no_imputed_detector_values": {
+          "met": true,
+          "detail": "2 missing (counted, not filled), 0 invalid",
+          "source": "PHASE-E.md: no unresolved factor is assigned zero"
+        },
+        "single_slice_population": {
+          "met": true,
+          "detail": "single slice: L1",
+          "source": "PHASE-E.md structural finding: T must vary within a slice"
+        }
+      },
+      "status": "NOT_READY",
+      "status_meaning": "READY means only that the population can carry the existing G5 and G6 criteria. It is not a gate verdict and asserts nothing about whether either gate passes."
+    },
+    "L7": {
+      "slice": "L7",
+      "slices_present": [
+        "L7"
+      ],
+      "counts": {
+        "total": 100,
+        "correct": 0,
+        "incorrect": 100,
+        "unlabelled": 0
+      },
+      "detector_census": {
+        "silent": 7,
+        "fired": 82,
+        "partial": 0,
+        "missing": 11,
+        "invalid": 0
+      },
+      "detector_auroc": null,
+      "score_auroc": null,
+      "partitions": {
+        "development": {
+          "n": 78,
+          "correct": 0,
+          "incorrect": 78
+        },
+        "evaluation": {
+          "n": 22,
+          "correct": 0,
+          "incorrect": 22
+        }
+      },
+      "conditions": {
+        "both_correctness_classes": {
+          "met": false,
+          "detail": "0 correct, 100 incorrect",
+          "source": "PHASE-E.md §7.4; PHASE-F.md §12.1"
+        },
+        "detector_fires_and_stays_silent": {
+          "met": true,
+          "detail": "fired 82, silent 7, partial 0",
+          "source": "PHASE-E.md, structural G5 finding"
+        },
+        "both_classes_in_every_partition": {
+          "met": false,
+          "detail": "single-class partition(s): ['development', 'evaluation']",
+          "source": "PHASE-E.md §6; PHASE-F.md §7"
+        },
+        "no_imputed_detector_values": {
+          "met": true,
+          "detail": "11 missing (counted, not filled), 0 invalid",
+          "source": "PHASE-E.md: no unresolved factor is assigned zero"
+        },
+        "single_slice_population": {
+          "met": true,
+          "detail": "single slice: L7",
+          "source": "PHASE-E.md structural finding: T must vary within a slice"
+        }
+      },
+      "status": "NOT_READY",
+      "status_meaning": "READY means only that the population can carry the existing G5 and G6 criteria. It is not a gate verdict and asserts nothing about whether either gate passes."
+    }
+  },
+  "pooled_l1_l7": {
+    "slice": null,
+    "slices_present": [
+      "L1",
+      "L7"
+    ],
+    "counts": {
+      "total": 200,
+      "correct": 43,
+      "incorrect": 157,
+      "unlabelled": 0
+    },
+    "detector_census": {
+      "silent": 68,
+      "fired": 82,
+      "partial": 37,
+      "missing": 13,
+      "invalid": 0
+    },
+    "detector_auroc": 0.772,
+    "score_auroc": 0.1909,
+    "partitions": {
+      "development": {
+        "n": 156,
+        "correct": 36,
+        "incorrect": 120
+      },
+      "evaluation": {
+        "n": 44,
+        "correct": 7,
+        "incorrect": 37
+      }
+    },
+    "conditions": {
+      "both_correctness_classes": {
+        "met": true,
+        "detail": "43 correct, 157 incorrect",
+        "source": "PHASE-E.md §7.4; PHASE-F.md §12.1"
+      },
+      "detector_fires_and_stays_silent": {
+        "met": true,
+        "detail": "fired 82, silent 68, partial 37",
+        "source": "PHASE-E.md, structural G5 finding"
+      },
+      "both_classes_in_every_partition": {
+        "met": true,
+        "detail": "both partitions hold both classes",
+        "source": "PHASE-E.md §6; PHASE-F.md §7"
+      },
+      "no_imputed_detector_values": {
+        "met": true,
+        "detail": "13 missing (counted, not filled), 0 invalid",
+        "source": "PHASE-E.md: no unresolved factor is assigned zero"
+      },
+      "single_slice_population": {
+        "met": false,
+        "detail": "population spans ['L1', 'L7']; the temporal factor is 1.0 on L1 and 0.0 on L7, so a detector AUROC here measures the era difference rather than detection",
+        "source": "PHASE-E.md structural finding: T must vary within a slice"
+      }
+    },
+    "status": "NOT_READY",
+    "status_meaning": "READY means only that the population can carry the existing G5 and G6 criteria. It is not a gate verdict and asserts nothing about whether either gate passes."
+  },
+  "confound": {
+    "detector_auroc_against_slice_l1": 0.9458,
+    "detector_auroc_within_slice": {
+      "L1": {
+        "n": 98,
+        "detector_auroc": 0.489
+      },
+      "L7": {
+        "n": 89,
+        "detector_auroc": null
+      }
+    },
+    "detector_auroc_pooled": 0.772,
+    "interpretation": "A detector AUROC against slice near 1.0 means the pooled population cannot separate detection from which era the item asks about; only the within-slice column is informative. Phase F follow-up experiment 2 measured the same confound on the score itself (pooled 0.6868 vs within-L1 0.8626).",
+    "source": "PHASE-E.md structural finding; PHASE-F-FOLLOWUP.md experiment 2"
+  },
+  "any_population_ready": false,
+  "specification_note": "The repository contains no Phase G specification or gate number; the conditions tested here are the sentences in PHASE-E.md §7.4 and the structural G5 finding, and PHASE-F.md §12.1. No new gate is defined.",
+  "generated_utc": "2026-10-24T17:26:03Z",
+  "inputs": {
+    "items_sha256": "19ab7c59a1b1e185fb816cb253c5fa4bca49423d830f770972a34b5b05674f12",
+    "model_sha256": "343c8495147b89494db48fe2c3130b100944d627b48db9418da61d1253bc81c9"
+  },
+  "config_path": "configs/phase_g_target.json"
+}

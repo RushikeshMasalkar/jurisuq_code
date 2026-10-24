@@ -1,0 +1,93 @@
+{
+  "phase": "G",
+  "kind": "limited approval-gated pilot",
+  "note": "One hosted API generator, 12 L1 + 12 L7 items, M=10, 240 requests. Nothing here modifies a frozen artefact, a gate constant or a threshold.",
+  "run_id": "phaseG-pilot-v1",
+  "items_per_slice": 12,
+  "seed": 20261024,
+
+  "generator": {
+    "provider": "openai",
+    "base_url": "https://api.deepseek.com/v1",
+    "model": "deepseek-flash",
+    "api_key_env": "DEEPSEEK_API_KEY",
+    "temperature": 1.0,
+    "top_p": 1.0,
+    "max_tokens": 220,
+    "n_samples": 10
+  },
+
+  "prompt_version": "p2-structured",
+  "judge": "provision",
+  "judge_scope": "representatives",
+
+  "cost_cap_usd": 0.5,
+
+  "pricing": {
+    "retrieved_utc": "2026-10-24",
+    "currency": "USD",
+    "unit": "per 1M tokens",
+    "source_urls": {
+      "deepseek": "https://api-docs.deepseek.com/quick_start/pricing/",
+      "openai": "https://developers.openai.com/api/docs/pricing"
+    },
+    "candidates": {
+      "deepseek-flash": {
+        "provider": "DeepSeek",
+        "base_url": "https://api.deepseek.com/v1",
+        "api_key_env": "DEEPSEEK_API_KEY",
+        "off_peak": {"input_per_mtok": 0.15, "output_per_mtok": 0.6},
+        "peak": {"input_per_mtok": 0.3, "output_per_mtok": 1.2},
+        "peak_hours": "01:00-04:00 and 06:00-10:00 UTC, Monday-Friday, excluding Chinese public holidays",
+        "thinking_mode": "supports non-thinking and thinking; thinking is the documented default, so the runner must confirm which mode served the request",
+        "logprobs": "supported",
+        "notes": "cheapest documented option; serving model DeepSeek-V4.1-Flash-1017"
+      },
+      "deepseek-v4-pro": {
+        "provider": "DeepSeek",
+        "base_url": "https://api.deepseek.com/v1",
+        "api_key_env": "DEEPSEEK_API_KEY",
+        "off_peak": {"input_per_mtok": 0.66, "output_per_mtok": 1.98},
+        "peak": {"input_per_mtok": 1.32, "output_per_mtok": 3.96},
+        "peak_hours": "as above",
+        "thinking_mode": "non-thinking and thinking supported",
+        "logprobs": "supported",
+        "notes": "flagship tier; higher capability, higher price, still inside the cap at this size"
+      },
+      "gpt-6-luna": {
+        "provider": "OpenAI",
+        "base_url": "https://api.openai.com/v1",
+        "api_key_env": "OPENAI_API_KEY",
+        "off_peak": {"input_per_mtok": 0.1, "output_per_mtok": 0.5},
+        "peak": {"input_per_mtok": 0.1, "output_per_mtok": 0.5},
+        "peak_hours": "no peak pricing published",
+        "thinking_mode": "standard chat completions",
+        "logprobs": "must be confirmed on the model before the run",
+        "notes": "cheapest documented OpenAI tier on the current pricing page"
+      },
+      "gpt-6.1-sol": {
+        "provider": "OpenAI",
+        "base_url": "https://api.openai.com/v1",
+        "api_key_env": "OPENAI_API_KEY",
+        "off_peak": {"input_per_mtok": 2.0, "output_per_mtok": 10.0},
+        "peak": {"input_per_mtok": 2.0, "output_per_mtok": 10.0},
+        "peak_hours": "no peak pricing published",
+        "thinking_mode": "standard chat completions",
+        "logprobs": "must be confirmed on the model before the run",
+        "notes": "listed for comparison; its estimated maximum cost exceeds the 0.50 cap at this pilot size, which is what the cap is for"
+      }
+    }
+  },
+
+  "privacy": {
+    "what_is_sent": "the system prompt and one synthetic legal question per request, plus the model's own replies",
+    "what_is_not_sent": [
+      "no client data, no case files, no personal data",
+      "no frozen run artefacts, no scores, no labels",
+      "no repository contents other than the prompt text"
+    ],
+    "data_origin": "synthetic items generated from the published IPC/BNS successor mapping; the slice is flagged verified=false",
+    "provider_retention": "governed by the chosen provider's API terms; DeepSeek and OpenAI both retain request data for abuse monitoring under their standard terms unless a zero-retention arrangement is in place",
+    "residual_risk": "the questions themselves are not confidential, but they would leave the machine; the legal caveat is that the dataset is unverified, so the answers are not legal advice and must not be published as such"
+  }
+}

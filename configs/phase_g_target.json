@@ -1,0 +1,251 @@
+{
+
+  "phase": "G",
+
+  "title": "Target-population construction for G5 and the L7 half of G6",
+
+  "modules": [],
+
+  "specification_status": {
+    "gate_defined_in_guide": true,
+    "gate_defined_in_this_file": false,
+    "corrected_on": "2026-10-24",
+    "supersedes": "the earlier statement that the repository contained no Phase G specification and no gate number",
+    "statement": "This file previously asserted that no Phase G specification and no gate number existed. The project's engineering guide defines Phase G (weeks 13-15, 'measure everything': headline tables, external benchmark transfer, laptop latency) and defines Gate G7 for it. The guide is a project document held outside this repository; that is a filing problem, not an absent specification, and it must not be reported as one.",
+    "guide_sections": [
+      "§12 (gate table, including G7)",
+      "§21.1 (reporting discipline)",
+      "§21.2 (evaluation grid)",
+      "§21.3 (deployment measurements)"
+    ],
+    "gate": {
+      "id": "G7",
+      "statement": "the target slice carries both correctness classes and the headline comparison is computable",
+      "fail_condition": "G7 fails when no target slice exists on which a ranking is defined",
+      "operationalised_in": "jurisuq/evaluation/matrix.py::gate_g7",
+      "conditions": [
+        "both correctness classes on every evaluated slice",
+        "headline comparison computable (a legal-aware arm and a baseline arm both defined on the target slice)",
+        "judge coverage reported per slice, as a column",
+        "undefined values stated with an explicit reason code"
+      ],
+      "status": "NOT_MET",
+      "status_reason": "L7 carries a single correctness class (0 correct of 100 items), which is the guide's own stated fail condition",
+      "thresholds_introduced": [],
+      "evidence": "runs/phaseG_eval_matrix.json"
+    },
+    "retained_prerequisites": [
+      "PHASE-E.md §7.4 - build a target population containing both classes before claiming target-slice AUROC or the complete G5 criterion",
+      "PHASE-E.md structural G5 finding - a slice with both correctness classes on which the detector both fires and stays silent",
+      "PHASE-F.md §12.1 - build a target slice with both correctness classes so the L7 stratum is evaluable"
+    ]
+  },
+
+  "audit": {
+    "run_id": "phaseA-laptop-v2-rejudged+ctx-r2+typed+warrant+uq-exact",
+    "note": "read-only; the detector fields come from Phase D and the scores from Phase E, both stored in this run",
+    "warrant_field": "warrant_warranted_agreement",
+    "correctness_field": "majority_correct",
+    "score_field": "uq_uncertainty"
+  },
+
+  "screen": {
+    "data": "data/lexuq_target_candidates_v1.jsonl",
+    "items": 24,
+    "samples": 10,
+    "temperature": 0.7,
+    "expectation_note": "24 items x 10 samples is the size of the Phase A pilot (scripts/06_pilot.py), which is the project's own precedent for a go/no-go screen",
+    "allow_generation": false
+  },
+
+  "yield_planning": {
+    "note": "PLANNING parameters for a cost estimate, not gates. They are passed explicitly to jurisuq.target.items_needed so the assumption is visible in the report.",
+    "needed_correct": 15,
+    "confidence": 0.95,
+    "basis": "a usable two-class evaluation population needs enough correct items for an AUROC interval to be meaningful; 15 is the planning floor used for the Phase G cost estimate and is NOT a threshold from the engineering guide"
+  },
+
+  "forbidden_operations": [
+    "note",
+    "retune_gate_constants",
+    "regenerate_frozen_runs",
+    "edit_frozen_data",
+    "change ace_max, c_verify, c_abstain, the 0.80 conformal target, or the phaseE-v1 split",
+    "select data, drop items, or relabel examples to make G7 pass",
+    "report a pooled slice statistic as if it were a slice result",
+    "report a value for a measurement that was not instrumented"
+  ],
+
+  "evaluation_matrix": {
+    "guide_section": "§21.2",
+    "module": "jurisuq/evaluation/matrix.py",
+    "builder": "scripts/42_build_eval_matrix.py",
+    "report": "runs/phaseG_eval_matrix.json",
+    "methods": [
+      "exact_agreement",
+      "lexical_similarity",
+      "discrete_semantic_entropy",
+      "standard_semantic_entropy",
+      "selfcheck",
+      "p_true",
+      "provision_agreement",
+      "legal_aware",
+      "legal_aware_uncalibrated"
+    ],
+    "methods_computed": [
+      "exact_agreement",
+      "discrete_semantic_entropy",
+      "standard_semantic_entropy",
+      "selfcheck",
+      "provision_agreement",
+      "legal_aware",
+      "legal_aware_uncalibrated"
+    ],
+    "methods_missing": {
+      "lexical_similarity": "declared in the guide's list but not implemented; only the entailment backend exists",
+      "p_true": "no token log-probabilities were stored in any frozen run, so the arm is measured absent"
+    },
+    "metrics": [
+      "auroc",
+      "auprc",
+      "normalized_aurc",
+      "selective_risk_at_fixed_coverage",
+      "ace_5bin",
+      "ece_10bin",
+      "brier",
+      "reliability_5bin",
+      "harm_weighted_risk_at_fixed_coverage",
+      "abstention_rate",
+      "confident_wrong"
+    ],
+    "orientation": "every score is oriented so that larger means more uncertain; AUROC detects incorrect answers (higher is better)",
+    "confident_wrong_definition": "wrong answer whose uncertainty lies in the lowest quartile",
+    "label_definition": "the judge's verdict on the modal answer",
+    "slices_present": [
+      "L1 control",
+      "L7 target"
+    ],
+    "slices_missing": [
+      "external benchmark task - deferred pending dataset and licensing approval"
+    ],
+    "generator_arms_present": [
+      "qwen2.5-7b-instruct, p2-structured, M=10 (frozen Phase A arm)"
+    ],
+    "generator_arms_missing": [
+      "second laptop size or quantisation - deferred, cost and storage review",
+      "one API model at evaluation time - ON HOLD: the DeepSeek smoke check returned HTTP 402 Insufficient Balance and the account cannot be funded; the free Gemini quota visible to the practitioner is 20 requests/day, insufficient for 240 in one session. No substitute provider was wired in. See runs/phaseG_pilot_status.json"
+    ],
+    "pooling_policy": "slices are never pooled; pooled_reference raises unless both slices are present and is tagged reference-only",
+    "fixed_coverage_for_selective_risk": 0.5,
+    "calibration_bins": {
+      "ace": 5,
+      "ece": 10,
+      "reliability": 5
+    },
+    "headline_partition": "the frozen pair-grouped evaluation partition, the only partition on which every method is out of sample"
+  },
+
+  "undefined_reason_codes": {
+    "single_correctness_class": "the slice has one class, so no ranking metric is defined",
+    "constant_score": "the method emits one distinct value, so the ranking and the fixed-coverage selection are tie-break artefacts",
+    "method_not_implemented": "the method is declared but this repository has no implementation for it",
+    "logprobs_absent": "the frozen runs stored no token log-probabilities",
+    "no_items_with_a_score_and_a_label": "the method produced no score on any resolved item of this slice",
+    "score_outside_unit_interval": "the score is not a probability, so calibration metrics do not apply",
+    "harm_class_absent": "no harm class is recorded, so the harm-weighted risk is undefined",
+    "degenerate_label_distribution": "the metric function returned no finite value on this population",
+    "not_instrumented": "the stages were not timed or sampled in any frozen run",
+    "no_data": "no values were supplied"
+  },
+
+  "deployment": {
+    "guide_section": "§21.3",
+    "module": "jurisuq/evaluation/deployment.py",
+    "builder": "scripts/43_measure_deployment.py",
+    "report": "runs/phaseG_deployment.json",
+    "measurements": {
+      "stage1_latency": {
+        "status": "measured offline",
+        "definition": "gen_latency_s + scoring_s per item, legal modules excluded",
+        "n": 200,
+        "median_s": 45.02,
+        "p95_s": 67.41,
+        "max_s": 97.83
+      },
+      "full_cascade_latency": {
+        "status": "undefined",
+        "reason_code": "not_instrumented",
+        "reason": "relation, detection, estimation and decision stages are not instrumented in the frozen runs",
+        "requires": "a laptop run; pass --timings to scripts/43_measure_deployment.py"
+      },
+      "peak_resident_memory": {
+        "status": "undefined",
+        "reason_code": "not_instrumented",
+        "reason": "no memory sampling exists in any Phase A-F run",
+        "requires": "psutil or getrusage during a live query, with the sampling method recorded"
+      },
+      "configuration_actually_measured": {
+        "model": "openai-compat:qwen2.5-7b-instruct",
+        "M": 10,
+        "quantisation": "not recorded in the run metadata",
+        "degraded": true,
+        "modules_run": [
+          "generation",
+          "provision-level scoring"
+        ]
+      }
+    },
+    "percentile_convention": "linear interpolation, the numpy default, stated because a p95 under another convention is not comparable"
+  },
+
+  "stage1_scope": {
+    "completed": [
+      "offline matrix and deployment tooling",
+      "tests",
+      "report assembly from frozen runs",
+      "corrected specification statements"
+    ],
+    "not_run": [
+      "any generation",
+      "any model download",
+      "any paid API call",
+      "any merge"
+    ],
+    "deferred_pending_approval": [
+      "API model at evaluation time - ON HOLD pending a verified zero-cost tier (see runs/phaseG_pilot_status.json)",
+      "external benchmark dataset and licensing",
+      "second laptop model or quantisation",
+      "Stage 2 generation run"
+    ],
+    "preserved": [
+      "frozen Phase A-F datasets, runs, splits, thresholds and results",
+      "G5 NOT_EVALUABLE",
+      "G6 NOT_MET"
+    ]
+  },
+
+  "pilot_status": {
+    "status": "ON_HOLD",
+    "record": "runs/phaseG_pilot_status.json",
+    "approved_plan_sha256": "eb06ed62db637c89110a4a2a511f65164d3ff990638c66832c1a6aa16e30ecc9",
+    "approved_plan_file": "runs/phaseG_pilot_plan.json",
+    "generations_obtained": 0,
+    "requests_succeeded": 0,
+    "cost_incurred_usd": 0.0,
+    "attempted": "DeepSeek smoke check, 2 requests, HTTP 402 Insufficient Balance",
+    "not_run": [
+      "alternative-provider smoke check",
+      "240-request API pilot"
+    ],
+    "reason": "no confirmed zero-cost API configuration can support 240 requests in one session",
+    "is_scientific_finding": false,
+    "restart_conditions": [
+      "a suitable zero-cost API tier or funding becomes available",
+      "the exact provider, model and model ID are verified as served",
+      "free-tier quotas and billing status are confirmed",
+      "the configuration is reviewed and a fresh approval hash is issued",
+      "a two-request smoke check succeeds before any full run",
+      "for a multi-day run, resumability and quota behaviour are validated first"
+    ]
+  }
+}

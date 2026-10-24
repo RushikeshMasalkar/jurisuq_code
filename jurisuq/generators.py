@@ -34,6 +34,10 @@ class GenResult:
     finish_reason: str | None = None
     latency_s: float = 0.0
     meta: dict = field(default_factory=dict)
+    #: tokens billed as input for this request, when the provider reports it.
+    #: Recorded so a paid run's cost can be reported from measurements rather
+    #: than estimated after the fact. 0 means the provider reported nothing.
+    prompt_tokens: int = 0
 
 
 # ----------------------------------------------------------------------
@@ -256,6 +260,7 @@ class OpenAICompatGenerator(BaseGenerator):
                 mean_logprob=_mean_logprob(choice),
                 finish_reason=choice.get("finish_reason"),
                 latency_s=dt,
+                prompt_tokens=int(usage.get("prompt_tokens") or 0),
             ))
             i += 1
         return results

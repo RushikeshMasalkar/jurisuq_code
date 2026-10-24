@@ -32,6 +32,8 @@ The phases are cumulative:
    with an explicit sample-only fallback.
 6. **Phase F** calibrates that score per stratum and applies a harm-weighted
    answer / verify / abstain policy with a conformal coverage layer.
+7. **Phase G** builds (and must first measure) the target population without
+   which G5 and the L7 half of G6 cannot be evaluated at all.
 
 The phases are deliberately separated: Phase C/D/E write sibling runs and
 leave their source runs unchanged. Phase E never recomputes Phase D outputs.
@@ -85,7 +87,8 @@ The full repository suite was run in this environment with
 | C | Engineering complete; four mappings corrected and eight target rows verified from documented statutory text | `runs/phaseA-laptop-v2-rejudged+ctx/` |
 | D | Typed-cluster rerun complete; G4 PASS; CM coverage limited by 13 unresolved records | `runs/phaseA-laptop-v2-rejudged+ctx-r2+typed+warrant/` |
 | E | Two-variant typed-run evaluation; G5 NOT_EVALUABLE | `runs/phaseA-laptop-v2-rejudged+ctx-r2+typed+warrant+uq-typed/` and `...+uq-exact/` |
-| F | Implemented and evaluated; G6 NOT_MET (control-slice calibration and selective risk fail, L7 stratum unevaluable) | `runs/phaseA-laptop-v2-rejudged+ctx-r2+typed+warrant+uq-exact+cal/` |
+| F | Implemented and evaluated; G6 NOT_MET (control-slice calibration and selective risk fail, L7 stratum unevaluable). Conformal figures superseded by the follow-up run `+cal-r2`; the original `+cal` is preserved unchanged | `runs/phaseA-laptop-v2-rejudged+ctx-r2+typed+warrant+uq-exact+cal/` (see also `...+cal-r2/`) |
+| G | Infrastructure implemented; §21.2 matrix and §21.3 deployment measurements computed offline; G7 is defined and **NOT_MET** (no target slice on which a ranking is defined). **API pilot ON HOLD** for resource reasons — no model output obtained. G5 NOT_EVALUABLE, G6 NOT_MET | `runs/phaseG_eval_matrix.json`, `runs/phaseG_deployment.json`, `runs/phaseG_pilot_status.json` |
 
 Phase E's target holdout contains only incorrect L7 answers, so its L7 AUROC
 is undefined and no G5 pass is claimed. The score is an uncalibrated risk
@@ -221,6 +224,83 @@ constant changed. Full record:
 [`PHASE-F-FOLLOWUP.md`](PHASE-F-FOLLOWUP.md); suite is now **270 passed, 1
 skipped**.
 
+### Phase G — target population, the §21 evaluation matrix, and a pilot on hold
+
+Phase G is the guide's "measure everything" phase (§12, §21.1–21.3). Both G5 and
+the L7 half of G6 are blocked on one thing: no evaluation population has both
+correctness classes. The guide defines **Gate G7** for exactly this — "the target
+slice carries both correctness classes and the headline comparison is
+computable", failing when "no target slice exists on which a ranking is
+defined".
+
+> **Correction.** Earlier revisions of this README, `PHASE-G.md` and
+> `configs/phase_g_target.json` said the repository had no Phase G specification
+> and no Phase G gate. That was inaccurate and is retracted. The specification
+> exists; it lives in the project's external engineering guide, which is why its
+> text was not to hand. G7 is a defined gate, and it currently **fails**.
+
+§21.2's evaluation matrix and the offline half of §21.3 are now implemented
+(`jurisuq/evaluation/`, `scripts/42`, `scripts/43`) and computed from the frozen
+runs — no new generation. On the frozen evaluation partition, 44 items:
+
+| Method (larger score = more uncertain) | L1 AUROC | L7 AUROC |
+|---|---:|---|
+| exact agreement | 0.5714 | undefined — single class |
+| lexical similarity | undefined — not implemented | undefined — not implemented |
+| discrete semantic entropy | 0.5714 | undefined — single class |
+| standard semantic entropy | 0.4857 | undefined — single class |
+| SelfCheck | 0.5905 | undefined — single class |
+| p_true | undefined — no logprobs | undefined — no logprobs |
+| provision agreement | 0.8333 | undefined — single class |
+| legal-aware | 0.6524 | undefined — no calibrated score |
+| legal-aware, uncalibrated | 0.6524 | undefined — single class |
+
+Judge coverage is 1.0000 per slice. **G7 is NOT_MET**: L7 has 0 correct of 100
+items, so no ranking is defined there, and the calibrated arm is fitted on L1
+only. Stage-1 latency is measured (n=200, median 45.02 s, p95 67.41 s); full
+cascade latency and peak memory are `not_instrumented` and await a laptop run.
+Twenty-two items with 7 correct cannot rank methods, so no ordering is claimed.
+
+#### API pilot: ON HOLD
+
+**A resource-driven postponement, not a scientific finding and not evidence of a
+failed detector.** Machine-readable record:
+[`runs/phaseG_pilot_status.json`](runs/phaseG_pilot_status.json).
+
+| | |
+|---|---|
+| **Completed** | the specification correction, the §21.2 matrix, the offline §21.3 measurements, the target-population audit and yield screen, and an approval-gated pilot harness with 53 guard tests. The approved DeepSeek plan was produced offline without generation. |
+| **Attempted, unsuccessful** | the DeepSeek smoke check (2 requests, `phaseG-pilot-v1-smoke`) returned **HTTP 402 Insufficient Balance on both requests**. No completion was returned, so no output, usage or accuracy exists to analyse. Cost incurred: zero. |
+| **On hold** | the same smoke check against an alternative free provider, and the full 240-request pilot. Neither has run. No free-provider code path was added, so there is no untested branch and no silent paid fallback. |
+| **Reason** | no confirmed zero-cost configuration can carry 240 requests. The free Gemini quota visible in AI Studio is 20 requests/day for 2.5 Flash-Lite — 12 days for the pilot — and a Gemini arm would additionally be a protocol deviation (no documented log-probabilities on the compat endpoint; thinking cannot be disabled on 3.x and its minimum budget exceeds `max_tokens` 220). A local model is not an automatic substitute: its knowledge of the July 2024 IPC→BNS transition is unestablished. |
+| **Restart conditions** | a zero-cost tier or funding appears; the exact model ID is verified as served; quotas and billing status are confirmed; a fresh approval hash is issued; and a 2-request smoke check succeeds before any full run. A multi-day run is deferred, not rejected, and needs a validated resume path first. |
+
+The approved DeepSeek plan and its hash
+(`eb06ed62…`, `runs/phaseG_pilot_plan.json`) are preserved unchanged. A different
+provider is a different experiment and would require its own configuration,
+plan, hash and smoke check — it must never reuse that approval.
+
+The audit (`scripts/40_audit_target_feasibility.py`, read-only) establishes that
+**no valid target population exists in the frozen artefacts**:
+
+| Population | correct / incorrect | detector fired / silent | detector AUROC | status |
+|---|---|---|---|---|
+| L1 | 43 / 57 | 0 / 61 (37 partial) | 0.4890 (chance) | NOT_READY |
+| L7 | 0 / 100 | 82 / 7 | undefined | NOT_READY |
+| L1 + L7 | 43 / 157 | 82 / 68 | 0.7720 | NOT_READY (confounded) |
+
+The pooled 0.772 is an artefact: the detector scores 0.9458 against
+`slice == L1`, and within the only two-class slice it is at chance. Separately,
+the L7 zero is not a comparator artefact — 0 of 1,000 samples across ten offences
+assert the gold section in any form. **G5 stays NOT_EVALUABLE and G6 stays
+NOT_MET.** Building the population needs new items and new generation, which is
+an open, costed checkpoint in `PHASE-G.md`.
+
+The suite is now **476 passed, 1 skipped** (206 new Phase G tests: 50 population
+screening + 39 evaluation matrix + 32 deployment + 32 documentation guards +
+53 pilot guards). Reports: `runs/phaseG_eval_matrix.json`,
+`runs/phaseG_deployment.json`, `runs/phaseG_pilot_status.json`.
+
 ## Documentation map
 
 Canonical phase guides, each containing implementation details and the complete
@@ -238,6 +318,11 @@ historical results record:
   AUROC interval, G5 status, and separate environment test records.
 - [Phase F follow-up](PHASE-F-FOLLOWUP.md) — the four post-merge experiments,
   corrected conformal provenance, and clustered uncertainty.
+- [Phase G guide](PHASE-G.md) — the corrected specification status and Gate G7,
+  the §21.2 evaluation matrix with its undefined reason codes, the §21.3
+  deployment measurements, the target-population readiness check, the
+  feasibility audit, the pilot harness, and the API pilot's hold with its
+  reasons and restart conditions.
 - [Phase F guide](PHASE-F.md) — calibration maps, grouped cross-fitting, the
   decision policy, the conformal layer, E6 results, and the G6 verdict with its
   failure conditions and limitations.
@@ -260,12 +345,15 @@ Phase D: context + stored answers -> A/T/J/K, W, CM, flags
 Phase E: sample statistics + stored W/CM/K -> monotone risk score/fallback
 Phase F: stored score + flags -> per-stratum p_reliable, conformal threshold,
          answer / verify / abstain with a reason
+Phase G: stored runs -> population readiness audit; candidate-item yield screen
 ```
 
 Primary modules are in [`jurisuq/`](jurisuq/): core pipeline and metrics,
 `relations/` for Phase B, `context/` for Phase C, `warrant/` for Phase D,
-`uncertainty/` for Phase E, and `calibration/` for Phase F. Scripts are numbered by phase:
-`00`–`06` (A), `10`–`13` (B), `20`–`22` (C), `23`–`27` (D/E) and `29`–`31` (F).
+`uncertainty/` for Phase E, `calibration/` for Phase F, and `target/` and
+`evaluation/` for Phase G.
+Scripts are numbered by phase: `00`–`06` (A), `10`–`13` (B), `20`–`22` (C),
+`23`–`27` (D/E), `29`–`31` (F, with follow-up experiments `32`–`34`) and `40`–`44` (G).
 
 ## Requirements and installation
 
