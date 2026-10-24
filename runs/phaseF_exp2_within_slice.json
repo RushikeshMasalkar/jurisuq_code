@@ -3,7 +3,7 @@
   "question": "does pooled Phase E fitting lose within-slice ranking?",
   "slice": "L1",
   "provision_entropy_variant": "exact",
-  "n_development_ids": 156,
+  "n_phase_e_development_items": 156,
   "n_development_scored": 78,
   "n_holdout_candidates": 22,
   "n_holdout_eligible": 20,
@@ -248,10 +248,10 @@
     "n_holdout": 44,
     "source": "stored in the Phase E model and verified against the slice"
   },
-  "generated_utc": "2026-10-24T16:12:44Z",
+  "generated_utc": "2026-10-24T16:17:53Z",
   "inputs": {
     "items_sha256": "19ab7c59a1b1e185fb816cb253c5fa4bca49423d830f770972a34b5b05674f12",
     "model_sha256": "343c8495147b89494db48fe2c3130b100944d627b48db9418da61d1253bc81c9"
   },
-  "git_commit": "d6a493ba40f37f64835f93b86ab0cc9b8b4ef5f1"
+  "git_commit": "29e9e12a360193488ac49ddb046a02223351bab3"
 }
