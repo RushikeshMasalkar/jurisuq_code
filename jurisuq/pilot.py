@@ -90,7 +90,17 @@ SPARSE_CLASS_BELOW = 5
 
 
 def sha256_file(path: str | Path) -> str:
-    return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+    """SHA-256 of a file's *content*, with CRLF line endings read as LF.
+
+    The recorded digests are content fingerprints of the frozen artefacts as
+    committed, and Git stores those blobs with LF. A Windows checkout with
+    ``core.autocrlf=true`` rewrites them to CRLF on disk, which would otherwise
+    turn an untouched dataset into a false integrity failure. Only the
+    ``CRLF -> LF`` rewrite is forgiven; every other byte is hashed as-is, so any
+    real edit — a changed field, a changed value, a dropped or added line, or a
+    missing trailing newline — still changes the digest.
+    """
+    return hashlib.sha256(Path(path).read_bytes().replace(b"\r\n", b"\n")).hexdigest()
 
 
 def verify_frozen_inputs(root: str | Path = ROOT) -> dict:
