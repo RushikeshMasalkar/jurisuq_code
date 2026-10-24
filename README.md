@@ -61,7 +61,7 @@ about the model class under test, not a defect in the instrument.
 | Registry | Status |
 |---|---|
 | Files, fields, configs, scripts, and experiment outputs from Blocks 1-8 | registered in the phase guides and run metadata |
-| E5 / G5 | implemented and recorded as **NOT_EVALUABLE**, not “TO IMPLEMENT” |
+| E5 / G5 | implemented and recorded as **NOT_EVALUABLE** |
 | Frozen dataset / statute / link digests | verified in every new context, warrant, typed, and uncertainty run metadata |
 | Aborted API/debug runs | deleted; no API-key patterns remain in `runs/**/meta.json` |
 
