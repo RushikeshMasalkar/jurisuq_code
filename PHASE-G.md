@@ -241,10 +241,12 @@ calls a model, and no frozen artefact is modified.
 | `jurisuq/target/population.py` | detector-state classification, `population_report` / `population_status` (the documented conditions, each carrying its source), `confound_report`, `yield_report`, `items_needed` |
 | `jurisuq/target/__init__.py` | package exports |
 | `scripts/40_audit_target_feasibility.py` | read-only audit of a stored run → `runs/phaseG_feasibility_audit.json` |
-| `scripts/41_screen_target_yield.py` | candidate-item yield screen; `mock` by default, real generation only with `--allow-generation` |
+| `scripts/41_screen_target_yield.py` | candidate-item yield screen; `mock` by default, real generation only with `--allow-generation`. Validates the item set against the Stage 2 contract before any generation and records the screened file's `data_sha256` |
+| `jurisuq/target/candidates.py` | the Stage 2 candidate-set contract: Phase A schema fields, the two-slice rule, unique ids, and `provenance.verified` required to be exactly `False` with a non-empty `source`; returns a summary that records what it did and did not check |
 | `configs/phase_g_target.json` | audit inputs, screen parameters, planning assumptions, and the recorded forbidden operations |
 | `tests/test_target_population.py` | 34 tests: state classification, every readiness condition, the pooled trap, missing-value handling, confound diagnostic, yield estimation, planning projection |
-| `tests/test_target_screen.py` | 16 tests: item-schema validation, slice-stratified capping, the generation guard, end-to-end mock run |
+| `tests/test_target_screen.py` | 22 tests: item-schema validation, the provenance refusals, slice-stratified capping, the generation guard, end-to-end mock run, and the recorded `data_sha256` |
+| `tests/test_target_candidates.py` | 38 tests: every required field, the slice rule, `gold.act`/`gold.provision`, unique ids, every provenance refusal (`verified: true`, a non-boolean flag, no flag, no source), a real Phase A record passing the schema, and a line-ending-agnostic content hash |
 | `jurisuq/evaluation/matrix.py` | the §21.2 grid: 9 methods × per-slice matrices, all ten metrics, per-slice judge coverage, reason-coded undefineds, confident-wrong, harm-weighted risk, `gate_g7`, and the no-pooling guard |
 | `jurisuq/evaluation/deployment.py` | §21.3 measurements: stage-1 latency, full-cascade median/p95, peak RSS, the measured-configuration record, and the §27.1 ladder check |
 | `scripts/42_build_eval_matrix.py` | builds `runs/phaseG_eval_matrix.json` from the frozen runs (offline) |
@@ -254,8 +256,8 @@ calls a model, and no frozen artefact is modified.
 | `jurisuq/pilot.py` | pilot safeguards: plan construction and hashing, per-million-token cost ceilings, the $0.50 cap, drift detection, deterministic item selection, frozen-dataset verification, and the outcome rules registered before generation |
 | `scripts/44_phase_g_pilot.py` | `--plan` (free, sends nothing), `--smoke` (2 requests), `--run` (240 requests); every paid path requires a matching approval hash |
 | `configs/phase_g_pilot.json` | the approved DeepSeek configuration, provider pricing with sources, and the data-handling statement |
-| `tests/test_pilot_guard.py` | 53 tests: cost arithmetic and the cap, approval-hash matching, drift on provider/model/URL/params/items/count, selection determinism, every pre-registered outcome rule, frozen-input verification, secret redaction, and run-directory protection (a populated run is refused and survives the refusal) |
-| `tests/test_phase_g_docs.py` | 15 tests: the corrected specification status, config/report/module agreement on the G7 verdict and the reason codes, the published table against the JSON, provenance, no pooling, no silent nulls |
+| `tests/test_pilot_guard.py` | 57 tests: cost arithmetic and the cap, approval-hash matching, drift on provider/model/URL/params/items/count, selection determinism, every pre-registered outcome rule, frozen-input verification, secret redaction, and run-directory protection (a populated run is refused and survives the refusal) |
+| `tests/test_phase_g_docs.py` | 39 tests: the corrected specification status, config/report/module agreement on the G7 verdict and the reason codes, the published table against the JSON, provenance, no pooling, no silent nulls |
 
 ### Gate G7, measured
 
@@ -369,8 +371,12 @@ python -X utf8 scripts\43_measure_deployment.py
 # and the plan hash. Sends nothing and spends nothing.
 python -X utf8 scripts\44_phase_g_pilot.py --plan
 
+# the Stage 2 candidate-set contract, on its own (offline; no model, no generation)
+# forward slashes are fine on Windows and avoid escaping in the -c string
+python -X utf8 -c "from jurisuq.target import load_candidates as l; print(len(l('data/lexuq_slice.jsonl')))"
+
 # focused tests
-python -X utf8 -m pytest tests\test_target_population.py tests\test_target_screen.py tests\test_eval_matrix.py tests\test_deployment_metrics.py tests\test_phase_g_docs.py tests\test_pilot_guard.py -q
+python -X utf8 -m pytest tests\test_target_population.py tests\test_target_screen.py tests\test_target_candidates.py tests\test_eval_matrix.py tests\test_deployment_metrics.py tests\test_phase_g_docs.py tests\test_pilot_guard.py -q
 ```
 
 The paid paths are **on hold** and are guarded, not merely documented:
@@ -407,7 +413,11 @@ ERROR: this script calls a model when provider != 'mock'.
 | After the documentation guard tests | 406 passed, 1 skipped |
 | After the pilot harness | 455 passed, 1 skipped |
 | After the hold documentation and its guards | 476 passed, 1 skipped |
+| After the cross-platform integrity fix (PR #6) | 482 passed, 1 skipped |
+| After the Stage 2 candidate-set contract (this change) | 531 passed, 1 skipped |
 | New tests | 206 (34 population + 16 screen + 39 matrix + 32 deployment + 32 doc guards + 53 pilot guards) |
+| New tests, Stage 2 contract | 44 (38 candidate contract + 6 screen) |
+| Phase G tests now | 261 (34 population + 22 screen + 38 candidates + 39 matrix + 32 deployment + 39 doc guards + 57 pilot guards) |
 | Skipped | `tests/test_relations.py:236` — `torch not installed`; pre-existing |
 | User's Windows environment | torch present, so the skip runs there (271 passed at baseline) |
 
@@ -465,6 +475,50 @@ item set in the Phase A schema with `verified: false` provenance; run the yield
 screen (`scripts/41`, ~24 items × 10 samples); decide from the measured
 `items_needed` whether a full run is affordable; and only then run full
 generation under a new run id (`phaseG-target-v1…`).
+
+### Stage 2, step 1 — the candidate-set contract (implemented offline)
+
+Step 1 above is a sentence. Part of it is checkable without a model, so it is
+now checked in code rather than left to prose: the candidate item set must be
+**in the Phase A schema** and must declare **`verified: false` provenance**. `jurisuq/target/candidates.py` enforces exactly that, and
+`scripts/41` validates the full set *before* it caps items or touches a
+generator.
+
+| Checked | Refused when |
+|---|---|
+| required fields | `item_id`, `pair_id`, `slice` or `question` is empty |
+| slice | not one of `L1`, `L7` (a third slice would be a different experiment) |
+| gold | `gold` is not an object, or lacks `gold.act` / `gold.provision` |
+| unique ids | two items share an `item_id` |
+| `provenance.verified` | the key is absent, or its value is anything but the boolean `False` |
+| `provenance.source` | absent, empty, or not a string |
+
+The `verified` check is the substantive one. Phase A records carry
+`provenance.verified = false` and Phase C's statute rows use the same flag for
+rows a human has not inspected. A Stage 2 candidate item is a *proposal for
+measurement* — the screen exists precisely to decide whether such items are
+worth a run — so a set that claims `verified: true` is out of contract and is
+refused. This is the same discipline as the rest of the repository: an
+unverified artefact must not be able to present itself as verified.
+
+Two further consequences were added to the screen's report payload, because a
+yield estimate that cannot be tied to the exact bytes screened is not
+reproducible:
+
+* `data_sha256` — the content hash of the candidate file (CRLF-insensitive, the
+  same semantics as `jurisuq/pilot.py::sha256_file`).
+* `candidate_contract` — the summary, including `not_checked`, which states in
+  the artefact itself that legal correctness, answerability, cross-item question
+  duplication and every gate are **outside** this check.
+
+**What this does not do.** It does not author an item set, decide that any item
+is answerable or legally correct, estimate a real yield, or move G7. There is no
+candidate item set in the repository (`data/lexuq_target_candidates_v1.jsonl` is
+named in `configs/phase_g_target.json` but does not exist), and none was
+invented: authoring benchmark items is a scientific act with its own approval,
+not a file to be generated to make a pipeline look complete. Stage 2 therefore
+remains blocked at step 1's human input, and the mock screen numbers remain a
+plumbing check that must never be quoted as a yield.
 
 No step here may change `ace_max = 0.05`, `c_verify = 0.15`, `c_abstain = 0.35`,
 the 0.80 conformal target, the `phaseE-v1` split, or any frozen run. None of

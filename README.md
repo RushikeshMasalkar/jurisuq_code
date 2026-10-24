@@ -296,10 +296,21 @@ assert the gold section in any form. **G5 stays NOT_EVALUABLE and G6 stays
 NOT_MET.** Building the population needs new items and new generation, which is
 an open, costed checkpoint in `PHASE-G.md`.
 
-The suite is now **476 passed, 1 skipped** (206 new Phase G tests: 50 population
-screening + 39 evaluation matrix + 32 deployment + 32 documentation guards +
-53 pilot guards). Reports: `runs/phaseG_eval_matrix.json`,
-`runs/phaseG_deployment.json`, `runs/phaseG_pilot_status.json`.
+Building the population is Stage 2, and its first step is now enforced in code
+rather than left to prose. Stage 2 begins by authoring a candidate item set "in
+the Phase A schema with `verified: false` provenance"; `jurisuq/target/candidates.py`
+checks exactly that before `scripts/41` screens anything, and the screen's report
+records the candidate file's `data_sha256` so a yield cannot be quoted against a
+different item set. The contract also states in the artefact what it does *not*
+establish — legal correctness, answerability and every gate are outside it. No
+candidate item set exists yet and none was invented, so Stage 2 remains blocked
+on authoring input.
+
+The suite is now **531 passed, 1 skipped** (261 Phase G tests: 34 population
+screening + 22 yield screen + 38 candidate-set contract + 39 evaluation matrix +
+32 deployment + 39 documentation guards + 57 pilot guards). Reports:
+`runs/phaseG_eval_matrix.json`, `runs/phaseG_deployment.json`,
+`runs/phaseG_pilot_status.json`.
 
 ## Documentation map
 
@@ -350,7 +361,8 @@ Phase G: stored runs -> population readiness audit; candidate-item yield screen
 
 Primary modules are in [`jurisuq/`](jurisuq/): core pipeline and metrics,
 `relations/` for Phase B, `context/` for Phase C, `warrant/` for Phase D,
-`uncertainty/` for Phase E, `calibration/` for Phase F, and `target/` and
+`uncertainty/` for Phase E, `calibration/` for Phase F, and `target/`
+(including the Stage 2 candidate contract in `target/candidates.py`) and
 `evaluation/` for Phase G.
 Scripts are numbered by phase: `00`–`06` (A), `10`–`13` (B), `20`–`22` (C),
 `23`–`27` (D/E), `29`–`31` (F, with follow-up experiments `32`–`34`) and `40`–`44` (G).

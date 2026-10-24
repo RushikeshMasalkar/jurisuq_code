@@ -34,6 +34,9 @@ def _item(item_id="L7-theft-001", slice_name="L7", **overrides):
         "question": "Which section applies to this situation?",
         "gold": {"act": "BNS", "provision": "303(2)", "label": "theft"},
         "trap": {"act": "IPC", "provision": "379", "label": "the repealed provision"},
+        # Stage 2 requires unverified provenance on every candidate item; these
+        # fixtures are proposals for measurement, not reviewed benchmark rows.
+        "provenance": {"source": "test fixture", "verified": False},
     }
     item.update(overrides)
     return item
@@ -81,6 +84,30 @@ def test_load_candidates_rejects_bad_items(tmp_path, mutation, message):
     with pytest.raises(SystemExit) as excinfo:
         screen.load_candidates(path)
     assert message in str(excinfo.value)
+
+
+@pytest.mark.parametrize("provenance,message", [
+    ({"verified": True, "source": "asserted checked"}, "verified"),
+    ({"source": "no flag at all"}, "'verified' flag"),
+    ({"verified": False}, "provenance.source"),
+    ("not-an-object", "provenance object"),
+])
+def test_load_candidates_refuses_provenance_that_breaks_the_contract(
+        tmp_path, provenance, message):
+    """Stage 2 items are unverified by construction; the screen must refuse
+    anything that claims otherwise or does not say where it came from."""
+    path = _write(tmp_path, [_item(provenance=provenance)])
+    with pytest.raises(SystemExit) as excinfo:
+        screen.load_candidates(path)
+    assert message in str(excinfo.value)
+
+
+def test_load_candidates_rejects_an_item_with_no_provenance(tmp_path):
+    item = _item()
+    del item["provenance"]
+    with pytest.raises(SystemExit) as excinfo:
+        screen.load_candidates(_write(tmp_path, [item]))
+    assert "provenance" in str(excinfo.value)
 
 
 def test_duplicate_item_ids_are_rejected(tmp_path):
@@ -147,6 +174,24 @@ def test_mock_screen_runs_end_to_end_and_writes_a_report(tmp_path):
     assert report["yield"]["overall"]["items"] == 4
     assert "not a gate" in report["verdict_note"]
     assert set(report["yield"]["topics"]) == {"theft"}
+    # provenance: the report names the exact bytes it screened and the contract
+    # they satisfied, so a yield cannot be quoted against a different item set
+    import hashlib
+    expected = hashlib.sha256(data.read_bytes().replace(b"\r\n", b"\n")).hexdigest()
+    assert report["data_sha256"] == expected
+    assert report["candidate_contract"]["provenance_verified"] is False
+    assert report["candidate_contract"]["slices"] == {"L1": 2, "L7": 2}
+
+
+def test_the_screen_refuses_an_item_set_that_claims_verification(tmp_path):
+    """End to end: a set marked verified never reaches the generator."""
+    data = _write(tmp_path, [_item(provenance={"source": "s", "verified": True})])
+    out = tmp_path / "screen.json"
+    proc = _run(["--data", str(data), "--out", str(out),
+                 "--set", "provider=mock", "--set", "n_samples=2"])
+    assert proc.returncode != 0
+    assert "verified" in (proc.stdout + proc.stderr)
+    assert not out.exists(), "a refused item set must not produce a report"
 
 
 def test_mock_screen_refuses_to_overwrite_without_force(tmp_path):
