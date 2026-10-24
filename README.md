@@ -18,7 +18,7 @@ from the Indian Penal Code (IPC) to the Bharatiya Nyaya Sanhita (BNS), effective
 - **L1** asks for law immediately before the transition and uses the BNS
   successor as the trap.
 
-The five phases are cumulative:
+The phases are cumulative:
 
 1. **Phase A** builds the sampling, judging, clustering, and sample-only
    uncertainty instrument.
@@ -30,6 +30,8 @@ The five phases are cumulative:
    agreement, temporal validity, jurisdiction fit, and contradiction mass.
 5. **Phase E** consumes stored Phase D fields in a monotone uncertainty model
    with an explicit sample-only fallback.
+6. **Phase F** calibrates that score per stratum and applies a harm-weighted
+   answer / verify / abstain policy with a conformal coverage layer.
 
 The phases are deliberately separated: Phase C/D/E write sibling runs and
 leave their source runs unchanged. Phase E never recomputes Phase D outputs.
@@ -83,6 +85,7 @@ The full repository suite was run in this environment with
 | C | Engineering complete; four mappings corrected and eight target rows verified from documented statutory text | `runs/phaseA-laptop-v2-rejudged+ctx/` |
 | D | Typed-cluster rerun complete; G4 PASS; CM coverage limited by 13 unresolved records | `runs/phaseA-laptop-v2-rejudged+ctx-r2+typed+warrant/` |
 | E | Two-variant typed-run evaluation; G5 NOT_EVALUABLE | `runs/phaseA-laptop-v2-rejudged+ctx-r2+typed+warrant+uq-typed/` and `...+uq-exact/` |
+| F | Implemented and evaluated; G6 NOT_MET (control-slice calibration and selective risk fail, L7 stratum unevaluable) | `runs/phaseA-laptop-v2-rejudged+ctx-r2+typed+warrant+uq-exact+cal/` |
 
 Phase E's target holdout contains only incorrect L7 answers, so its L7 AUROC
 is undefined and no G5 pass is claimed. The score is an uncalibrated risk
@@ -165,6 +168,43 @@ the required unanimously-wrong collision rescue does not occur. G5 remains
 blocked by the missing within-slice temporal-factor variance, independently
 of this relation-model improvement.
 
+### Phase F — calibration and the decision layer (M9/M10)
+
+Phase F converts the uncalibrated Phase E score into a per-stratum
+`p_reliable` (isotonic regression, Platt scaling for small strata, grouped
+K-fold grouped by slice and offence cluster) and then into a decision
+(`answer` / `verify` / `abstain`) using a harm-weighted loss comparison rather
+than a coverage target. A split-conformal layer reports an approximate,
+finite-sample coverage threshold with its exchangeability assumption stated.
+The query path is label-blind: `scripts/30_apply_policy.py` reads only a
+whitelist of fields and never reads `majority_correct`, `sample_correct`,
+`gold` or `trap` when scoring, and the validator checks that statically by
+parsing the script.
+
+The phase is implemented and evaluated end to end in under a second on CPU, and
+**Gate G6 is NOT_MET**:
+
+| G6 condition | Threshold | Measured | Verdict |
+|---|---|---|---|
+| Calibration quality (development, cross-fitted) | ACE ≤ 0.05 | 0.2797 (L1, n=78) | FAIL |
+| Harm-weighted selective risk at 50 % coverage | below every baseline | 0.5455 vs 0.4545 (sample-only) | FAIL |
+| Conformal coverage within sampling tolerance | empirical ≥ target − tol | 0.8636 ≥ 0.80 − 0.1671 | pass |
+| No labels on the query path | static check | label-blind | pass |
+| Target stratum evaluable | both classes | L7 has 0 correct of 100 | not evaluable |
+
+Two structural notes, both recorded in the run: a monotone calibration map
+cannot change the ranking, so selective risk equals the raw score's by
+construction and only a different score is an informative baseline; and on this
+slice every offence cluster resolves to `custodial`, so harm weighting is a
+constant multiplier here. The L7 stratum is single-class, so `p_reliable` is
+`null` for all 100 L7 records and they take the declared `verify` action rather
+than receiving an imputed probability. G6 cannot pass until Phase G builds a
+target slice with both correctness classes; see `PHASE-F.md` for the full E6
+record, the descriptive isotonic-versus-Platt sensitivity, and the limitations.
+
+With Phase F added the suite is **216 passed, 1 skipped** (57 new Phase F tests;
+the skip is the pre-existing torch-gated Phase B test).
+
 ## Documentation map
 
 Canonical phase guides, each containing implementation details and the complete
@@ -180,6 +220,9 @@ historical results record:
   interval, ablation, G4, integrity hashes, and legal limits.
 - [Phase E guide](PHASE-E.md) — legal-aware scoring, fallback behavior, paired
   AUROC interval, G5 status, and separate environment test records.
+- [Phase F guide](PHASE-F.md) — calibration maps, grouped cross-fitting, the
+  decision policy, the conformal layer, E6 results, and the G6 verdict with its
+  failure conditions and limitations.
 
 [Deployment and troubleshooting](DEPLOYMENT-GUIDE.md) contains operational
 setup notes and known environment issues. The machine-readable source records
@@ -197,12 +240,14 @@ Phase C: statute table + IPC/BNS links -> immutable context-packed run
 Phase D: context + stored answers -> A/T/J/K, W, CM, flags
               |
 Phase E: sample statistics + stored W/CM/K -> monotone risk score/fallback
+Phase F: stored score + flags -> per-stratum p_reliable, conformal threshold,
+         answer / verify / abstain with a reason
 ```
 
 Primary modules are in [`jurisuq/`](jurisuq/): core pipeline and metrics,
-`relations/` for Phase B, `context/` for Phase C, `warrant/` for Phase D, and
-`uncertainty/` for Phase E. Scripts are numbered by phase:
-`00`–`06` (A), `10`–`13` (B), `20`–`22` (C), and `23`–`27` (D/E).
+`relations/` for Phase B, `context/` for Phase C, `warrant/` for Phase D,
+`uncertainty/` for Phase E, and `calibration/` for Phase F. Scripts are numbered by phase:
+`00`–`06` (A), `10`–`13` (B), `20`–`22` (C), `23`–`27` (D/E) and `29`–`31` (F).
 
 ## Requirements and installation
 
@@ -253,6 +298,7 @@ Focused deterministic checks:
 python -m pytest tests/test_context.py -q
 python -m pytest tests/test_warrant.py -q
 python -m pytest tests/test_uncertainty.py -q
+python -m pytest tests/test_calibration.py tests/test_policy.py -q
 ```
 
 The checked-in Phase E record reports 149 passed and 1 skipped in the sandbox,
