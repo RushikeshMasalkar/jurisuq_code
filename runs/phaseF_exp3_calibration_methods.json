@@ -1,0 +1,848 @@
+{
+  "experiment": "E5c",
+  "stratum_key": "slice",
+  "strata": {
+    "L1": {
+      "n_development": 78,
+      "n_holdout": 22,
+      "experiment": "E5c",
+      "question": "is isotonic the right map at this sample size, and does a pre-registered small-sample rule agree with the evidence?",
+      "development_base_rate_correct": 0.46153846153846156,
+      "rule": {
+        "chosen": "platt",
+        "n_development": 78,
+        "reliability_min": 0.25213983857000977,
+        "reliability_max": 0.3316744142475091,
+        "reliability_range": 0.07953457567749933,
+        "n_threshold": 100,
+        "range_threshold": 0.15,
+        "small_sample_method": "platt",
+        "default_method": "isotonic",
+        "triggered_by": [
+          "n_development=78 < 100",
+          "reliability range 0.0795 < 0.15"
+        ],
+        "rule_uses_holdout_labels": false
+      },
+      "candidates": {
+        "raw": {
+          "description": "the Phase E risk score used directly as 1 - risk; no fitting, monotone by construction",
+          "fitted_on": "no fit (identity on 1 - risk)",
+          "n_development": 78,
+          "parameters": {},
+          "development": {
+            "n": 78,
+            "ace_5bin": 0.15425289592886982,
+            "ece_10bin": 0.1542528959288697,
+            "brier": 0.2710845441153676,
+            "log_loss": 0.7401560024557632,
+            "selective_risk_at_50": 0.4358974358974359
+          },
+          "holdout": {
+            "n": 22,
+            "ace_5bin": 0.055549194936080466,
+            "ece_10bin": 0.15117753677138213,
+            "brier": 0.21770364407849188,
+            "log_loss": 0.6262069169409921,
+            "selective_risk_at_50": 0.5454545454545454
+          },
+          "holdout_saturated_at_one": 0,
+          "holdout_at_zero": 0
+        },
+        "platt": {
+          "description": "smoothed logistic map fitted on the development partition",
+          "fitted_on": "development partition",
+          "n_development": 78,
+          "parameters": {
+            "method": "platt",
+            "slope": 6.52482332943421,
+            "intercept": -2.1598536778047452,
+            "n": 78,
+            "n_positive": 36,
+            "n_negative": 42,
+            "note": "follow-up experiment 3 candidate: platt"
+          },
+          "predicts_a_single_value_above_the_top_knot": false,
+          "n_development_above_top_knot": 1,
+          "development": {
+            "n": 78,
+            "ace_5bin": 0.05935847169587229,
+            "ece_10bin": 0.22576928056782014,
+            "brier": 0.24695086129235846,
+            "log_loss": 0.6872060698261908,
+            "selective_risk_at_50": 0.4358974358974359
+          },
+          "holdout": {
+            "n": 22,
+            "ace_5bin": 0.13984346574536471,
+            "ece_10bin": 0.13984346574536483,
+            "brier": 0.23858469378878952,
+            "log_loss": 0.671761288404523,
+            "selective_risk_at_50": 0.5454545454545454
+          },
+          "holdout_saturated_at_one": 0,
+          "holdout_at_zero": 0
+        },
+        "isotonic": {
+          "description": "pool-adjacent-violators map fitted on the development partition",
+          "fitted_on": "development partition",
+          "n_development": 78,
+          "parameters": {
+            "method": "isotonic",
+            "x": [
+              0.25213983857000977,
+              0.3249671971095007,
+              0.3252262847760169,
+              0.33147347684462325,
+              0.3316744142475091
+            ],
+            "y": [
+              0.3220338983050847,
+              0.6666666666666666,
+              0.9285714285714286,
+              1.0,
+              1.0
+            ],
+            "n": 78,
+            "n_positive": 36,
+            "n_negative": 42,
+            "note": "follow-up experiment 3 candidate: isotonic"
+          },
+          "predicts_a_single_value_above_the_top_knot": true,
+          "n_development_above_top_knot": 1,
+          "development": {
+            "n": 78,
+            "ace_5bin": 0.24779387677159445,
+            "ece_10bin": 0.24779387677159442,
+            "brier": 0.2553669268245227,
+            "log_loss": 0.7340502260580789,
+            "selective_risk_at_50": 0.4358974358974359
+          },
+          "holdout": {
+            "n": 22,
+            "ace_5bin": 0.2796623011975103,
+            "ece_10bin": 0.2796623011975103,
+            "brier": 0.2993423164200025,
+            "log_loss": 1.5375030577218178,
+            "selective_risk_at_50": 0.5454545454545454
+          },
+          "holdout_saturated_at_one": 1,
+          "holdout_at_zero": 0
+        },
+        "constant": {
+          "description": "a single probability = development positive rate, for every item",
+          "fitted_on": "development partition",
+          "n_development": 78,
+          "parameters": {
+            "base_rate": 0.46153846153846156
+          },
+          "development": {
+            "n": 78,
+            "ace_5bin": 8.326672684688674e-16,
+            "ece_10bin": 8.326672684688674e-16,
+            "brier": 0.2485207100591716,
+            "log_loss": 0.6901856760188039,
+            "selective_risk_at_50": 0.5897435897435898
+          },
+          "holdout": {
+            "n": 22,
+            "ace_5bin": 0.14335664335664344,
+            "ece_10bin": 0.14335664335664344,
+            "brier": 0.23749327595481448,
+            "log_loss": 0.6680871519876237,
+            "selective_risk_at_50": 0.6363636363636364
+          },
+          "holdout_saturated_at_one": 0,
+          "holdout_at_zero": 0
+        },
+        "development_rate": {
+          "description": "alias of constant, kept so the report names the Phase F 'constant' baseline explicitly",
+          "fitted_on": "development partition",
+          "n_development": 78,
+          "parameters": {
+            "base_rate": 0.46153846153846156
+          },
+          "development": {
+            "n": 78,
+            "ace_5bin": 8.326672684688674e-16,
+            "ece_10bin": 8.326672684688674e-16,
+            "brier": 0.2485207100591716,
+            "log_loss": 0.6901856760188039,
+            "selective_risk_at_50": 0.5897435897435898
+          },
+          "holdout": {
+            "n": 22,
+            "ace_5bin": 0.14335664335664344,
+            "ece_10bin": 0.14335664335664344,
+            "brier": 0.23749327595481448,
+            "log_loss": 0.6680871519876237,
+            "selective_risk_at_50": 0.6363636363636364
+          },
+          "holdout_saturated_at_one": 0,
+          "holdout_at_zero": 0
+        }
+      },
+      "development_cross_fitted": {
+        "platt": {
+          "n": 78,
+          "ace_5bin": 0.09108284357297625,
+          "brier": 0.25282954001597235,
+          "log_loss": 0.6993885770714363,
+          "fold_report": {
+            "seed": "phaseE-v1|L1",
+            "requested_k": 5,
+            "effective_k": 5,
+            "groups": [
+              "L1|attempt_to_murder",
+              "L1|cheating",
+              "L1|criminal_breach_of_trust",
+              "L1|criminal_intimidation",
+              "L1|cruelty_by_husband",
+              "L1|culpable_homicide",
+              "L1|murder",
+              "L1|theft",
+              "L1|theft_in_dwelling",
+              "L1|wrongful_restraint"
+            ],
+            "group_to_fold": {
+              "L1|attempt_to_murder": 4,
+              "L1|cheating": 1,
+              "L1|criminal_breach_of_trust": 3,
+              "L1|criminal_intimidation": 3,
+              "L1|cruelty_by_husband": 2,
+              "L1|culpable_homicide": 0,
+              "L1|murder": 0,
+              "L1|theft": 4,
+              "L1|theft_in_dwelling": 1,
+              "L1|wrongful_restraint": 2
+            },
+            "fold_sizes": {
+              "0": 14,
+              "1": 19,
+              "2": 17,
+              "3": 12,
+              "4": 16
+            },
+            "folds": [
+              {
+                "fold": 0,
+                "status": "fitted",
+                "n_train": 64,
+                "n_test": 14
+              },
+              {
+                "fold": 1,
+                "status": "fitted",
+                "n_train": 59,
+                "n_test": 19
+              },
+              {
+                "fold": 2,
+                "status": "fitted",
+                "n_train": 61,
+                "n_test": 17
+              },
+              {
+                "fold": 3,
+                "status": "fitted",
+                "n_train": 66,
+                "n_test": 12
+              },
+              {
+                "fold": 4,
+                "status": "fitted",
+                "n_train": 62,
+                "n_test": 16
+              }
+            ],
+            "n_cross_fitted": 78
+          }
+        },
+        "isotonic": {
+          "n": 78,
+          "ace_5bin": 0.27969827988395934,
+          "brier": 0.2975528450183965,
+          "log_loss": 1.1062127028510138,
+          "fold_report": {
+            "seed": "phaseE-v1|L1",
+            "requested_k": 5,
+            "effective_k": 5,
+            "groups": [
+              "L1|attempt_to_murder",
+              "L1|cheating",
+              "L1|criminal_breach_of_trust",
+              "L1|criminal_intimidation",
+              "L1|cruelty_by_husband",
+              "L1|culpable_homicide",
+              "L1|murder",
+              "L1|theft",
+              "L1|theft_in_dwelling",
+              "L1|wrongful_restraint"
+            ],
+            "group_to_fold": {
+              "L1|attempt_to_murder": 4,
+              "L1|cheating": 1,
+              "L1|criminal_breach_of_trust": 3,
+              "L1|criminal_intimidation": 3,
+              "L1|cruelty_by_husband": 2,
+              "L1|culpable_homicide": 0,
+              "L1|murder": 0,
+              "L1|theft": 4,
+              "L1|theft_in_dwelling": 1,
+              "L1|wrongful_restraint": 2
+            },
+            "fold_sizes": {
+              "0": 14,
+              "1": 19,
+              "2": 17,
+              "3": 12,
+              "4": 16
+            },
+            "folds": [
+              {
+                "fold": 0,
+                "status": "fitted",
+                "n_train": 64,
+                "n_test": 14
+              },
+              {
+                "fold": 1,
+                "status": "fitted",
+                "n_train": 59,
+                "n_test": 19
+              },
+              {
+                "fold": 2,
+                "status": "fitted",
+                "n_train": 61,
+                "n_test": 17
+              },
+              {
+                "fold": 3,
+                "status": "fitted",
+                "n_train": 66,
+                "n_test": 12
+              },
+              {
+                "fold": 4,
+                "status": "fitted",
+                "n_train": 62,
+                "n_test": 16
+              }
+            ],
+            "n_cross_fitted": 78
+          }
+        }
+      },
+      "holdout_ace_ranking_best_first": [
+        "raw",
+        "platt",
+        "constant",
+        "isotonic"
+      ],
+      "chosen_by_rule": "platt",
+      "selection_used_holdout_labels": false,
+      "honesty_note": "The holdout block is reported for every candidate so nothing is hidden, but the shipped choice is 'chosen_by_rule'. Reporting a candidate that wins on holdout as the winner would be selecting on held-out labels.",
+      "caveat": "n_holdout is small; a single item moves ACE by ~1/n. The development cross-fitted column is the primary evidence, the holdout column is a check."
+    },
+    "L7": {
+      "n_development": 78,
+      "n_holdout": 22,
+      "error": "ValueError: development labels contain a single class"
+    }
+  },
+  "combined_pooled": {
+    "experiment": "E5c",
+    "question": "is isotonic the right map at this sample size, and does a pre-registered small-sample rule agree with the evidence?",
+    "n_development": 156,
+    "n_holdout": 44,
+    "development_base_rate_correct": 0.23076923076923078,
+    "rule": {
+      "chosen": "isotonic",
+      "n_development": 156,
+      "reliability_min": 0.12832426998352575,
+      "reliability_max": 1.0,
+      "reliability_range": 0.8716757300164742,
+      "n_threshold": 100,
+      "range_threshold": 0.15,
+      "small_sample_method": "platt",
+      "default_method": "isotonic",
+      "triggered_by": [
+        "neither condition: default method applies"
+      ],
+      "rule_uses_holdout_labels": false
+    },
+    "candidates": {
+      "raw": {
+        "description": "the Phase E risk score used directly as 1 - risk; no fitting, monotone by construction",
+        "fitted_on": "no fit (identity on 1 - risk)",
+        "n_development": 156,
+        "parameters": {},
+        "development": {
+          "n": 156,
+          "ace_5bin": 0.14861495509316322,
+          "ece_10bin": 0.14861495509316322,
+          "brier": 0.16348569320096076,
+          "log_loss": 0.5649831382606838,
+          "selective_risk_at_50": 0.6153846153846154
+        },
+        "holdout": {
+          "n": 44,
+          "ace_5bin": 0.10893890550067178,
+          "ece_10bin": 0.17679613611606637,
+          "brier": 0.14675001914817806,
+          "log_loss": 0.4576706202057528,
+          "selective_risk_at_50": 0.7272727272727273
+        },
+        "holdout_saturated_at_one": 0,
+        "holdout_at_zero": 0
+      },
+      "platt": {
+        "description": "smoothed logistic map fitted on the development partition",
+        "fitted_on": "development partition",
+        "n_development": 156,
+        "parameters": {
+          "method": "platt",
+          "slope": 6.128143221182824,
+          "intercept": -2.817671039440626,
+          "n": 156,
+          "n_positive": 36,
+          "n_negative": 120,
+          "note": "follow-up experiment 3 candidate: platt"
+        },
+        "predicts_a_single_value_above_the_top_knot": false,
+        "n_development_above_top_knot": 1,
+        "development": {
+          "n": 156,
+          "ace_5bin": 0.15481431211405408,
+          "ece_10bin": 0.15481431211405408,
+          "brier": 0.16623595829209023,
+          "log_loss": 0.5012708002758766,
+          "selective_risk_at_50": 0.6153846153846154
+        },
+        "holdout": {
+          "n": 44,
+          "ace_5bin": 0.12067415844577487,
+          "ece_10bin": 0.17442272379031043,
+          "brier": 0.15347424292071216,
+          "log_loss": 0.4683356005821574,
+          "selective_risk_at_50": 0.7272727272727273
+        },
+        "holdout_saturated_at_one": 0,
+        "holdout_at_zero": 0
+      },
+      "isotonic": {
+        "description": "pool-adjacent-violators map fitted on the development partition",
+        "fitted_on": "development partition",
+        "n_development": 156,
+        "parameters": {
+          "method": "isotonic",
+          "x": [
+            0.12832426998352575,
+            0.1291915770894525,
+            0.1337019131490561,
+            0.1357572918050065,
+            0.13598258343202618,
+            0.13813095223661176,
+            0.13870243201990518,
+            0.1391776626322473,
+            0.1410545118842933,
+            0.14136977431789954,
+            0.14218817184651067,
+            0.14407673518106412,
+            0.14730842103834774,
+            0.14940155051231263,
+            0.14982299507084929,
+            0.15039272634649492,
+            0.15181478657834158,
+            0.15203881276121978,
+            0.15622822004722525,
+            0.15668719685614918,
+            0.15717216406168877,
+            0.1591043690197118,
+            0.15971529789456718,
+            0.1637467472056453,
+            0.1642629288510422,
+            0.16702808287791204,
+            0.16736543947328497,
+            0.17014610447243594,
+            0.1704289537151672,
+            0.17136453524127915,
+            0.17151640188088912,
+            0.17155507313238483,
+            0.17386295405188212,
+            0.17410495865557207,
+            0.17797782793438677,
+            0.180418735263984,
+            0.1806179973983888,
+            0.18357496361130787,
+            0.24082399653118491,
+            0.25213983857000977,
+            0.3249671971095007,
+            0.3252262847760169
+          ],
+          "y": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.2923076923076923,
+            0.6666666666666666,
+            0.75
+          ],
+          "n": 156,
+          "n_positive": 36,
+          "n_negative": 120,
+          "note": "follow-up experiment 3 candidate: isotonic"
+        },
+        "predicts_a_single_value_above_the_top_knot": false,
+        "n_development_above_top_knot": 1,
+        "development": {
+          "n": 156,
+          "ace_5bin": 0.12825265818512435,
+          "ece_10bin": 0.12825265818512438,
+          "brier": 0.15746749379477346,
+          "log_loss": 0.42458889729691834,
+          "selective_risk_at_50": 0.6153846153846154
+        },
+        "holdout": {
+          "n": 44,
+          "ace_5bin": 0.1837297912508382,
+          "ece_10bin": 0.22271266603486312,
+          "brier": 0.17817163875794662,
+          "log_loss": 0.4816599912595729,
+          "selective_risk_at_50": 0.7272727272727273
+        },
+        "holdout_saturated_at_one": 0,
+        "holdout_at_zero": 17
+      },
+      "constant": {
+        "description": "a single probability = development positive rate, for every item",
+        "fitted_on": "development partition",
+        "n_development": 156,
+        "parameters": {
+          "base_rate": 0.23076923076923078
+        },
+        "development": {
+          "n": 156,
+          "ace_5bin": 2.498001805406602e-16,
+          "ece_10bin": 2.498001805406602e-16,
+          "brier": 0.17751479289940802,
+          "log_loss": 0.5402041423888613,
+          "selective_risk_at_50": 0.8461538461538461
+        },
+        "holdout": {
+          "n": 44,
+          "ace_5bin": 0.07167832167832155,
+          "ece_10bin": 0.07167832167832155,
+          "brier": 0.13891877353415802,
+          "log_loss": 0.45390539242843514,
+          "selective_risk_at_50": 0.8181818181818182
+        },
+        "holdout_saturated_at_one": 0,
+        "holdout_at_zero": 0
+      },
+      "development_rate": {
+        "description": "alias of constant, kept so the report names the Phase F 'constant' baseline explicitly",
+        "fitted_on": "development partition",
+        "n_development": 156,
+        "parameters": {
+          "base_rate": 0.23076923076923078
+        },
+        "development": {
+          "n": 156,
+          "ace_5bin": 2.498001805406602e-16,
+          "ece_10bin": 2.498001805406602e-16,
+          "brier": 0.17751479289940802,
+          "log_loss": 0.5402041423888613,
+          "selective_risk_at_50": 0.8461538461538461
+        },
+        "holdout": {
+          "n": 44,
+          "ace_5bin": 0.07167832167832155,
+          "ece_10bin": 0.07167832167832155,
+          "brier": 0.13891877353415802,
+          "log_loss": 0.45390539242843514,
+          "selective_risk_at_50": 0.8181818181818182
+        },
+        "holdout_saturated_at_one": 0,
+        "holdout_at_zero": 0
+      }
+    },
+    "development_cross_fitted": {
+      "platt": {
+        "n": 156,
+        "ace_5bin": 0.0990610225123469,
+        "brier": 0.20559381523400733,
+        "log_loss": 0.6509099039509099,
+        "fold_report": {
+          "seed": "phaseE-v1|pooled",
+          "requested_k": 5,
+          "effective_k": 5,
+          "groups": [
+            "L1|attempt_to_murder",
+            "L1|cheating",
+            "L1|criminal_breach_of_trust",
+            "L1|criminal_intimidation",
+            "L1|cruelty_by_husband",
+            "L1|culpable_homicide",
+            "L1|murder",
+            "L1|theft",
+            "L1|theft_in_dwelling",
+            "L1|wrongful_restraint",
+            "L7|attempt_to_murder",
+            "L7|cheating",
+            "L7|criminal_breach_of_trust",
+            "L7|criminal_intimidation",
+            "L7|cruelty_by_husband",
+            "L7|culpable_homicide",
+            "L7|murder",
+            "L7|theft",
+            "L7|theft_in_dwelling",
+            "L7|wrongful_restraint"
+          ],
+          "group_to_fold": {
+            "L1|attempt_to_murder": 3,
+            "L1|cheating": 3,
+            "L1|criminal_breach_of_trust": 0,
+            "L1|criminal_intimidation": 2,
+            "L1|cruelty_by_husband": 1,
+            "L1|culpable_homicide": 1,
+            "L1|murder": 3,
+            "L1|theft": 4,
+            "L1|theft_in_dwelling": 1,
+            "L1|wrongful_restraint": 2,
+            "L7|attempt_to_murder": 4,
+            "L7|cheating": 1,
+            "L7|criminal_breach_of_trust": 2,
+            "L7|criminal_intimidation": 4,
+            "L7|cruelty_by_husband": 0,
+            "L7|culpable_homicide": 4,
+            "L7|murder": 3,
+            "L7|theft": 2,
+            "L7|theft_in_dwelling": 0,
+            "L7|wrongful_restraint": 0
+          },
+          "fold_sizes": {
+            "0": 33,
+            "1": 34,
+            "2": 30,
+            "3": 29,
+            "4": 30
+          },
+          "folds": [
+            {
+              "fold": 0,
+              "status": "fitted",
+              "n_train": 123,
+              "n_test": 33
+            },
+            {
+              "fold": 1,
+              "status": "fitted",
+              "n_train": 122,
+              "n_test": 34
+            },
+            {
+              "fold": 2,
+              "status": "fitted",
+              "n_train": 126,
+              "n_test": 30
+            },
+            {
+              "fold": 3,
+              "status": "fitted",
+              "n_train": 127,
+              "n_test": 29
+            },
+            {
+              "fold": 4,
+              "status": "fitted",
+              "n_train": 126,
+              "n_test": 30
+            }
+          ],
+          "n_cross_fitted": 156
+        }
+      },
+      "isotonic": {
+        "n": 156,
+        "ace_5bin": 0.12434398904657888,
+        "brier": 0.18794232579202927,
+        "log_loss": 0.4949587482274238,
+        "fold_report": {
+          "seed": "phaseE-v1|pooled",
+          "requested_k": 5,
+          "effective_k": 5,
+          "groups": [
+            "L1|attempt_to_murder",
+            "L1|cheating",
+            "L1|criminal_breach_of_trust",
+            "L1|criminal_intimidation",
+            "L1|cruelty_by_husband",
+            "L1|culpable_homicide",
+            "L1|murder",
+            "L1|theft",
+            "L1|theft_in_dwelling",
+            "L1|wrongful_restraint",
+            "L7|attempt_to_murder",
+            "L7|cheating",
+            "L7|criminal_breach_of_trust",
+            "L7|criminal_intimidation",
+            "L7|cruelty_by_husband",
+            "L7|culpable_homicide",
+            "L7|murder",
+            "L7|theft",
+            "L7|theft_in_dwelling",
+            "L7|wrongful_restraint"
+          ],
+          "group_to_fold": {
+            "L1|attempt_to_murder": 3,
+            "L1|cheating": 3,
+            "L1|criminal_breach_of_trust": 0,
+            "L1|criminal_intimidation": 2,
+            "L1|cruelty_by_husband": 1,
+            "L1|culpable_homicide": 1,
+            "L1|murder": 3,
+            "L1|theft": 4,
+            "L1|theft_in_dwelling": 1,
+            "L1|wrongful_restraint": 2,
+            "L7|attempt_to_murder": 4,
+            "L7|cheating": 1,
+            "L7|criminal_breach_of_trust": 2,
+            "L7|criminal_intimidation": 4,
+            "L7|cruelty_by_husband": 0,
+            "L7|culpable_homicide": 4,
+            "L7|murder": 3,
+            "L7|theft": 2,
+            "L7|theft_in_dwelling": 0,
+            "L7|wrongful_restraint": 0
+          },
+          "fold_sizes": {
+            "0": 33,
+            "1": 34,
+            "2": 30,
+            "3": 29,
+            "4": 30
+          },
+          "folds": [
+            {
+              "fold": 0,
+              "status": "fitted",
+              "n_train": 123,
+              "n_test": 33
+            },
+            {
+              "fold": 1,
+              "status": "fitted",
+              "n_train": 122,
+              "n_test": 34
+            },
+            {
+              "fold": 2,
+              "status": "fitted",
+              "n_train": 126,
+              "n_test": 30
+            },
+            {
+              "fold": 3,
+              "status": "fitted",
+              "n_train": 127,
+              "n_test": 29
+            },
+            {
+              "fold": 4,
+              "status": "fitted",
+              "n_train": 126,
+              "n_test": 30
+            }
+          ],
+          "n_cross_fitted": 156
+        }
+      }
+    },
+    "holdout_ace_ranking_best_first": [
+      "constant",
+      "raw",
+      "platt",
+      "isotonic"
+    ],
+    "chosen_by_rule": "isotonic",
+    "selection_used_holdout_labels": false,
+    "honesty_note": "The holdout block is reported for every candidate so nothing is hidden, but the shipped choice is 'chosen_by_rule'. Reporting a candidate that wins on holdout as the winner would be selecting on held-out labels.",
+    "caveat": "n_holdout is small; a single item moves ACE by ~1/n. The development cross-fitted column is the primary evidence, the holdout column is a check.",
+    "note": "pooled across strata for reference only; Phase F fits one map per stratum, so this is not the configuration that ships"
+  },
+  "run_id": "phaseF_exp3_calibration_methods",
+  "source_run_id": "phaseA-laptop-v2-rejudged+ctx-r2+typed+warrant+uq-exact",
+  "shipped_calibration_run_id": "phaseA-laptop-v2-rejudged+ctx-r2+typed+warrant+uq-exact+cal-r2",
+  "source_tree_sha256": "2f753a3d6f6101f9f497cff2046d7eb4a39b467d812b2a00468fc241d9a2d329",
+  "source_unchanged": true,
+  "split": {
+    "seed": "phaseE-v1",
+    "test_fraction": 0.2,
+    "n_development": 156,
+    "n_holdout": 44,
+    "source": "stored in the Phase E model and verified against the slice"
+  },
+  "risk_score_field": "uq_uncertainty (Phase E, uncalibrated_monotone_risk_score)",
+  "shipped_method_rule": {
+    "rule": "isotonic when the stratum has >= 40 development records with both classes, otherwise platt",
+    "isotonic_min_n": 40,
+    "source": "calibration_model.json of the +cal-r2 run",
+    "uses_reliability_range": false,
+    "note": "the shipped rule looks only at sample size, so L1 (n=78) is always isotonic; the follow-up rule adds the input-range condition"
+  },
+  "shipped_descriptive_sensitivity": {
+    "L1": {
+      "method": "platt",
+      "ace_5bin_cross_fitted": 0.09108284357297625,
+      "n_cross_fitted": 78,
+      "used_for_selection_or_gate": false,
+      "note": "descriptive only: the shipped map follows the pre-specified method rule and the gate is evaluated on it"
+    },
+    "L7": null
+  },
+  "skipped_items": [],
+  "generated_utc": "2026-10-24T16:14:23Z",
+  "inputs": {
+    "items_sha256": "19ab7c59a1b1e185fb816cb253c5fa4bca49423d830f770972a34b5b05674f12",
+    "model_sha256": "343c8495147b89494db48fe2c3130b100944d627b48db9418da61d1253bc81c9"
+  },
+  "git_commit": "d6a493ba40f37f64835f93b86ab0cc9b8b4ef5f1"
+}
