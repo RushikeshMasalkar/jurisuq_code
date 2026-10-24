@@ -21,7 +21,7 @@ from __future__ import annotations
 
 import math
 
-from .conformal import conformal_threshold, coverage_tolerance, empirical_coverage
+from .conformal import coverage_report
 from .maps import fit_map, map_from_dict, predict, reliability_input
 from .metrics import (ace, brier, ece, log_loss, reliability_table,
                       risk_coverage_curve, selective_risk)
@@ -186,7 +186,9 @@ def attach_probabilities(records: list[dict], fitted: dict, *,
 
 def _evaluate_stratum(rows: list[dict], probabilities: dict[str, dict], *,
                       label_field: str, harm_classes: list[str],
-                      policy: DecisionPolicy, target_coverage: float) -> dict:
+                      policy: DecisionPolicy, target_coverage: float,
+                      calibration_probabilities: dict[str, float] | None = None,
+                      calibration_source: str = "") -> dict:
     usable = [(r, probabilities[r["item_id"]]["p_reliable"]) for r in rows
               if probabilities[r["item_id"]]["p_reliable"] is not None]
     labels = [_binary_label(r, label_field) for r, _ in usable]
@@ -229,24 +231,36 @@ def _evaluate_stratum(rows: list[dict], probabilities: dict[str, dict], *,
                                                      weights=weights),
         "risk_coverage_curve": risk_coverage_curve(probs, labels, weights=weights),
     }
-    threshold = conformal_threshold(probs, target_coverage=target_coverage)
-    coverage = empirical_coverage(probs, threshold["threshold"])
-    tolerance = coverage_tolerance(coverage["n"], target_coverage)
-    result["conformal"] = {
-        "method": "split-conformal, finite-sample corrected",
-        "calibration_source": "development partition, cross-fitted probabilities",
-        "target_coverage": target_coverage,
-        "threshold": threshold["threshold"],
-        "threshold_status": threshold["status"],
-        "empirical_coverage_on_holdout": coverage["coverage"],
-        "n_holdout": coverage["n"],
-        "tolerance": tolerance,
-        "within_tolerance": (None if coverage["coverage"] is None else
-                             coverage["coverage"] >= target_coverage - tolerance),
-        "exchangeability_caveat": (
-            "Items are matched L1/L7 pairs from ten offence clusters; within-stratum "
-            "exchangeability is approximate, so the guarantee is approximate."),
-    }
+    # The conformal threshold must come from data disjoint from the holdout.
+    # Before the follow-up audit this call passed the holdout probabilities
+    # themselves, which made the reported coverage in-sample. The calibration
+    # set is now required explicitly and its provenance is recorded verbatim.
+    calibration_values = sorted(float(v) for v in (calibration_probabilities or {}).values())
+    if calibration_values:
+        result["conformal"] = coverage_report(
+            probs, calibration_values, target_coverage=target_coverage,
+            calibration_source=calibration_source)
+    else:
+        result["conformal"] = {
+            "method": "split-conformal, finite-sample corrected",
+            "calibration_source": calibration_source or "unavailable",
+            "n_calibration": 0,
+            "threshold": None,
+            "threshold_status": "no_development_calibration_set",
+            "target_coverage": target_coverage,
+            "n_holdout": len(probs),
+            "covered": None,
+            "empirical_coverage_on_holdout": None,
+            "tolerance": None,
+            "wald_criterion_floor": None,
+            "within_tolerance": None,
+            "clopper_pearson_lower_95": None,
+            "exact_bound_reaches_target": None,
+            "calibration_disjoint_from_holdout": True,
+            "exchangeability_caveat": ("no development calibration probabilities were "
+                                       "available for this stratum, so no threshold is "
+                                       "reported"),
+        }
     decisions = [policy.decide(p, h) for (_, p), h in zip(usable, harm_classes)]
     result["policy"] = action_census(decisions)
     result["policy"]["thresholds_by_harm_class"] = {
@@ -276,10 +290,17 @@ def evaluate_g6(records: list[dict], holdout_ids: set[str], fitted: dict, *,
     per_stratum: dict[str, dict] = {}
     for stratum in strata:
         rows = [r for r in holdout if stratum_of(r) == stratum]
-        entry = _evaluate_stratum(rows, probabilities, label_field=label_field,
-                                  harm_classes=[harm_by_item[r["item_id"]] for r in rows],
-                                  policy=policy, target_coverage=target_coverage)
         dev = fitted["strata"].get(stratum, {})
+        calibration_probabilities = dev.get("cross_fitted_p_reliable") or None
+        entry = _evaluate_stratum(
+            rows, probabilities, label_field=label_field,
+            harm_classes=[harm_by_item[r["item_id"]] for r in rows],
+            policy=policy, target_coverage=target_coverage,
+            calibration_probabilities=calibration_probabilities,
+            calibration_source=(
+                "development partition, grouped cross-fitted probabilities "
+                f"(n={len(calibration_probabilities)})" if calibration_probabilities
+                else "none: this stratum has no fitted calibration map"))
         entry["development"] = {
             "status": dev.get("status"),
             "method": dev.get("method"),

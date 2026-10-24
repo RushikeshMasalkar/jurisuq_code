@@ -81,3 +81,81 @@ def coverage_tolerance(n: int, target: float, *, z: float = 1.96) -> float:
     if n <= 0:
         return 1.0
     return z * math.sqrt(max(target * (1.0 - target), 0.0) / n)
+
+
+def clopper_pearson_lower(covered: int, n: int, *, alpha: float = 0.05) -> float | None:
+    """Exact one-sided lower confidence bound on a binomial proportion.
+
+    The Wald tolerance in ``coverage_tolerance`` is the criterion the parallel
+    Phase D/E work used; it is deliberately permissive at small n. This exact
+    bound is reported alongside it so a reader can see how little a coverage
+    of k/n really certifies when n is in the low tens.
+
+    Returns 0.0 for ``covered == 0`` and 1.0 for ``covered == n``; ``None`` for
+    an empty sample.
+    """
+    if n <= 0:
+        return None
+    if not 0 <= covered <= n:
+        raise ValueError("covered must lie in [0, n]")
+    if not 0.0 < alpha < 1.0:
+        raise ValueError("alpha must lie in (0, 1)")
+    if covered == 0:
+        return 0.0
+    if covered == n:
+        return 1.0
+    # Solve P(X >= covered | p) = alpha for p by bisection; the left side is
+    # increasing in p, so a bracketed search is safe and deterministic.
+    def upper_tail(p: float) -> float:
+        # sum_{i=covered}^{n} C(n,i) p^i (1-p)^(n-i)
+        total = 0.0
+        for i in range(covered, n + 1):
+            total += math.comb(n, i) * (p ** i) * ((1.0 - p) ** (n - i))
+        return total
+
+    lo, hi = 0.0, 1.0
+    for _ in range(200):
+        mid = 0.5 * (lo + hi)
+        # upper_tail is increasing in p: above the root we are too generous.
+        if upper_tail(mid) > alpha:
+            hi = mid
+        else:
+            lo = mid
+    return 0.5 * (lo + hi)
+
+
+def coverage_report(holdout_p: Sequence[float], calibration_p: Sequence[float], *,
+                    target_coverage: float, alpha: float = 0.05,
+                    calibration_source: str) -> dict:
+    """Full conformal record from an explicit, out-of-sample calibration set.
+
+    ``calibration_p`` must come from data disjoint from ``holdout_p``. Nothing
+    in this function inspects correctness labels; the coverage it reports is a
+    statement about the score, not about accuracy.
+    """
+    threshold = conformal_threshold(calibration_p, target_coverage=target_coverage)
+    coverage = empirical_coverage(holdout_p, threshold["threshold"])
+    tolerance = coverage_tolerance(coverage["n"], target_coverage)
+    exact = (None if coverage["coverage"] is None
+             else clopper_pearson_lower(coverage["covered"], coverage["n"], alpha=alpha))
+    return {
+        "method": "split-conformal, finite-sample corrected",
+        "calibration_source": calibration_source,
+        "n_calibration": threshold["n_calibration"],
+        "threshold": threshold["threshold"],
+        "threshold_status": threshold["status"],
+        "target_coverage": target_coverage,
+        "n_holdout": coverage["n"],
+        "covered": coverage["covered"],
+        "empirical_coverage_on_holdout": coverage["coverage"],
+        "tolerance": tolerance,
+        "wald_criterion_floor": target_coverage - tolerance,
+        "within_tolerance": (None if coverage["coverage"] is None
+                             else coverage["coverage"] >= target_coverage - tolerance),
+        "clopper_pearson_lower_95": exact,
+        "exact_bound_reaches_target": (None if exact is None else exact >= target_coverage),
+        "calibration_disjoint_from_holdout": True,
+        "exchangeability_caveat": (
+            "Items are matched L1/L7 pairs from ten offence clusters; within-stratum "
+            "exchangeability is approximate, so the guarantee is approximate."),
+    }

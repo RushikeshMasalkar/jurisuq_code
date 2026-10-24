@@ -23,11 +23,29 @@ run, and never writes into its source.
 | Conformal coverage layer (split-conformal, finite-sample corrected) | implemented, tested, evaluated |
 | E6 evaluation on the held-out partition | executed on two Phase E variants |
 | Gate G6 | **NOT_MET** — 2 of 4 conditions fail, 1 stratum unevaluable |
+| Post-merge follow-up (4 experiments) | executed; see [`PHASE-F-FOLLOWUP.md`](PHASE-F-FOLLOWUP.md) |
 
 Phase F is **not** complete in the sense the guide means by a phase gate. The
 machinery is complete and reproducible; the *claim* the gate exists to license
 is not supported by this instrument. The two failures are reported in §7 and
 are not repairable by changing a threshold after the fact.
+
+### Follow-up correction (supersedes the conformal figures below)
+
+An audit of the numbers in §6 found that the conformal threshold was computed
+from the same 22 holdout items its coverage was then measured on. The corrected
+pipeline takes the threshold from the 78 development items' grouped cross-fitted
+probabilities and report both a Wald tolerance and a Clopper–Pearson bound. The
+corrected run is the **new sibling** `…+uq-exact+cal-r2`; the original `+cal`
+run is preserved unchanged and is **not** replaced. Coverage moves from 0.8636
+to 0.6818 (15/22), the threshold from 0.3855 to 0.4702, and **the G6 verdict does
+not change: it is NOT_MET in both.**
+
+Three further experiments (within-slice refitting, calibration-map selection
+under a pre-registered rule, and topic-clustered uncertainty intervals) are
+recorded in [`PHASE-F-FOLLOWUP.md`](PHASE-F-FOLLOWUP.md). None of them changes a
+gate constant or produces a pass. The §6 and §7 tables below are retained as the
+historical record of the as-merged run.
 
 ### Dependency finding (read this before extending Phase F)
 
@@ -318,8 +336,8 @@ Two clarifications that matter for reading the second condition:
 
 | Check | Result |
 |---|---|
-| `python -m pytest tests/test_calibration.py tests/test_policy.py -q` | **57 passed** (39 + 18) |
-| `python -m pytest -q` (full suite) | **216 passed, 1 skipped in 1.45 s** |
+| `python -m pytest tests/test_calibration.py tests/test_policy.py -q` | **63 passed** (45 + 18) after the follow-up conformal tests |
+| `python -m pytest -q` (full suite) | **270 passed, 1 skipped in 4.94 s** after the follow-up work (216 passed at merge) |
 | Baseline before Phase F (same environment) | 159 passed, 1 skipped |
 | Skipped | `tests/test_relations.py:236` — `torch not installed`; pre-existing, unrelated |
 | Linting | `python -m compileall` clean on the new package and scripts; the repository declares no linter |

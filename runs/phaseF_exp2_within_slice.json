@@ -1,0 +1,257 @@
+{
+  "experiment": "E5b",
+  "question": "does pooled Phase E fitting lose within-slice ranking?",
+  "slice": "L1",
+  "provision_entropy_variant": "exact",
+  "n_phase_e_development_items": 156,
+  "n_development_scored": 78,
+  "n_holdout_candidates": 22,
+  "n_holdout_eligible": 20,
+  "holdout_excluded_ids": [
+    "L1-criminal_intimidation-009",
+    "L1-criminal_intimidation-087"
+  ],
+  "holdout_exclusion_rule": "features not complete for the legal head, so neither arm can score the item; reported, not dropped silently",
+  "pooled_training": {
+    "source": "stored legal_head from the Phase E run",
+    "training_n": 150,
+    "training_positive": 114,
+    "training_negative": 36,
+    "feature_weights": {
+      "u_prov": 0.10350293609715888,
+      "u_text": 0.0050195641043234126,
+      "u_warrant": 0.20560949590035385,
+      "u_cm": 0.20741881997852563,
+      "u_contra": 0.0,
+      "u_prov*u_text": 0.10336913280247903,
+      "u_prov*u_warrant": 0.0609276155882541,
+      "u_prov*u_cm": 0.056921362552254356,
+      "u_prov*u_contra": 0.0,
+      "u_text*u_warrant": 0.20522970570231747,
+      "u_text*u_cm": 0.2064306713891385,
+      "u_text*u_contra": 0.0,
+      "u_warrant*u_cm": 0.2094708291340662,
+      "u_warrant*u_contra": 0.0,
+      "u_cm*u_contra": 0.0
+    },
+    "fit_note": "Projected batch logistic; pairwise interactions; L2=0.25; coefficients >= 0."
+  },
+  "within_slice_training": {
+    "training_n": 78,
+    "training_positive": 42,
+    "training_negative": 36,
+    "feature_weights": {
+      "u_prov": 0.17170962949488303,
+      "u_text": 0.006128083724378482,
+      "u_warrant": 0.0,
+      "u_cm": 0.0,
+      "u_contra": 0.0,
+      "u_prov*u_text": 0.1706783919024326,
+      "u_prov*u_warrant": 0.0,
+      "u_prov*u_cm": 0.0,
+      "u_prov*u_contra": 0.0,
+      "u_text*u_warrant": 0.0,
+      "u_text*u_cm": 0.0,
+      "u_text*u_contra": 0.0,
+      "u_warrant*u_cm": 0.0,
+      "u_warrant*u_contra": 0.0,
+      "u_cm*u_contra": 0.0
+    },
+    "fit_note": "Projected batch logistic; pairwise interactions; L2=0.25; coefficients >= 0."
+  },
+  "ranking_on_identical_holdout_items": {
+    "pooled": {
+      "n": 20,
+      "auroc": 0.6868131868131868,
+      "correct": 7,
+      "incorrect": 13
+    },
+    "within_slice": {
+      "n": 20,
+      "auroc": 0.8626373626373627,
+      "correct": 7,
+      "incorrect": 13
+    }
+  },
+  "downstream_calibration": {
+    "pooled": {
+      "method": "isotonic",
+      "development_cross_fitted_ace_5bin": 0.25041003182804145,
+      "holdout_ace_5bin": 0.23882746939083027,
+      "holdout_brier": 0.27220694947077295,
+      "holdout_log_loss": 0.9768958882324483,
+      "holdout_selective_risk_at_50": 0.5,
+      "n_holdout": 20,
+      "fold_report": {
+        "seed": "phaseE-v1|exp2|pooled",
+        "requested_k": 5,
+        "effective_k": 5,
+        "groups": [
+          "L1|attempt_to_murder",
+          "L1|cheating",
+          "L1|criminal_breach_of_trust",
+          "L1|criminal_intimidation",
+          "L1|cruelty_by_husband",
+          "L1|culpable_homicide",
+          "L1|murder",
+          "L1|theft",
+          "L1|theft_in_dwelling",
+          "L1|wrongful_restraint"
+        ],
+        "group_to_fold": {
+          "L1|attempt_to_murder": 2,
+          "L1|cheating": 2,
+          "L1|criminal_breach_of_trust": 1,
+          "L1|criminal_intimidation": 0,
+          "L1|cruelty_by_husband": 4,
+          "L1|culpable_homicide": 1,
+          "L1|murder": 0,
+          "L1|theft": 3,
+          "L1|theft_in_dwelling": 4,
+          "L1|wrongful_restraint": 3
+        },
+        "fold_sizes": {
+          "0": 10,
+          "1": 16,
+          "2": 19,
+          "3": 18,
+          "4": 15
+        },
+        "folds": [
+          {
+            "fold": 0,
+            "status": "fitted",
+            "n_train": 68,
+            "n_test": 10
+          },
+          {
+            "fold": 1,
+            "status": "fitted",
+            "n_train": 62,
+            "n_test": 16
+          },
+          {
+            "fold": 2,
+            "status": "fitted",
+            "n_train": 59,
+            "n_test": 19
+          },
+          {
+            "fold": 3,
+            "status": "fitted",
+            "n_train": 60,
+            "n_test": 18
+          },
+          {
+            "fold": 4,
+            "status": "fitted",
+            "n_train": 63,
+            "n_test": 15
+          }
+        ],
+        "n_cross_fitted": 78
+      }
+    },
+    "within_slice": {
+      "method": "isotonic",
+      "development_cross_fitted_ace_5bin": 0.1957945308555204,
+      "holdout_ace_5bin": 0.19406651284401982,
+      "holdout_brier": 0.20732424194103136,
+      "holdout_log_loss": 0.8315206050103126,
+      "holdout_selective_risk_at_50": 0.4,
+      "n_holdout": 20,
+      "fold_report": {
+        "seed": "phaseE-v1|exp2|within",
+        "requested_k": 5,
+        "effective_k": 5,
+        "groups": [
+          "L1|attempt_to_murder",
+          "L1|cheating",
+          "L1|criminal_breach_of_trust",
+          "L1|criminal_intimidation",
+          "L1|cruelty_by_husband",
+          "L1|culpable_homicide",
+          "L1|murder",
+          "L1|theft",
+          "L1|theft_in_dwelling",
+          "L1|wrongful_restraint"
+        ],
+        "group_to_fold": {
+          "L1|attempt_to_murder": 1,
+          "L1|cheating": 0,
+          "L1|criminal_breach_of_trust": 2,
+          "L1|criminal_intimidation": 3,
+          "L1|cruelty_by_husband": 4,
+          "L1|culpable_homicide": 2,
+          "L1|murder": 1,
+          "L1|theft": 4,
+          "L1|theft_in_dwelling": 3,
+          "L1|wrongful_restraint": 0
+        },
+        "fold_sizes": {
+          "0": 21,
+          "1": 14,
+          "2": 16,
+          "3": 14,
+          "4": 13
+        },
+        "folds": [
+          {
+            "fold": 0,
+            "status": "fitted",
+            "n_train": 57,
+            "n_test": 21
+          },
+          {
+            "fold": 1,
+            "status": "fitted",
+            "n_train": 64,
+            "n_test": 14
+          },
+          {
+            "fold": 2,
+            "status": "fitted",
+            "n_train": 62,
+            "n_test": 16
+          },
+          {
+            "fold": 3,
+            "status": "fitted",
+            "n_train": 64,
+            "n_test": 14
+          },
+          {
+            "fold": 4,
+            "status": "fitted",
+            "n_train": 65,
+            "n_test": 13
+          }
+        ],
+        "n_cross_fitted": 78
+      }
+    }
+  },
+  "selection_note": "the comparison is pre-specified (pooled vs slice-restricted); no arm was chosen on holdout performance",
+  "caveats": [
+    "holdout eligible n=20; a difference of one item moves AUROC by roughly 0.05-0.1, so this is a signal, not a precise estimate",
+    "both arms are fitted on the same development items, but the within-slice arm has fewer training rows, which trades variance for relevance",
+    "no nested model selection was performed: the slice-restricted fit is the pre-specified alternative, not the winner of a search"
+  ],
+  "run_id": "phaseF_exp2_within_slice",
+  "source_run_id": "phaseA-laptop-v2-rejudged+ctx-r2+typed+warrant+uq-exact",
+  "source_tree_sha256": "2f753a3d6f6101f9f497cff2046d7eb4a39b467d812b2a00468fc241d9a2d329",
+  "source_unchanged": true,
+  "split": {
+    "seed": "phaseE-v1",
+    "test_fraction": 0.2,
+    "n_development": 156,
+    "n_holdout": 44,
+    "source": "stored in the Phase E model and verified against the slice"
+  },
+  "generated_utc": "2026-10-24T16:17:53Z",
+  "inputs": {
+    "items_sha256": "19ab7c59a1b1e185fb816cb253c5fa4bca49423d830f770972a34b5b05674f12",
+    "model_sha256": "343c8495147b89494db48fe2c3130b100944d627b48db9418da61d1253bc81c9"
+  },
+  "git_commit": "29e9e12a360193488ac49ddb046a02223351bab3"
+}

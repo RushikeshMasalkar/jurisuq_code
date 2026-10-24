@@ -321,7 +321,15 @@ def _split(records, share=0.5):
     return development, holdout
 
 
-def test_g6_is_not_evaluable_when_the_holdout_has_one_class():
+def test_g6_reports_a_single_class_holdout_as_unevaluable_not_as_a_pass():
+    """A single-class holdout cannot support conditions 1 and 2.
+
+    Condition 3 (coverage) is label-free and is still evaluated, now against an
+    out-of-sample threshold. Where that threshold is not cleared the gate reads
+    NOT_MET, which is the pre-existing verdict logic applied to a genuine
+    failure; the point of this test is that the stratum is reported as
+    unevaluable and the gate never reads PASS.
+    """
     records = _toy_records(40)
     dev, holdout = _split(records)
     fitted = fit_strata(records, dev, k=3)
@@ -330,9 +338,14 @@ def test_g6_is_not_evaluable_when_the_holdout_has_one_class():
             record["majority_correct"] = 0
     report = evaluate_g6(records, holdout, fitted, policy=DecisionPolicy(),
                          statute_rows=_statutes())
-    assert report["per_stratum"]["L1"]["status"] == "not_evaluable_single_class_holdout"
-    assert report["verdict"] == "NOT_EVALUABLE"
+    stratum = report["per_stratum"]["L1"]
+    assert stratum["status"] == "not_evaluable_single_class_holdout"
     assert report["conditions"]["harm_weighted_selective_risk_at_50pct_below_every_baseline"]["pass"] is None
+    assert report["verdict"] != "PASS"
+    # the coverage condition is evaluated from development data, never from the
+    # single-class holdout's own probabilities
+    assert stratum["conformal"]["n_calibration"] > 0
+    assert stratum["conformal"]["calibration_disjoint_from_holdout"] is True
 
 
 def test_g6_verdict_is_not_met_when_calibration_is_poor():
@@ -400,3 +413,129 @@ def test_query_path_scanner_rejects_a_missing_file(tmp_path):
 
     with pytest.raises(FileNotFoundError):
         query_path_is_label_blind(tmp_path / "absent.py")
+
+
+# ----------------------------------------------------------------------
+# Follow-up experiment 1: out-of-sample conformal evaluation
+# ----------------------------------------------------------------------
+def _graded_records(n=80):
+    """Records whose score is informative but not perfectly separating.
+
+    The flatter ``_toy_records`` fixture calibrates to exact 0/1 steps, which
+    makes the development and holdout conformal thresholds identical and so
+    cannot detect a source swap. This fixture keeps genuine overlap.
+    """
+    records = []
+    for i in range(n):
+        bucket = i % 10
+        risk = 0.20 + bucket * 0.03
+        correct = 0 if bucket >= 6 else 1
+        if i % 7 == 0:
+            correct = 1 - correct  # deterministic noise so classes overlap
+        records.append({
+            "item_id": f"L1-topic{i % 4}-{i:03d}", "slice": "L1", "topic": f"topic{i % 4}",
+            "uq_uncertainty": risk, "uq_components": {"u_prov": risk},
+            "majority_correct": correct, "warrant_common_mode_flags": [],
+            "warrant_as_of": "2024-06-30"})
+    return records
+
+
+def _holdout_and_dev(fitted, records, holdout):
+    """Dev cross-fitted probabilities and holdout probabilities for a stratum."""
+    dev_p = dict(fitted["strata"]["L1"]["cross_fitted_p_reliable"])
+    probs = attach_probabilities(records, fitted)
+    hold_p = {r["item_id"]: probs[r["item_id"]]["p_reliable"]
+              for r in records if r["item_id"] in holdout
+              and r["slice"] == "L1" and probs[r["item_id"]]["p_reliable"] is not None}
+    return dev_p, hold_p
+
+
+def test_conformal_threshold_comes_from_development_not_the_holdout():
+    """Regression test for the in-sample conformal defect.
+
+    The reported threshold must equal the value implied by the development
+    cross-fitted probabilities. If the implementation ever falls back to
+    fitting the threshold on the holdout, these two numbers diverge.
+    """
+    records = _graded_records(80)
+    dev, holdout = _split(records)
+    fitted = fit_strata(records, dev, k=4)
+    dev_p, hold_p = _holdout_and_dev(fitted, records, holdout)
+    assert dev_p and hold_p
+    report = evaluate_g6(records, holdout, fitted, policy=DecisionPolicy(),
+                         statute_rows=_statutes())
+    conformal = report["per_stratum"]["L1"]["conformal"]
+    from jurisuq.calibration.conformal import conformal_threshold
+    expected = conformal_threshold(list(dev_p.values()), target_coverage=0.8)["threshold"]
+    leaked = conformal_threshold(list(hold_p.values()), target_coverage=0.8)["threshold"]
+    assert conformal["threshold"] == pytest.approx(expected)
+    assert conformal["n_calibration"] == len(dev_p)
+    assert leaked != pytest.approx(expected), "test fixture must distinguish the two sources"
+    assert "development" in conformal["calibration_source"]
+
+
+def test_conformal_record_states_the_source_and_both_criteria():
+    records = _graded_records(80)
+    dev, holdout = _split(records)
+    fitted = fit_strata(records, dev, k=4)
+    report = evaluate_g6(records, holdout, fitted, policy=DecisionPolicy(),
+                         statute_rows=_statutes())
+    conformal = report["per_stratum"]["L1"]["conformal"]
+    for key in ("calibration_source", "n_calibration", "threshold", "target_coverage",
+                "n_holdout", "covered", "empirical_coverage_on_holdout", "tolerance",
+                "wald_criterion_floor", "within_tolerance",
+                "clopper_pearson_lower_95", "exact_bound_reaches_target"):
+        assert key in conformal, key
+    assert conformal["calibration_disjoint_from_holdout"] is True
+    assert conformal["wald_criterion_floor"] == pytest.approx(
+        conformal["target_coverage"] - conformal["tolerance"])
+
+
+def test_conformal_unavailable_for_a_legacy_model_without_cross_fitted_probabilities():
+    """Older Phase F models stored a map but no cross-fitted probabilities.
+
+    Such a model must report no threshold and impute nothing, rather than fall
+    back to the holdout probabilities (the defect this experiment fixes).
+    """
+    records = _graded_records(60)
+    dev, holdout = _split(records)
+    fitted = fit_strata(records, dev, k=3)
+    assert fitted["strata"]["L1"]["cross_fitted_p_reliable"]
+    fitted["strata"]["L1"].pop("cross_fitted_p_reliable")
+    report = evaluate_g6(records, holdout, fitted, policy=DecisionPolicy(),
+                         statute_rows=_statutes())
+    conformal = report["per_stratum"]["L1"]["conformal"]
+    assert conformal["threshold"] is None
+    assert conformal["threshold_status"] == "no_development_calibration_set"
+    assert conformal["empirical_coverage_on_holdout"] is None
+    assert conformal["within_tolerance"] is None
+    assert report["conditions"]["empirical_coverage_within_tolerance_of_target"]["pass"] is None
+    assert report["verdict"] != "PASS"
+
+
+def test_clopper_pearson_lower_bound_is_exact_at_the_edges():
+    from jurisuq.calibration.conformal import clopper_pearson_lower
+    assert clopper_pearson_lower(0, 22) == 0.0
+    assert clopper_pearson_lower(22, 22) == 1.0
+    assert clopper_pearson_lower(1, 0) is None
+    assert clopper_pearson_lower(15, 22) == pytest.approx(0.4845, abs=5e-4)
+    with pytest.raises(ValueError):
+        clopper_pearson_lower(23, 22)
+    with pytest.raises(ValueError):
+        clopper_pearson_lower(5, 22, alpha=1.5)
+
+
+def test_clopper_pearson_never_exceeds_the_point_estimate():
+    from jurisuq.calibration.conformal import clopper_pearson_lower
+    for k, n in ((15, 22), (36, 78), (7, 22), (19, 22), (1, 3)):
+        assert clopper_pearson_lower(k, n) <= k / n + 1e-12
+
+
+def test_coverage_report_flags_when_the_exact_bound_misses_the_target():
+    from jurisuq.calibration.conformal import coverage_report
+    report = coverage_report([0.9] * 15 + [0.1] * 7, [i / 100 for i in range(1, 101)],
+                             target_coverage=0.8, calibration_source="toy")
+    assert report["empirical_coverage_on_holdout"] == pytest.approx(15 / 22)
+    assert report["within_tolerance"] in (True, False)
+    assert report["exact_bound_reaches_target"] is False
+    assert report["clopper_pearson_lower_95"] < 0.8
