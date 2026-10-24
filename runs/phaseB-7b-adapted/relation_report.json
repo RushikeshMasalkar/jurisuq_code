@@ -1,0 +1,187 @@
+{
+  "ambiguous_rate": 0.0162,
+  "checkpoint": "models/phaseC-inlegalbert-adapted-7a",
+  "confusion": {
+    "AMBIGUOUS": {
+      "AMBIGUOUS": 4,
+      "CONDITIONALLY_EQUIVALENT": 0,
+      "DIFFERENT_PROVISION": 0,
+      "LEGALLY_EQUIVALENT": 0,
+      "SAME_PROVISION": 0
+    },
+    "CONDITIONALLY_EQUIVALENT": {
+      "AMBIGUOUS": 0,
+      "CONDITIONALLY_EQUIVALENT": 8,
+      "DIFFERENT_PROVISION": 0,
+      "LEGALLY_EQUIVALENT": 0,
+      "SAME_PROVISION": 0
+    },
+    "DIFFERENT_PROVISION": {
+      "AMBIGUOUS": 0,
+      "CONDITIONALLY_EQUIVALENT": 0,
+      "DIFFERENT_PROVISION": 130,
+      "LEGALLY_EQUIVALENT": 0,
+      "SAME_PROVISION": 16
+    },
+    "LEGALLY_EQUIVALENT": {
+      "AMBIGUOUS": 0,
+      "CONDITIONALLY_EQUIVALENT": 0,
+      "DIFFERENT_PROVISION": 0,
+      "LEGALLY_EQUIVALENT": 18,
+      "SAME_PROVISION": 0
+    },
+    "SAME_PROVISION": {
+      "AMBIGUOUS": 1,
+      "CONDITIONALLY_EQUIVALENT": 0,
+      "DIFFERENT_PROVISION": 0,
+      "LEGALLY_EQUIVALENT": 0,
+      "SAME_PROVISION": 131
+    }
+  },
+  "dataset_content_hash": "6e39a85276af8136bdfb4b2a5831862bbf85c662d232e29515d68386b3e9a94b",
+  "dataset_version": "relations_v2",
+  "different_provision_precision": 1.0,
+  "different_provision_recall": 0.8904,
+  "e2_separation": {
+    "skipped": true
+  },
+  "exact_key_baseline_macro_f1": 0.7941,
+  "g2_old_vs_new": {
+    "new": {
+      "changed_items": null,
+      "different_provision": {
+        "f1": 0.942,
+        "precision": 1.0,
+        "recall": 0.8904,
+        "support": 146
+      },
+      "exact_key_baseline_macro_f1": 0.7941,
+      "gate_conditions": {
+        "beats_exact_key": true,
+        "merge_precision_ok": true,
+        "phase_a_untouched": true,
+        "rescue_criterion_met": false
+      },
+      "macro_f1": 0.954,
+      "merge_decision": {
+        "f1": 0.9486404833836858,
+        "fn": 1,
+        "fp": 16,
+        "precision": 0.9075144508670521,
+        "recall": 0.9936708860759493,
+        "threshold": 0.5,
+        "tn": 134,
+        "tp": 157
+      },
+      "rescue_by_slice": {
+        "L1": 0,
+        "L7": 0
+      }
+    },
+    "old": {
+      "changed_items": 130,
+      "different_provision": {
+        "f1": 0.0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "support": 6
+      },
+      "exact_key_baseline_macro_f1": 0.7765,
+      "gate_conditions": {
+        "beats_exact_key": true,
+        "merge_precision_ok": true,
+        "phase_a_untouched": true,
+        "separation_criterion_met": true
+      },
+      "macro_f1": 0.777,
+      "merge_precision": 0.8824,
+      "rescue_by_slice": {
+        "L1": 0,
+        "L7": 0
+      }
+    },
+    "old_run_id": "phaseB-relations-full"
+  },
+  "gate_g2": {
+    "conditions": {
+      "beats_exact_key": true,
+      "merge_precision_ok": true,
+      "phase_a_untouched": true,
+      "rescue_criterion_met": false
+    },
+    "verdict": "NOT YET"
+  },
+  "macro_f1": 0.954,
+  "merge_decision": {
+    "f1": 0.9486404833836858,
+    "fn": 1,
+    "fp": 16,
+    "precision": 0.9075144508670521,
+    "recall": 0.9936708860759493,
+    "threshold": 0.5,
+    "tn": 134,
+    "tp": 157
+  },
+  "merge_f1": 0.9397,
+  "merge_precision": 0.8912,
+  "merge_threshold": 0.5,
+  "n_test": 308,
+  "per_class": {
+    "AMBIGUOUS": {
+      "f1": 0.8889,
+      "precision": 0.8,
+      "recall": 1.0,
+      "support": 4
+    },
+    "CONDITIONALLY_EQUIVALENT": {
+      "f1": 1.0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "support": 8
+    },
+    "DIFFERENT_PROVISION": {
+      "f1": 0.942,
+      "precision": 1.0,
+      "recall": 0.8904,
+      "support": 146
+    },
+    "LEGALLY_EQUIVALENT": {
+      "f1": 1.0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "support": 18
+    },
+    "SAME_PROVISION": {
+      "f1": 0.9391,
+      "precision": 0.8912,
+      "recall": 0.9924,
+      "support": 132
+    }
+  },
+  "phase_a_tree_hash_after": "a98583fd66db4f46bb1ac014",
+  "phase_a_tree_hash_before": "a98583fd66db4f46bb1ac014",
+  "phase_a_untouched": true,
+  "run_id": "phaseB-7b-adapted",
+  "transition_gold_trap_probe": {
+    "L1/2024-01-01": {
+      "merge_rate": 0.3,
+      "merged": 3,
+      "n": 10
+    },
+    "L1/2026-10-01": {
+      "merge_rate": 0.2,
+      "merged": 2,
+      "n": 10
+    },
+    "L7/2024-01-01": {
+      "merge_rate": 0.9,
+      "merged": 9,
+      "n": 10
+    },
+    "L7/2026-10-01": {
+      "merge_rate": 0.9,
+      "merged": 9,
+      "n": 10
+    }
+  }
+}
