@@ -326,6 +326,40 @@ def test_frozen_inputs_are_verified_against_recorded_digests():
     assert all(entry["match"] for entry in digests.values())
 
 
+@pytest.mark.parametrize("relative", sorted(FROZEN_DATASET_SHA256))
+def test_frozen_inputs_survive_a_crlf_checkout(relative, tmp_path):
+    """A Windows CRLF checkout must not read as a tampered dataset.
+
+    ``core.autocrlf=true`` rewrites line endings on checkout without changing
+    content, so the digest is computed over content with CRLF read as LF.
+    """
+    source = (ROOT / relative).read_bytes().replace(b"\r\n", b"\n")
+    (tmp_path / "data").mkdir()
+    for other in FROZEN_DATASET_SHA256:          # a complete copy to verify against
+        (tmp_path / other).write_bytes((ROOT / other).read_bytes().replace(b"\r\n", b"\n"))
+    crlf = source.replace(b"\n", b"\r\n")
+    (tmp_path / relative).write_bytes(crlf)
+    assert (tmp_path / relative).read_bytes() != source, "fixture is not actually CRLF"
+    digests = verify_frozen_inputs(tmp_path)
+    assert digests[relative]["match"], f"{relative} failed only because of line endings"
+    assert digests[relative]["actual"] == FROZEN_DATASET_SHA256[relative]
+
+
+@pytest.mark.parametrize("relative", sorted(FROZEN_DATASET_SHA256))
+def test_frozen_inputs_still_detect_a_real_edit(relative, tmp_path):
+    """Line-ending tolerance must not make a genuine change invisible."""
+    (tmp_path / "data").mkdir()
+    for other in FROZEN_DATASET_SHA256:          # a complete, untouched copy
+        (tmp_path / other).write_bytes((ROOT / other).read_bytes().replace(b"\r\n", b"\n"))
+    source = (tmp_path / relative).read_bytes()
+    edited = source + b'{"injected": true}\n' if relative.endswith(".jsonl") \
+        else source.replace(b"}", b', "injected": true}', 1)
+    assert edited != source, "fixture edit did not apply"
+    (tmp_path / relative).write_bytes(edited)
+    with pytest.raises(SystemExit, match="differs from its recorded digest"):
+        verify_frozen_inputs(tmp_path)
+
+
 def test_the_guard_refuses_a_tampered_dataset(tmp_path):
     (tmp_path / "data").mkdir()
     for relative in FROZEN_DATASET_SHA256:

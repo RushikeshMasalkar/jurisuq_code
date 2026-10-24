@@ -217,6 +217,18 @@ PINNED_PLAN_HASH = "eb06ed62db637c89110a4a2a511f65164d3ff990638c66832c1a6aa16e30
 PINNED_CONFIG_SHA256 = "fe77951adea8f0a3b3558ad4303c7412ae5973793c0d03f5df60da285d1c4045"
 
 
+def _sha256_content(path: Path) -> str:
+    """SHA-256 of a file's content, with CRLF line endings read as LF.
+
+    The pinned digests fingerprint the content Git stores (LF). A Windows
+    checkout with ``core.autocrlf=true`` materialises the same content as CRLF,
+    so hashing the raw bytes there reported a mismatch on a file nobody had
+    touched. Normalising only ``CRLF -> LF`` makes the check independent of the
+    checkout's line-ending policy while still failing on any real edit.
+    """
+    return hashlib.sha256(path.read_bytes().replace(b"\r\n", b"\n")).hexdigest()
+
+
 def test_pilot_status_record_exists_and_says_on_hold():
     status = _load(STATUS)
     assert status["status"] == "ON_HOLD"
@@ -280,17 +292,41 @@ def test_no_substitute_provider_was_wired_in():
 
 def test_the_approved_deepseek_plan_is_byte_identical():
     plan = ROOT / "runs" / "phaseG_pilot_plan.json"
-    assert hashlib.sha256(plan.read_bytes()).hexdigest() == PINNED_PLAN_FILE_SHA256
+    assert _sha256_content(plan) == PINNED_PLAN_FILE_SHA256
     assert json.loads(plan.read_text())["plan_sha256"] == PINNED_PLAN_HASH
 
 
 def test_the_deepseek_configuration_is_unmodified_and_still_deepseek():
     config = _load(ROOT / "configs" / "phase_g_pilot.json")
-    assert hashlib.sha256((ROOT / "configs" / "phase_g_pilot.json").read_bytes()).hexdigest() \
-        == PINNED_CONFIG_SHA256
+    assert _sha256_content(ROOT / "configs" / "phase_g_pilot.json") == PINNED_CONFIG_SHA256
     assert config["generator"]["model"] == "deepseek-flash"
     assert config["generator"]["base_url"] == "https://api.deepseek.com/v1"
     assert "api_key" not in config["generator"]
+
+
+def test_integrity_hashes_are_line_ending_agnostic(tmp_path):
+    """The same content must hash identically whether checked out LF or CRLF."""
+    source = (ROOT / "runs" / "phaseG_pilot_plan.json").read_bytes()
+    lf = tmp_path / "lf.json"
+    crlf = tmp_path / "crlf.json"
+    lf.write_bytes(source.replace(b"\r\n", b"\n"))
+    crlf.write_bytes(lf.read_bytes().replace(b"\n", b"\r\n"))
+    # the fixture must really differ on disk, or this test proves nothing
+    assert lf.read_bytes() != crlf.read_bytes()
+    assert _sha256_content(lf) == _sha256_content(crlf) == PINNED_PLAN_FILE_SHA256
+
+
+def test_integrity_hash_still_detects_a_real_content_edit(tmp_path):
+    """Normalising line endings must not blunt the check it protects."""
+    source = (ROOT / "configs" / "phase_g_pilot.json").read_bytes()
+    edited = tmp_path / "edited.json"
+    edited.write_bytes(source.replace(b'"deepseek-flash"', b'"some-other-model"'))
+    assert edited.read_bytes() != source, "fixture edit did not apply"
+    assert _sha256_content(edited) != PINNED_CONFIG_SHA256
+    # a trailing-newline-only change is also a real change
+    denewlined = tmp_path / "denewlined.json"
+    denewlined.write_bytes(source.replace(b"\r\n", b"\n").rstrip(b"\n"))
+    assert _sha256_content(denewlined) != PINNED_CONFIG_SHA256
 
 
 def test_status_record_and_config_agree_on_the_plan_hash():
