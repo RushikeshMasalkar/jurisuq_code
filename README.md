@@ -50,6 +50,12 @@ Gemini API screening found 2.5-flash unavailable, 3.8-flash returning 503,
 and 3.6-flash exhausting the free-tier daily quota (HTTP 429). Under the
 zero-cost constraint no API model was used.
 
+The Qwen3-14B local pilot screen (reasoning off, 24 items, 12 per slice)
+completed in 1,373 seconds with 100% judge coverage. Per-sample accuracy was
+L7 `0.00` and L1 `0.56`; the verdict mix was `stale_law=33`,
+`wrong_section=19`, `gold=16`, and `gold_operative=4`. This did not alter the
+frozen slice: the primary run remains `qwen2.5-7b-instruct`.
+
 Under this constraint L7 has no correct items, so G5 remains
 **NOT_EVALUABLE** and the L1-L7 comparison cannot be made. Per master-guide
 section 16.4, the failed G2 directs the project to its diagnostic

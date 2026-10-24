@@ -21,6 +21,15 @@ regenerated with it. Gemini API screening found 2.5-flash unavailable,
 3.8-flash returning 503, and 3.6-flash exhausting the free-tier daily quota
 (HTTP 429), so no API model was used under the zero-cost constraint.
 
+### Qwen3-14B pilot screen
+
+The required local pilot used the endpoint model id `qwen3-14b` with
+reasoning off. It completed in 1,373 seconds on 24 pilot items (12 per slice,
+72 sampled answers), with 100% judge coverage. Per-sample accuracy was L7
+`0.00` and L1 `0.56`. The verdict mix was `stale_law=33`,
+`wrong_section=19`, `gold=16`, and `gold_operative=4`. This is a screen only:
+the primary run remains `qwen2.5-7b-instruct`, and no slice was regenerated.
+
 ## Components and data
 
 - `jurisuq/generators.py`: mock and OpenAI-compatible local generators.
