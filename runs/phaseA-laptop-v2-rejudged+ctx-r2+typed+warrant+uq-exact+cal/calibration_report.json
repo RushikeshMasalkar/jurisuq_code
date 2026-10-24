@@ -1,0 +1,425 @@
+{
+  "phase": "F",
+  "experiment": "E6",
+  "gate": "G6",
+  "label_field": "majority_correct",
+  "harm_rule": "max",
+  "target_coverage": 0.8,
+  "policy": {
+    "verify_cost": 0.15,
+    "abstain_cost": 0.35,
+    "on_undefined": "verify",
+    "harm_weights": {
+      "both": 3.0,
+      "custodial": 5.0,
+      "definition": 1.5,
+      "procedural": 1.0,
+      "unknown": 5.0
+    },
+    "rule": "answer if (1-p)*h <= verify_cost; verify if <= abstain_cost; else abstain"
+  },
+  "holdout": {
+    "n": 44,
+    "strata": [
+      "L1",
+      "L7"
+    ]
+  },
+  "per_stratum": {
+    "L1": {
+      "n_holdout": 22,
+      "n_scored": 22,
+      "n_correct": 7,
+      "n_incorrect": 15,
+      "both_classes_present": true,
+      "metrics": {
+        "ace_5bin": 0.2796623011975103,
+        "ece_10bin": 0.2796623011975103,
+        "brier": 0.2993423164200025,
+        "log_loss": 1.5375030577218178,
+        "reliability_5bin": [
+          {
+            "bin": 0,
+            "lo": 0.0,
+            "hi": 0.2,
+            "n": 0,
+            "mean_p": null,
+            "accuracy": null
+          },
+          {
+            "bin": 1,
+            "lo": 0.2,
+            "hi": 0.4,
+            "n": 4,
+            "mean_p": 0.35974892791167457,
+            "accuracy": 0.25
+          },
+          {
+            "bin": 2,
+            "lo": 0.4,
+            "hi": 0.6,
+            "n": 9,
+            "mean_p": 0.5085413055086557,
+            "accuracy": 0.1111111111111111
+          },
+          {
+            "bin": 3,
+            "lo": 0.6,
+            "hi": 0.8,
+            "n": 6,
+            "mean_p": 0.6436275845061347,
+            "accuracy": 0.6666666666666666
+          },
+          {
+            "bin": 4,
+            "lo": 0.8,
+            "hi": 1.0,
+            "n": 3,
+            "mean_p": 0.9994895573858114,
+            "accuracy": 0.3333333333333333
+          }
+        ]
+      },
+      "selective": {
+        "coverage": 0.5,
+        "calibrated": {
+          "coverage": 0.5,
+          "n": 22,
+          "n_accepted": 11,
+          "risk": 0.5454545454545454,
+          "harm_weighted_risk": 0.5454545454545454,
+          "threshold": 0.5718282148249659,
+          "n_errors_accepted": 6
+        },
+        "baseline_phase_e_raw": {
+          "coverage": 0.5,
+          "n": 22,
+          "n_accepted": 11,
+          "risk": 0.5454545454545454,
+          "harm_weighted_risk": 0.5454545454545454,
+          "threshold": 0.304926056017661,
+          "n_errors_accepted": 6
+        },
+        "baseline_sample_only_u_prov": {
+          "coverage": 0.5,
+          "n": 22,
+          "n_accepted": 11,
+          "risk": 0.45454545454545453,
+          "harm_weighted_risk": 0.45454545454545453,
+          "threshold": 0.46989700043360183,
+          "n_errors_accepted": 5
+        },
+        "risk_coverage_curve": [
+          {
+            "coverage": 0.1,
+            "n": 22,
+            "n_accepted": 3,
+            "risk": 0.6666666666666666,
+            "harm_weighted_risk": 0.6666666666666666,
+            "threshold": 0.999234336078717,
+            "n_errors_accepted": 2
+          },
+          {
+            "coverage": 0.2,
+            "n": 22,
+            "n_accepted": 5,
+            "risk": 0.4,
+            "harm_weighted_risk": 0.4,
+            "threshold": 0.6666666666666666,
+            "n_errors_accepted": 2
+          },
+          {
+            "coverage": 0.3,
+            "n": 22,
+            "n_accepted": 7,
+            "risk": 0.42857142857142855,
+            "harm_weighted_risk": 0.42857142857142855,
+            "threshold": 0.6375324038092636,
+            "n_errors_accepted": 3
+          },
+          {
+            "coverage": 0.4,
+            "n": 22,
+            "n_accepted": 9,
+            "risk": 0.4444444444444444,
+            "harm_weighted_risk": 0.4444444444444444,
+            "threshold": 0.6095747127631459,
+            "n_errors_accepted": 4
+          },
+          {
+            "coverage": 0.5,
+            "n": 22,
+            "n_accepted": 11,
+            "risk": 0.5454545454545454,
+            "harm_weighted_risk": 0.5454545454545454,
+            "threshold": 0.5718282148249659,
+            "n_errors_accepted": 6
+          },
+          {
+            "coverage": 0.6,
+            "n": 22,
+            "n_accepted": 14,
+            "risk": 0.6428571428571429,
+            "harm_weighted_risk": 0.6428571428571429,
+            "threshold": 0.5220168781181195,
+            "n_errors_accepted": 9
+          },
+          {
+            "coverage": 0.7,
+            "n": 22,
+            "n_accepted": 16,
+            "risk": 0.6875,
+            "harm_weighted_risk": 0.6875,
+            "threshold": 0.46089537857202056,
+            "n_errors_accepted": 11
+          },
+          {
+            "coverage": 0.8,
+            "n": 22,
+            "n_accepted": 18,
+            "risk": 0.6666666666666666,
+            "harm_weighted_risk": 0.6666666666666666,
+            "threshold": 0.4483091954733521,
+            "n_errors_accepted": 12
+          },
+          {
+            "coverage": 0.9,
+            "n": 22,
+            "n_accepted": 20,
+            "risk": 0.7,
+            "harm_weighted_risk": 0.7,
+            "threshold": 0.37602123852862035,
+            "n_errors_accepted": 14
+          },
+          {
+            "coverage": 1.0,
+            "n": 22,
+            "n_accepted": 22,
+            "risk": 0.6818181818181818,
+            "harm_weighted_risk": 0.6818181818181818,
+            "threshold": 0.3222428125799797,
+            "n_errors_accepted": 15
+          }
+        ]
+      },
+      "conformal": {
+        "method": "split-conformal, finite-sample corrected",
+        "calibration_source": "development partition, cross-fitted probabilities",
+        "target_coverage": 0.8,
+        "threshold": 0.3855212905028752,
+        "threshold_status": "defined",
+        "empirical_coverage_on_holdout": 0.8636363636363636,
+        "n_holdout": 22,
+        "tolerance": 0.16714936162279856,
+        "within_tolerance": true,
+        "exchangeability_caveat": "Items are matched L1/L7 pairs from ten offence clusters; within-stratum exchangeability is approximate, so the guarantee is approximate."
+      },
+      "calibration_undefined_ids": [],
+      "policy": {
+        "actions": {
+          "answer": 3,
+          "verify": 0,
+          "abstain": 19
+        },
+        "triggers": {
+          "reliability_above_answer_threshold": 3,
+          "reliability_below_verify_threshold": 19
+        },
+        "thresholds_by_harm_class": {
+          "custodial": {
+            "harm_class": "custodial",
+            "harm_weight": 5.0,
+            "p_answer": 0.97,
+            "p_verify": 0.93,
+            "abstain_reachable": true
+          }
+        }
+      },
+      "status": "evaluated",
+      "development": {
+        "status": "fitted",
+        "method": "isotonic",
+        "n_correct": 36,
+        "n_incorrect": 42,
+        "ace_5bin_cross_fitted": 0.27969827988395934,
+        "n_cross_fitted": 78
+      }
+    },
+    "L7": {
+      "n_holdout": 22,
+      "n_scored": 0,
+      "n_correct": 0,
+      "n_incorrect": 0,
+      "both_classes_present": false,
+      "metrics": null,
+      "selective": null,
+      "conformal": null,
+      "calibration_undefined_ids": [
+        "L7-theft-038",
+        "L7-criminal_breach_of_trust-029",
+        "L7-wrongful_restraint-033",
+        "L7-criminal_breach_of_trust-035",
+        "L7-murder-013",
+        "L7-criminal_intimidation-087",
+        "L7-theft_in_dwelling-075",
+        "L7-criminal_intimidation-032",
+        "L7-theft_in_dwelling-067",
+        "L7-criminal_intimidation-092",
+        "L7-culpable_homicide-030",
+        "L7-wrongful_restraint-060",
+        "L7-murder-008",
+        "L7-criminal_intimidation-009",
+        "L7-criminal_intimidation-034",
+        "L7-theft-083",
+        "L7-murder-046",
+        "L7-cruelty_by_husband-020",
+        "L7-criminal_breach_of_trust-018",
+        "L7-wrongful_restraint-015",
+        "L7-murder-036",
+        "L7-murder-003"
+      ],
+      "status": "not_evaluable_single_class_holdout",
+      "development": {
+        "status": "single_class_in_development",
+        "method": null,
+        "n_correct": 0,
+        "n_incorrect": 78,
+        "ace_5bin_cross_fitted": null,
+        "n_cross_fitted": null
+      },
+      "reason": "the held-out stratum contains one correctness class, so a calibration or ranking metric on it is undefined"
+    }
+  },
+  "harm_class_counts": {
+    "custodial": 44
+  },
+  "harm_weight_variance_present": false,
+  "conditions": {
+    "calibration_ace_at_or_below_0.05_on_development": {
+      "pass": false,
+      "defined": true,
+      "threshold": 0.05,
+      "rows": [
+        {
+          "stratum": "L1",
+          "ace_5bin": 0.27969827988395934,
+          "n_cross_fitted": 78,
+          "evaluable": true,
+          "threshold": 0.05,
+          "pass": false
+        },
+        {
+          "stratum": "L7",
+          "ace_5bin": null,
+          "n_cross_fitted": 0,
+          "evaluable": false,
+          "threshold": 0.05,
+          "pass": null
+        }
+      ],
+      "failed_strata": [
+        "L1"
+      ],
+      "reason": null
+    },
+    "harm_weighted_selective_risk_at_50pct_below_every_baseline": {
+      "pass": false,
+      "defined": true,
+      "rows": [
+        {
+          "stratum": "L1",
+          "evaluable": true,
+          "calibrated": 0.5454545454545454,
+          "baseline_phase_e_raw": 0.5454545454545454,
+          "baseline_sample_only_u_prov": 0.45454545454545453,
+          "comparison_baselines": [
+            "baseline_sample_only_u_prov"
+          ],
+          "raw_equal_by_construction": true,
+          "coverage": 0.5,
+          "pass": false
+        },
+        {
+          "stratum": "L7",
+          "evaluable": false,
+          "reason": "the held-out stratum contains one correctness class, so a calibration or ranking metric on it is undefined"
+        }
+      ],
+      "failed_strata": [
+        "L1"
+      ],
+      "reason": null,
+      "note": "A monotone calibration map preserves the Phase E ranking, so the selective risk of the calibrated score equals that of the raw score by construction; only baselines built on a different score are informative and only they decide this condition."
+    },
+    "empirical_coverage_within_tolerance_of_target": {
+      "pass": true,
+      "defined": true,
+      "rows": [
+        {
+          "stratum": "L1",
+          "evaluable": true,
+          "target": 0.8,
+          "empirical": 0.8636363636363636,
+          "tolerance": 0.16714936162279856,
+          "pass": true
+        },
+        {
+          "stratum": "L7",
+          "evaluable": false
+        }
+      ],
+      "failed_strata": [],
+      "reason": null
+    },
+    "query_path_reads_no_labels": {
+      "pass": true,
+      "defined": true,
+      "reason": null
+    }
+  },
+  "verdict": "NOT_MET",
+  "gate_status": "NOT_MET",
+  "verdict_reason": "failed conditions: calibration_ace_at_or_below_0.05_on_development, harm_weighted_selective_risk_at_50pct_below_every_baseline",
+  "limitations": [
+    "Evaluation is on the frozen 200-item slice; the holdout is 44 items (22 per slice) and the L7 stratum has a single correctness class.",
+    "Calibration maps are fitted on one 7B quantised checkpoint's answers; they do not transfer to another model without refitting.",
+    "The harm class is derived from the question's offence cluster in the Phase C statute store; on this slice every cluster resolves to the same class, so harm weighting does not change the ranking here.",
+    "The conformal guarantee assumes exchangeability within a stratum; matched L1/L7 pairs and shared topics violate that assumption in the strong form.",
+    "The Phase E score this layer consumes was not better than the sample-only baseline on the control slice, so calibration cannot create skill."
+  ],
+  "run_id": "phaseA-laptop-v2-rejudged+ctx-r2+typed+warrant+uq-exact+cal",
+  "source_run_id": "phaseA-laptop-v2-rejudged+ctx-r2+typed+warrant+uq-exact",
+  "calibration_model_path": "runs/phaseA-laptop-v2-rejudged+ctx-r2+typed+warrant+uq-exact+cal/calibration_model.json",
+  "calibration_model_sha256": "96e3a83bbcf297fb45649af41e78fc29014f60e4849359f238b0cc5e15ea742e",
+  "scored_items_sha256": "3213a6b16d3150063e4b6d697e2beb8e295747d815173f0390c7c603fe7a34cb",
+  "items_unchanged_by_validation": true,
+  "interface_rule": {
+    "path": "/home/user/jurisuq_code/scripts/30_apply_policy.py",
+    "label_blind": true,
+    "forbidden_fields_found": [],
+    "forbidden_fields_checked": [
+      "majority_correct",
+      "sample_correct",
+      "frac_correct",
+      "majority_frac_correct",
+      "gold",
+      "trap"
+    ],
+    "method": "AST scan of identifiers and non-docstring string constants"
+  },
+  "n_records": 200,
+  "n_calibrated": 100,
+  "n_undefined_reliability": 100,
+  "calibration_status_census": {
+    "calibrated": 100,
+    "undefined_stratum_not_calibrated": 100
+  },
+  "action_census": {
+    "answer": 17,
+    "verify": 101,
+    "abstain": 82
+  },
+  "generated_utc": "2026-10-24T14:26:16Z",
+  "label_access": "correctness labels are read only in this offline validation script, after scoring was written",
+  "source_tree_hash_after_validation": "68969d29a9dcacf709cd848f7febad30cad2064c6c1327efe814bdcb5a024663"
+}
