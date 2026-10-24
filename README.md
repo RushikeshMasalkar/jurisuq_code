@@ -226,14 +226,40 @@ skipped**.
 
 ### Phase G — target population for G5 and the L7 half of G6
 
-Phase G is a data-availability phase, not a modelling phase. Both G5 and the L7
-half of G6 are blocked on one thing: no evaluation population has both
-correctness classes. The repository contains **no Phase G specification and no
-Phase G gate**; the only documented requirement is the one sentence repeated in
-`PHASE-E.md` §7.4, `PHASE-E.md`'s structural G5 finding, and `PHASE-F.md` §12.1
-— a target slice with both correctness classes on which the detector both fires
-and stays silent. The phase therefore implements that prerequisite as an
-executable check and defines no new gate.
+Phase G is the guide's "measure everything" phase (§12, §21.1–21.3). Both G5 and
+the L7 half of G6 are blocked on one thing: no evaluation population has both
+correctness classes. The guide defines **Gate G7** for exactly this — "the target
+slice carries both correctness classes and the headline comparison is
+computable", failing when "no target slice exists on which a ranking is
+defined".
+
+> **Correction.** Earlier revisions of this README, `PHASE-G.md` and
+> `configs/phase_g_target.json` said the repository had no Phase G specification
+> and no Phase G gate. That was inaccurate and is retracted. The specification
+> exists; it lives in the project's external engineering guide, which is why its
+> text was not to hand. G7 is a defined gate, and it currently **fails**.
+
+§21.2's evaluation matrix and the offline half of §21.3 are now implemented
+(`jurisuq/evaluation/`, `scripts/42`, `scripts/43`) and computed from the frozen
+runs — no new generation. On the frozen evaluation partition, 44 items:
+
+| Method (larger score = more uncertain) | L1 AUROC | L7 AUROC |
+|---|---:|---|
+| exact agreement | 0.5714 | undefined — single class |
+| lexical similarity | undefined — not implemented | undefined — not implemented |
+| discrete semantic entropy | 0.5714 | undefined — single class |
+| standard semantic entropy | 0.4857 | undefined — single class |
+| SelfCheck | 0.5905 | undefined — single class |
+| p_true | undefined — no logprobs | undefined — no logprobs |
+| provision agreement | 0.8333 | undefined — single class |
+| legal-aware | 0.6524 | undefined — no calibrated score |
+| legal-aware, uncalibrated | 0.6524 | undefined — single class |
+
+Judge coverage is 1.0000 per slice. **G7 is NOT_MET**: L7 has 0 correct of 100
+items, so no ranking is defined there, and the calibrated arm is fitted on L1
+only. Stage-1 latency is measured (n=200, median 45.02 s, p95 67.41 s); full
+cascade latency and peak memory are `not_instrumented` and await a laptop run.
+Twenty-two items with 7 correct cannot rank methods, so no ordering is claimed.
 
 The audit (`scripts/40_audit_target_feasibility.py`, read-only) establishes that
 **no valid target population exists in the frozen artefacts**:
@@ -251,7 +277,9 @@ assert the gold section in any form. **G5 stays NOT_EVALUABLE and G6 stays
 NOT_MET.** Building the population needs new items and new generation, which is
 an open, costed checkpoint in `PHASE-G.md`.
 
-The suite is now **320 passed, 1 skipped** (50 new Phase G tests).
+The suite is now **406 passed, 1 skipped** (136 new Phase G tests: 50 population
+screening + 39 evaluation matrix + 32 deployment + 15 documentation guards). Reports:
+`runs/phaseG_eval_matrix.json`, `runs/phaseG_deployment.json`.
 
 ## Documentation map
 
@@ -270,8 +298,10 @@ historical results record:
   AUROC interval, G5 status, and separate environment test records.
 - [Phase F follow-up](PHASE-F-FOLLOWUP.md) — the four post-merge experiments,
   corrected conformal provenance, and clustered uncertainty.
-- [Phase G guide](PHASE-G.md) — specification gap, the target-population
-  readiness check, the feasibility audit, and the pending generation checkpoint.
+- [Phase G guide](PHASE-G.md) — the corrected specification status and Gate G7,
+  the §21.2 evaluation matrix with its undefined reason codes, the §21.3
+  deployment measurements, the target-population readiness check, the
+  feasibility audit, and the pending generation checkpoint.
 - [Phase F guide](PHASE-F.md) — calibration maps, grouped cross-fitting, the
   decision policy, the conformal layer, E6 results, and the G6 verdict with its
   failure conditions and limitations.

@@ -1,0 +1,94 @@
+{
+  "phase": "G",
+  "section": "21.3 deployment measurements",
+  "configuration_actually_measured": {
+    "model": "openai-compat:qwen2.5-7b-instruct",
+    "quantisation": "not recorded in run metadata",
+    "M": 10,
+    "prompt_version": "p2-structured",
+    "temperature": 1.0,
+    "judge": "provision",
+    "modules_run": [
+      "generation",
+      "provision-level scoring"
+    ],
+    "modules_not_run": [
+      "relation model",
+      "detector",
+      "estimator",
+      "decision"
+    ],
+    "degraded": true,
+    "degraded_because": "this is the Phase A run: legal modules had not been built, so it measures the stage-1 fallback path, not the full cascade",
+    "source": "phaseA-laptop-v2-rejudged/meta.json",
+    "n_items_timed": 200
+  },
+  "stage1_latency": {
+    "n": 200,
+    "median": 45.016300678253174,
+    "p95": 67.40911507606504,
+    "mean": 46.30206829786301,
+    "min": 29.484365463256836,
+    "max": 97.82622957229614,
+    "unit": "seconds",
+    "undefined": null,
+    "percentile_convention": "linear interpolation (numpy default)",
+    "stage": "stage-1 (generation + provision-level score)",
+    "definition": "gen_latency_s + scoring_s per item, legal modules excluded",
+    "n_items_skipped": 0,
+    "source": "stored Phase A run fields",
+    "modules_excluded": [
+      "relation model",
+      "detector",
+      "estimator",
+      "decision"
+    ]
+  },
+  "full_cascade_latency": {
+    "stage": "full cascade",
+    "stages": [
+      "generation",
+      "relation_prediction",
+      "typed_clustering",
+      "detection",
+      "estimation",
+      "decision"
+    ],
+    "n": 0,
+    "median": null,
+    "p95": null,
+    "mean": null,
+    "min": null,
+    "max": null,
+    "unit": "seconds",
+    "undefined": "not_instrumented",
+    "reason": "the frozen runs time only generation and record construction; relation, detection, estimation and decision stages are not instrumented, so no cascade latency is derivable from them",
+    "how_to_measure": "scripts/43_measure_deployment.py --timings <file> on the target laptop, or --instrument during a live run"
+  },
+  "peak_resident_memory": {
+    "measurement": "peak resident memory",
+    "megabytes": null,
+    "undefined": "not_instrumented",
+    "reason": "no memory sampling exists in any Phase A-F run",
+    "how_to_measure": "psutil.Process().memory_info().rss sampled during a live query, or resource.getrusage(RUSAGE_SELF).ru_maxrss on POSIX; record which one was used"
+  },
+  "completed_offline": [
+    "stage1_latency",
+    "configuration_actually_measured"
+  ],
+  "requires_laptop_run": [
+    "full_cascade_latency",
+    "peak_resident_memory"
+  ],
+  "rule": "a degraded configuration must be described, not hidden; the report states what ran (guide §21.3)",
+  "generated_by": "scripts/43_measure_deployment.py",
+  "generated_utc": "2026-10-24T17:46:26Z",
+  "git_commit": "e9ee09ac71ce1565d4e9723bbed220a9463dcf76",
+  "source_run_id": "phaseA-laptop-v2-rejudged",
+  "inputs": {
+    "source_tree_sha256": "994671d92205c7b964649744d95c8e87e1013eeec0fbd18d70f2e2e7f4211c98",
+    "items_sha256": "8608265bd491c996d97935ae7cd59d03f2ac8865852b38dd96e2be9bcdd14da6",
+    "source_unchanged_during_report": true
+  },
+  "measurement_mode": "offline summary only"
+}

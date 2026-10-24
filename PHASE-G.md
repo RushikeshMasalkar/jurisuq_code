@@ -1,30 +1,59 @@
-# JURIS-UQ — Phase G: target population for the G5 and G6 target stratum
+# JURIS-UQ — Phase G: target population and the §21 evaluation matrix
 
-**Status: infrastructure implemented and audited; the target population does not
-exist yet. No Phase G gate is defined, because none is documented.**
+**Status: measurement infrastructure implemented.** The §21.2 evaluation matrix
+and the offline half of the §21.3 deployment report can now be produced from the
+frozen runs. The target population the guide's Gate G7 requires does **not**
+exist, so **G7 is `NOT_MET`**. G5 stays `NOT_EVALUABLE` and G6 stays `NOT_MET`.
 
-## Specification status — read this first
+## Specification status — corrected
 
-The repository contains **no Phase G specification**. The engineering guide
-whose §16.4, §20, §20.3 and §21.1 this project cites is not part of the tree,
-and no gate number, threshold, or acceptance table for Phase G appears anywhere
-in it. Every occurrence of "Phase G" in the documentation is a forward
-reference, and all of them say the same thing:
+> **Correction (Phase G, Stage 1).** Earlier revisions of this file and of
+> `configs/phase_g_target.json` stated that no Phase G specification and no gate
+> number existed. That was wrong, and it is retracted here. The project's
+> engineering guide defines Phase G (weeks 13–15) and a gate for it, G7. The
+> guide is a project document that lives outside this repository, which is why
+> the text was not to hand — that is a filing problem, not an absence of
+> specification, and it must never again be reported as one.
+
+Phase G, per the guide, is the "measure everything" phase: headline evaluation
+tables, external-benchmark transfer, and laptop latency and memory. Its
+governing sections are §12 (the gate table, including G7), §21.1 (reporting
+discipline), §21.2 (the evaluation grid) and §21.3 (deployment measurements).
+
+**Gate G7 — the sentence that defines it.** "The target slice carries both
+correctness classes and the headline comparison is computable." The guide states
+the failure condition explicitly: G7 fails when "no target slice exists on which
+a ranking is defined."
+
+G7 is therefore a defined gate with two substantive conditions, and it is **not**
+satisfied today. The measured status is in "Gate G7" below. Nothing in this phase invents
+a gate, a threshold, or an acceptance table; the threshold-free conditions of G7
+are the guide's own words, operationalised as four explicit checks that can be
+inspected in `jurisuq/evaluation/matrix.py::gate_g7`.
+
+### How the guide's requirements map onto this repository
+
+| Guide requirement | Where it is implemented | Status |
+|---|---|---|
+| §21.1(a) both correctness classes on every evaluated slice | `gate_g7`, condition 1 | **fails on L7** (0 correct of 100) |
+| §21.1(b) slices reported separately, pooled only *alongside* both | `build_matrix` (never pools), `pooled_reference` (refuses unless both slices present, tagged reference-only) | implemented |
+| §21.1(c) judge coverage per slice, as a column | `judge_coverage`, attached to every cell and block | implemented, 1.0000 on both slices |
+| §21.1(d) undefined printed as undefined, with a reason | reason codes in `matrix.py`, propagated into the JSON | implemented |
+| §21.2 nine uncertainty methods on identical items and samples | `METHODS` (9 declared) | 7 computed, `lexical_similarity` unimplemented, `p_true` has no logprobs |
+| §21.2 metrics: AUROC, AUPRC, nAURC, selective risk @ fixed coverage, ACE, ECE, Brier, reliability, abstention rate, harm-weighted risk | `score_cell` | all implemented |
+| §21.2 discipline: AUROC detects *incorrect*; confident-wrong = wrong ∧ lowest-quartile uncertainty | `score_cell`, `confident_wrong` | implemented |
+| §21.2 slices: control, target, external benchmark | L1, L7 present | external benchmark **deferred** (dataset + licensing approval) |
+| §21.2 generator: two laptop sizes/quantisations + one API model | 1 of 2 laptop arms | both extra arms **deferred** |
+| §21.3 stage-1 latency, full-cascade median + p95, peak RSS, configuration measured | `deployment.py`, `scripts/43` | stage-1 + configuration measured; cascade and RSS **not instrumented** |
+
+The old forward references remain accurate as *prerequisites* and are kept
+below for provenance:
 
 | Source | Text | What it requires |
 |---|---|---|
 | `PHASE-E.md` §7.4 | "The synthetic matched slice has no correct L7 majority answers. Build a target population containing both classes before claiming target-slice AUROC or evaluating the complete G5 criterion." | both correctness classes on the target slice |
 | `PHASE-E.md`, structural G5 finding | "It requires an evaluation population in which `T` varies within a slice: a slice with both correctness classes on which the detector both fires and stays silent." | both classes **and** both detector states, **within one slice** |
 | `PHASE-F.md` §12.1 | "build a target slice with both correctness classes; without it G6's second and third conditions remain single-sided and the L7 stratum stays unevaluable." | same population, so G6's L7 half becomes defined |
-
-That is the entire documented scope. Phase G is a **data-availability phase**:
-it exists to make G5 and the L7 half of G6 evaluable, not to add a model.
-
-Because no gate is documented, this phase implements **no new gate**, changes no
-existing gate constant, and does not report a pass or a fail of anything. What
-it does implement is the documented prerequisite, as an executable check, plus
-the audit that establishes whether that prerequisite is currently met. A numeric
-Phase G gate can be added later only once an approved specification exists.
 
 ## The finding: no valid target population exists in the frozen artefacts
 
@@ -139,6 +168,80 @@ calls a model, and no frozen artefact is modified.
 | `configs/phase_g_target.json` | audit inputs, screen parameters, planning assumptions, and the recorded forbidden operations |
 | `tests/test_target_population.py` | 34 tests: state classification, every readiness condition, the pooled trap, missing-value handling, confound diagnostic, yield estimation, planning projection |
 | `tests/test_target_screen.py` | 16 tests: item-schema validation, slice-stratified capping, the generation guard, end-to-end mock run |
+| `jurisuq/evaluation/matrix.py` | the §21.2 grid: 9 methods × per-slice matrices, all ten metrics, per-slice judge coverage, reason-coded undefineds, confident-wrong, harm-weighted risk, `gate_g7`, and the no-pooling guard |
+| `jurisuq/evaluation/deployment.py` | §21.3 measurements: stage-1 latency, full-cascade median/p95, peak RSS, the measured-configuration record, and the §27.1 ladder check |
+| `scripts/42_build_eval_matrix.py` | builds `runs/phaseG_eval_matrix.json` from the frozen runs (offline) |
+| `scripts/43_measure_deployment.py` | builds `runs/phaseG_deployment.json`; offline by default, `--timings` on the laptop |
+| `tests/test_eval_matrix.py` | 39 tests: every metric, the single-class and constant-score traps, every reason code, confidence-quartile edges, the no-pooling guard, G7 on both fixtures, no-NaN |
+| `tests/test_deployment_metrics.py` | 32 tests: percentile convention, empty/single summaries, field skipping, both undefined reasons, the ladder, configuration requirement |
+| `tests/test_phase_g_docs.py` | 15 tests: the corrected specification status, config/report/module agreement on the G7 verdict and the reason codes, the published table against the JSON, provenance, no pooling, no silent nulls |
+
+### Gate G7, measured
+
+Produced by `scripts/42_build_eval_matrix.py` from the frozen Phase E scores and
+the Phase F calibration run. Headline columns are the frozen pair-grouped
+**evaluation** partition (44 items), which is the only partition on which every
+method is out of sample; the report also carries a descriptive all-item matrix
+with an explicit in-sample caveat for the fitted method.
+
+| Method | L1 AUROC | L7 AUROC |
+|---|---:|---|
+| exact agreement | 0.5714 | undefined — `single_correctness_class` |
+| lexical similarity | undefined — `method_not_implemented` | undefined — `method_not_implemented` |
+| discrete semantic entropy | 0.5714 | undefined — `single_correctness_class` |
+| standard semantic entropy | 0.4857 | undefined — `single_correctness_class` |
+| SelfCheck | 0.5905 | undefined — `single_correctness_class` |
+| p_true | undefined — `logprobs_absent` | undefined — `logprobs_absent` |
+| provision agreement | 0.8333 | undefined — `single_correctness_class` |
+| legal-aware | 0.6524 | undefined — `no_items_with_a_score_and_a_label` |
+| legal-aware, uncalibrated | 0.6524 | undefined — `single_correctness_class` |
+
+Judge coverage is 1.0000 on both slices (0 unresolved items, 0 unresolved
+samples). The four G7 checks come out met / NOT met as follows:
+
+| G7 condition | Status |
+|---|---|
+| both correctness classes on every evaluated slice | **NOT met** — L7 has 0 correct of 22 evaluation items (0 of 100 overall) |
+| headline comparison computable | **NOT met** — no legal-aware vs baseline ranking exists on L7 |
+| judge coverage reported per slice | met |
+| undefined values stated with a reason | met |
+
+**Gate G7: `NOT_MET`.** The reason is the guide's own fail condition: no target
+slice exists on which a ranking is defined.
+
+Two further gaps sit underneath that verdict and are reported rather than
+papered over:
+
+* The calibrated legal-aware method is defined on **L1 only** (100 of 100 items
+  there, 0 of 100 on L7). Even if L7 had both classes, the calibrated arm could
+  not be scored on it without extending calibration, which needs generation.
+* `p_true` is unavailable for every item because the frozen runs stored no
+  token log-probabilities. It is a declared arm with a measured absence, not a
+  method that was silently dropped.
+
+### §21.3 deployment measurements
+
+| Measurement | Result |
+|---|---|
+| stage-1 latency (generation + provision score, no legal modules) | n=200, median 45.02 s, p95 67.41 s, max 97.83 s |
+| full-cascade latency, median and p95 | undefined — `not_instrumented` |
+| peak resident memory | undefined — `not_instrumented` |
+| configuration actually measured | `openai-compat:qwen2.5-7b-instruct`, M=10, quantisation not recorded in the run metadata, degraded (no legal modules) |
+
+The two undefined rows are undefined because the frozen runs record only
+generation time; relation, detection, estimation and decision are not
+instrumented, and no memory sampling exists in any Phase A–F run. They require a
+laptop run and are reproduced with `scripts/43_measure_deployment.py --timings
+<file>`, whose expected input shape is documented in the script. No value is
+estimated for them.
+
+### Evaluation arms that are missing by decision
+
+| §21.2 arm | Status | Why |
+|---|---|---|
+| second laptop model or quantisation | deferred | cost and storage review; the guide's two-arm generator axis is 1 of 2 |
+| one API model at evaluation time | deferred | not approved; no spend or generation authorised in this stage |
+| external benchmark slice | deferred | dataset selection and licensing need separate approval; no benchmark data is in the repository |
 
 ### The readiness conditions
 
@@ -170,8 +273,14 @@ python -X utf8 scripts\40_audit_target_feasibility.py
 # the screen, offline plumbing check (no model is called)
 python -X utf8 scripts\41_screen_target_yield.py --data data\lexuq_slice.jsonl --items 6 --out runs\phaseG_screen_mock.json --set provider=mock --set n_samples=3
 
+# the evaluation matrix (§21.2) and the G7 verdict, offline
+python -X utf8 scripts\42_build_eval_matrix.py
+
+# the deployment report (§21.3), offline half
+python -X utf8 scripts\43_measure_deployment.py
+
 # focused tests
-python -X utf8 -m pytest tests\test_target_population.py tests\test_target_screen.py -q
+python -X utf8 -m pytest tests\test_target_population.py tests\test_target_screen.py tests\test_eval_matrix.py tests\test_deployment_metrics.py -q
 ```
 
 The screen **refuses** to run against a real backend unless `--allow-generation`
@@ -188,8 +297,10 @@ ERROR: this script calls a model when provider != 'mock'.
 | Check | Result |
 |---|---|
 | Sandbox baseline before this phase | 270 passed, 1 skipped |
-| After Phase G infrastructure | 320 passed, 1 skipped |
-| New tests | 50 (34 population + 16 screen) |
+| After Phase G population infrastructure | 320 passed, 1 skipped |
+| After the §21 matrix and deployment tooling | 391 passed, 1 skipped |
+| After the documentation guard tests | 406 passed, 1 skipped |
+| New tests | 136 (34 population + 16 screen + 39 matrix + 32 deployment + 15 doc guards) |
 | Skipped | `tests/test_relations.py:236` — `torch not installed`; pre-existing |
 | User's Windows environment | torch present, so the skip runs there (271 passed at baseline) |
 
@@ -205,11 +316,23 @@ ERROR: this script calls a model when provider != 'mock'.
   slice the detector is at chance (0.489).
 * The L7 zero is not a comparator artefact: zero of 1,000 samples assert the gold
   section, in any form, in any of the ten topics.
+* The §21.2 matrix can be computed end to end from frozen artefacts. On L1, the
+  only two-class slice, provision agreement (0.8333) and the two legal-aware arms
+  (0.6524) rank above chance, as do the exact-agreement, discrete-semantic-entropy
+  and SelfCheck columns (0.57–0.59); only standard semantic entropy lands at
+  0.4857, i.e. at chance.
+* G7 fails, and fails for a measured reason: L7 carries one correctness class,
+  so no ranking is defined there.
 
 **Does not show**
 
-* Any Phase G result. There is no target population yet, so G5 stays
-  `NOT_EVALUABLE`, G6 stays `NOT_MET`, and the L7 stratum stays undefined.
+* Any Phase G result on a valid target population. There is still no target
+  population, G5 stays `NOT_EVALUABLE`, G6 stays `NOT_MET`, and the L7 stratum
+  stays undefined.
+* That the legal-aware method beats the baselines. On L1 the strongest single
+  column is the provision-agreement baseline (0.8333), above both legal-aware
+  arms (0.6524), and that comparison rests on 22 evaluation items with 7
+  correct — far too few to rank methods. No method ordering is claimed here.
 * That a generator change would fix the yield. That is the open empirical
   question the screen exists to answer.
 * That the base model is "responsible" for the legal errors in a scientific
@@ -218,8 +341,9 @@ ERROR: this script calls a model when provider != 'mock'.
 
 ## Remaining work and the pending checkpoint
 
-The next step is the only one that can move the gates, and it requires
-generation:
+Stage 1 (this work) is offline and stops here. The steps below are Stage 2 and
+need explicit approval before any of them is run. The first is the only one that
+can move G7, and it requires generation:
 
 1. **Author an approved candidate item set** — new post-transition items in the
    Phase A schema, with `verified: false` provenance, covering more than the ten
@@ -235,18 +359,21 @@ the 0.80 conformal target, the `phaseE-v1` split, or any frozen run.
 
 ## Known limitations
 
-1. **No specification.** The conditions implemented are faithful to the phase
-   records, but a gate defined in the missing guide could require more or other
-   things. The gap is recorded in `configs/phase_g_target.json`
-   (`specification_status`) and must be closed before a Phase G verdict is
-   claimed.
-2. **The audit covers one run.** It characterises the frozen
+1. **G7 is failed, not merely unevaluable.** The guide defines G7 and states
+   its failure condition; the target slice has one correctness class, so the
+   gate is `NOT_MET` on the guide's own terms. It is not a documentation gap and
+   must not be reported as one.
+2. **Half of the §21.2 grid is absent by decision.** One generator, two slices,
+   no external benchmark. The matrix is honest about the missing axes but it is
+   not the full grid the guide describes, and no claim should be read as if it
+   were.
+3. **The audit covers one run.** It characterises the frozen
    `qwen2.5-7b-instruct` run; a different generator could produce a different
    class balance, which is exactly what the screen measures.
-3. **`items_needed` is a planning projection.** It assumes independent items at a
+4. **`items_needed` is a planning projection.** It assumes independent items at a
    constant rate; real yield varies by topic, which is why the report is
    per-topic.
-4. **Detector states are coarse.** `W = 1` and `W = 0` are treated as the two
+5. **Detector states are coarse.** `W = 1` and `W = 0` are treated as the two
    documented states, and interior values are reported separately rather than
    assigned to either. If the guide defines "fires" differently, the
    classification needs revisiting.
