@@ -311,7 +311,8 @@ class WarrantDetector:
 
     def detect(self, record: dict,
                cluster_labels: Sequence[int] | None = None,
-               relation_matrix: Sequence[Sequence[str]] | None = None
+               relation_matrix: Sequence[Sequence[str]] | None = None,
+               contradiction_source: str = "auto"
                ) -> WarrantResult:
         """Score one run record.  Pure: it reads no correctness label."""
         keys = [str(k) for k in (record.get("asserted_keys") or [])]
@@ -345,7 +346,16 @@ class WarrantDetector:
         J, j_cov = self.jurisdiction_fit(modal_group)
 
         # K: contradiction mass of the non-modal clusters against the modal
-        if relation_matrix is not None and cluster_labels is not None:
+        use_rule = contradiction_source == "rule" or (
+            contradiction_source == "auto" and self._different_offence)
+        if use_rule and cluster_labels is not None:
+            K = rule_contradiction_mass(groups, modal_key,
+                                        self._different_offence)
+            k_source = "rule_crosswalk_different_offence"
+        elif contradiction_source == "none":
+            K = None
+            k_source = "none"
+        elif relation_matrix is not None and cluster_labels is not None:
             K = self._model_contradiction_mass(groups, modal_group,
                                                relation_matrix, cluster_labels, m)
             k_source = "model"

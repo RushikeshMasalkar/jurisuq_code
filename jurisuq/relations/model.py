@@ -144,7 +144,7 @@ if HAS_TORCH:
         return torch.device("cpu")
 
     def train_model(pairs, cfg: dict, tokenizer=None, encoder_name: str | None = None,
-                    log=print, device=None):
+                    log=print, device=None, epoch_callback=None):
         """Fine-tune on training pairs, select the threshold on dev, return (model, history)."""
         require("transformers")
         device = device or resolve_device(cfg.get("device"))
@@ -172,8 +172,12 @@ if HAS_TORCH:
         for r in pairs:
             counts[LABEL2IDX[r.label]] += 1
         total = sum(counts) or 1
+        weight_cap = float(cfg.get("class_weight_cap", 10.0))
+        overrides = cfg.get("class_weight_overrides", {})
         weights = torch.tensor(
-            [min(10.0, total / max(1, c) / len(OPERATIONAL)) for c in counts],
+            [float(overrides.get(label, min(weight_cap, total / max(1, c) /
+                                             len(OPERATIONAL))))
+             for label, c in zip(OPERATIONAL, counts)],
             dtype=torch.float32, device=device)
         lossf = nn.CrossEntropyLoss(weight=weights)
         opt = torch.optim.AdamW(model.parameters(), lr=float(cfg.get("lr", 2e-5)),
@@ -195,6 +199,8 @@ if HAS_TORCH:
                 seen += labels.size(0)
             history.append({"epoch": ep, "train_loss": run / max(1, seen),
                             "seconds": round(time.time() - t0, 1)})
+            if epoch_callback is not None:
+                epoch_callback(model, tokenizer, history[-1])
             log(f"  epoch {ep}/{epochs}  loss {run / max(1, seen):.4f}"
                 f"  ({history[-1]['seconds']}s)")
         return model, history
@@ -249,13 +255,14 @@ if HAS_TORCH:
         p.mkdir(parents=True, exist_ok=True)
         torch.save(model.state_dict(), p / "model.pt")
         tokenizer.save_pretrained(p)
-        (p / "meta.json").write_text(json.dumps(meta, indent=2, sort_keys=True) + "\n")
+        (p / "meta.json").write_text(
+            json.dumps(meta, indent=2, sort_keys=True) + "\n", encoding="utf-8")
         return p
 
     def load_checkpoint(path):
         require("transformers")
         p = pathlib.Path(path)
-        meta = json.loads((p / "meta.json").read_text())
+        meta = json.loads((p / "meta.json").read_text(encoding="utf-8"))
         if meta.get("serialisation_version") != SERIALISATION_VERSION:
             raise ValueError(f"checkpoint was trained under serialisation "
                              f"{meta.get('serialisation_version')!r}, this code implements "

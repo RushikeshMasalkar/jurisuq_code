@@ -1,0 +1,3 @@
+{"epoch": 1, "train_loss": 0.5922873270148026, "seconds": 1171.0, "dev_macro_f1": 0.231}
+{"epoch": 2, "train_loss": 0.2698802024061124, "seconds": 1180.3, "dev_macro_f1": 0.6666}
+{"epoch": 3, "train_loss": 0.13238284248282448, "seconds": 1208.5, "dev_macro_f1": 0.9648}

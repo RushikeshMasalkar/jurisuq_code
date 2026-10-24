@@ -29,7 +29,7 @@ from jurisuq.relations.stats import per_class as _per_class  # noqa: E402
 
 
 def load_split(path: pathlib.Path, limit: int = 0) -> list[PairRecord]:
-    rows = [PairRecord.from_json(l) for l in path.read_text().splitlines()]
+    rows = [PairRecord.from_json(l) for l in path.read_text(encoding="utf-8").splitlines()]
     return rows[:limit] if limit else rows
 
 
@@ -48,13 +48,13 @@ def main() -> None:
                     help="re-select tau on the existing checkpoint without training")
     args = ap.parse_args()
 
-    cfg = json.loads(pathlib.Path(args.config).read_text())
+    cfg = json.loads(pathlib.Path(args.config).read_text(encoding="utf-8"))
     if args.epochs:
         cfg["epochs"] = args.epochs
     if args.encoder:
         cfg["encoder"] = args.encoder
     ds_dir = pathlib.Path(cfg["dataset_dir"])
-    manifest = json.loads((ds_dir / "manifest.json").read_text())
+    manifest = json.loads((ds_dir / "manifest.json").read_text(encoding="utf-8"))
     train = load_split(ds_dir / "train.jsonl", args.limit)
     dev = load_split(ds_dir / "dev.jsonl", args.limit)
     print(f"dataset {manifest['dataset_version']}  train {len(train)}  dev {len(dev)}  "
@@ -66,8 +66,24 @@ def main() -> None:
 
     run_dir = ROOT / cfg["run_dir"] / args.run_id
     run_dir.mkdir(parents=True, exist_ok=True)
+    train_log_path = run_dir / "train_log.jsonl"
+    train_log = train_log_path.open("a", encoding="utf-8")
+
+    def record_epoch(model, tokenizer, entry):
+        probs = M.predict_proba(model, tokenizer, dev, cfg)
+        preds = [M.IDX2LABEL[max(range(len(p)), key=lambda k: p[k])] for p in probs]
+        dev_f1 = _macro_f1([r.label for r in dev], preds, OPERATIONAL)
+        logged = dict(entry, dev_macro_f1=round(dev_f1, 4))
+        train_log.write(json.dumps(logged) + "\n")
+        train_log.flush()
+        print(f"  epoch {entry['epoch']} dev macro-F1 {dev_f1:.4f}", flush=True)
+
     t0 = time.time()
-    model, history = M.train_model(train, cfg, encoder_name=cfg["encoder"])
+    try:
+        model, history = M.train_model(
+            train, cfg, encoder_name=cfg["encoder"], epoch_callback=record_epoch)
+    finally:
+        train_log.close()
     tokenizer = M.load_tokenizer(cfg["encoder"])
 
     dev_probs = M.predict_proba(model, tokenizer, dev, cfg)
@@ -101,9 +117,8 @@ def main() -> None:
     ckpt = M.save_checkpoint(ROOT / cfg["checkpoint_dir"] /
                              f"{manifest['dataset_version']}-{cfg['encoder'].split('/')[-1]}-{args.run_id}",
                              model, tokenizer, meta)
-    (run_dir / "train_log.jsonl").write_text(
-        "".join(json.dumps(h) + "\n" for h in history))
-    (run_dir / "dev_report.json").write_text(json.dumps(meta, indent=2, sort_keys=True) + "\n")
+    (run_dir / "dev_report.json").write_text(
+        json.dumps(meta, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
     print(f"  tau = {tau:.2f}  merge F1 {merge_f1:.3f}  (precision {tau_stats['precision']:.3f}, "
           f"recall {tau_stats['recall']:.3f})")

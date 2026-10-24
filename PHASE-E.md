@@ -2,13 +2,64 @@
 
 Phase E turns the Phase A sample statistics and stored Phase D warrant outputs into a per-answer uncertainty score. It is an incremental, label-separated stage: fitting is supervised on a development partition; scoring is a separate label-blind command; validation reads correctness labels only after scores have been written.
 
+## Compute and cost
+
+Inference runs locally through LM Studio on this machine. No accelerator is
+used: PyTorch reports `2.9.1+cpu`, with CUDA, MPS, and XPU unavailable, so
+inference and relation-model training run on CPU. The project spent nothing:
+there were no paid API calls, subscriptions, or billing. The primary Phase A
+run remains the frozen `qwen2.5-7b-instruct` run. Qwen3-14B Q4_K_M was a
+local screen only (reasoning on and off); it answered IPC 379 to a
+post-1-July-2024 theft question and scored 0% on L7. Gemini 2.5-flash was
+unavailable, 3.8-flash returned 503, and 3.6-flash hit the free-tier daily
+quota (HTTP 429), so no API model was used.
+
+Under this zero-cost local-compute constraint L7 has no correct items. G5
+remains **NOT_EVALUABLE**, and the L1-L7 comparison cannot be made. Per
+master-guide section 16.4, the failed G2 directs the project to its
+diagnostic contribution: Phase A plus the Phase D temporal detector. This is
+a finding about the model class under test, not a defect in the instrument.
+
+## Field and script registry
+
+| Field | Type | Producer | Consumer | Status |
+|---|---|---|---|---|
+| `clusters` | `list[int]` | `scripts/13_attach_typed.py` | Phase D, E | registered |
+| `cluster_provisions` | `list[str]` | `scripts/13_attach_typed.py` | Phase D | registered |
+| `relation_matrix` | `list[list[str]]` | `scripts/13_attach_typed.py` | Phase D (K) | registered |
+| `relation_scores` | `list[list[float]]` | `scripts/13_attach_typed.py` | audit / figures | registered |
+| `typed_stats` | object | `scripts/13_attach_typed.py` | Phase E (`u_prov`) | registered |
+| `scripts/13_attach_typed.py` | CLI script | Phase B | Phase D, E | registered |
+| `scripts/23_detect_warrant.py --cluster-source {auto,exact,typed}` | CLI flag; default `auto` | Phase D | Phase D evaluation | registered; implemented and evaluated |
+| `scripts/23_detect_warrant.py --contradiction-source {auto,rule,model,none}` | CLI flag; default `auto` | Phase D | Phase D evaluation | registered; Block 4 |
+
+Alias decision: retain the shipped fields
+`warrant_observed_agreement`, `warrant_warranted_agreement`,
+`warrant_common_mode_score`, and `uq_uncertainty`. Their master-guide aliases
+are `warrant_A/T/J/K`, `warrant_W`, `common_mode`, and `u_combined`,
+respectively; no renaming is performed.
+
+Block 5 evaluates two registered provision-entropy variants side by side:
+`typed_stats.entropy_norm` and the like-for-like Phase A form
+`methods.prov_se / log2(n_samples)`. The latter is directly comparable to
+the frozen pilot; neither variant is selected as definitive.
+
+Threat to validity: the frozen slice has zero gold/trap co-occurrence across
+200 items (L1 gold-only 69 / neither 31; L7 trap-only 52 / neither 48).
+The relation model's false-merge risk across the IPC-to-BNS transition is
+therefore unmeasured by this benchmark.
+
 ## 1. Scope and evidence boundary
 
 The technical guide defines Phase E as a small learned monotone model, fitted on development data, over the sample-only and legal-structure signals. The implementation follows that design with a pure-Python projected logistic model and pairwise interactions. It does **not** claim calibration, general legal reliability, or a passed G5.
 
 The current Phase D run stores `warrant_warranted_agreement`, `warrant_common_mode_score`, and `warrant_contradiction_mass`; the first two are already Phase D's computed `W` and `CM`. Phase E consumes those exact fields. It never re-derives `A`, `T`, `J`, `K`, `W`, or `CM`.
 
-The shipped `+ctx+warrant` run marks its representation `exact_key` and does not contain the Phase B `typed_stats` block. Accordingly, this implementation's `u_prov` is the normalized Phase A `methods.prov_se` exact provision-key entropy, **not** a newly computed typed-cluster entropy. Once a Phase B typed-statistics field is registered in the run schema, a later version may use it; this drop does not invent or reconstruct one.
+The Block 5 input is the typed Phase D run and contains the Phase B
+`typed_stats` block. The evaluation fits two separate models: typed
+`typed_stats.entropy_norm`, and the normalized Phase A
+`methods.prov_se` exact provision-key entropy retained for like-for-like
+comparison with the frozen pilot. No variant is selected as definitive.
 
 ## 2. Components and score
 
@@ -193,6 +244,80 @@ Only three held-out records received a legal-aware score in this split. Coeffici
 
 The score is an uncalibrated risk ranking, not a probability of error or reliability. Phase F calibration is not implemented here. The synthetic 200-item benchmark, 7B checkpoint, Phase C statute coverage/verification limits, and single-class L7 outcome sharply constrain interpretation.
 
+## Block 5b — attribution-controlled evaluation
+
+Block 5b is retained in new sibling runs:
+
+- `phaseE-5b-pooled-typed_model.json` and `...+uq-5b-pooled-typed`
+- `phaseE-5b-pooled-exact_model.json` and `...+uq-5b-pooled-exact`
+- `phaseE-5b-L1-typed_model.json` and `...+uq-5b-L1-typed`
+- `phaseE-5b-L1-exact_model.json` and `...+uq-5b-L1-exact`
+
+These outputs do not modify the frozen pilot or the earlier Block 5 runs.
+Missing legal inputs use the fitted degradation of the sample-only submodel
+(intercept, `u_prov`, `u_text`, and `u_prov*u_text`); they are labelled
+`sample_only_degraded`, not raw-entropy fallbacks. Each new scoring run has
+187 `legal_aware`, 13 `sample_only_degraded`, 0 `sample_only_fallback`, and
+0 `unscorable` records.
+
+The pooled split is 156 development / 44 holdout; the L1-only split is 78 /
+22 and evaluates only L1. Within-slice holdout results are:
+
+| Fit / variant | Slice | AUROC | AUPRC | nAURC | risk@50% | baseline AUROC |
+|---|---|---:|---:|---:|---:|---:|
+| pooled / typed | L1 (22) | 0.6238 | 0.7243 | 0.3963 | 0.5455 | 0.6381 |
+| pooled / exact | L1 (22) | 0.6905 | 0.7568 | 0.5054 | 0.5455 | 0.8714 |
+| L1-only / typed | L1 (22) | 0.5714 | 0.7129 | 0.3358 | 0.5455 | 0.6381 |
+| L1-only / exact | L1 (22) | 0.8714 | 0.9349 | 0.7078 | 0.4545 | 0.8714 |
+
+For pooled runs, L7 is 22/22 incorrect: AUROC and nAURC are undefined,
+while AUPRC and risk@50% are both 1.0. L1-only runs have no L7 evaluation
+population. Paired AUROC score-minus-baseline differences are -0.0143
+(pooled typed, 95% CI [-0.1458, 0.0882]), -0.1810 (pooled exact,
+[-0.5000, 0.0000]), -0.0667 (L1-only typed, [-0.3158, 0.1880]), and
+0.0000 (L1-only exact, [0.0000, 0.0000]). G5 is NOT_EVALUABLE in every
+case; no variant is selected.
+
+For the pooled exact-key L1 holdout, 20 records were legal-aware and 2 were
+degraded fallbacks; both fallbacks were incorrect. On the same 20 legal-aware
+records, learned-score AUROC was 0.6868 versus exact `u_prov` 0.8626. On
+all 22 L1 records after degradation rescaling, the values were 0.6905 and
+0.8714. This remains a negative result. Typed entropy is exactly zero on
+106/200 records versus 33/200 for exact keys; all 32 legal-aware records in
+the frozen pilot had exact `u_prov=0`, explaining its zero fitted provision
+weight.
+
+## Block 5c — structural G5 finding
+
+On the frozen 200-item instrument, the temporal factor is constant within each
+slice: `T=1.0` on 94 of 94 resolvable L1 records and `T=0.0` on 80 of 81
+resolvable L7 records. With `J=1` and `K` approximately zero, warranted
+agreement collapses to `W=A` on L1 and `W=0` on L7. Consequently `u_cm` is
+identically zero on the L1 control slice, while `u_warrant` reduces to a
+function of observed agreement `A`, which `u_prov` already encodes.
+
+The legal-aware components therefore have no within-slice information:
+there is zero variance on L1, and L7 has only one correctness class. This
+explains why the L1-only fit reproduces the sample-only ranking exactly
+(AUROC `0.8714` versus baseline `0.8714`; paired difference `0.0000`,
+interval `[0.0000, 0.0000]`) and why the pooled exact fit is worse within L1
+(AUROC `0.6905`): it uses `u_warrant` and `u_cm` as slice indicators.
+
+This is a structural impossibility result for the current instrument. Gate G5
+cannot be satisfied by any estimator, hyperparameter, or ablation on this
+instrument. It requires an evaluation population in which `T` varies within
+a slice: a slice with both correctness classes on which the detector both
+fires and stays silent. Building that population is Phase G work and is the
+sole remaining blocker for G5.
+
+Block 6 is therefore ordered as a representation-trustworthiness check, not
+as a G5 rescue attempt. Typed entropy is exactly zero on 106/200 records
+versus 33/200 under exact keys, and the typed relation model's
+`DIFFERENT_PROVISION` recall is `0.00`. Block 6 can assess or improve
+confidence in the typed representation, but it cannot create the missing
+within-slice variance in `T`; the expensive 13/23/24/25/26/27 chain must be
+rerun only once, after the two-class target population exists.
+
 ## Reproduction commands
 
 From the repository root:
@@ -206,3 +331,55 @@ python -X utf8 -m pytest -q
 ```
 
 `uq_validation.json` is the machine-readable source for the E5 holdout metrics and G5 status.
+
+## Block 6b — corrected typed-input rehearsal
+
+Blocks 4 and 5 are superseded, not deleted. Their reported numbers were
+computed under relations_v1 (tau 0.45, DIFFERENT_PROVISION F1 0.00);
+superseded by relations_v2; see Block 6b.
+
+The rehearsal used new sibling runs
+`phaseA-laptop-v2-rejudged+ctx-r2+typed-v2-r3` and
+`phaseA-laptop-v2-rejudged+ctx-r2+typed-v2-r3+warrant-v2-r3`, followed by
+four new Phase E model/output pairs. No prior run or report was overwritten.
+The typed cluster distribution was 1: 33, 2: 54, 3: 39, 4: 38, 5: 14,
+6: 13, 7: 7, and 9: 2. Typed collisions therefore total 33 and equal
+the exact-key collision count of 33.
+
+The corrected Phase D/G4 result is AUROC 0.9412, 95% CI [0.8529, 1.0000],
+with TP=16, FP=0, TN=15, FN=2. Ablations are: T pinned to 1, AUROC
+0.5000 (drop 0.4412); J pinned to 1, AUROC 0.9412 (drop 0.0000); and
+K pinned to 0, AUROC 0.9412 (drop 0.0000). `cm_defined` is 172/200.
+
+The four provision-entropy/fitting variants all retain G5 `NOT_EVALUABLE`
+because the held-out L7 target slice remains single-class. Results below
+are AUROC for the Phase E score versus the sample-only baseline:
+
+| Fit / variant | L1 AUROC | L1 baseline AUROC | L7 AUROC | Paired delta (95% CI) |
+|---|---:|---:|---:|---:|
+| pooled / typed | 0.6857 | 0.8571 | undefined | -0.1714 [-0.3932, 0.0000] |
+| pooled / exact | 0.6857 | 0.8714 | undefined | -0.1857 [-0.4063, -0.0167] |
+| L1-only / typed | 0.8095 | 0.8571 | not evaluated | -0.0476 [-0.1429, 0.0139] |
+| L1-only / exact | 0.8095 | 0.8714 | not evaluated | -0.0619 [-0.1667, 0.0000] |
+
+The Block 5c structural finding is confirmed on corrected typed inputs:
+T=1 on all 93 resolvable L1 records, and T=0 on 78 of 79 resolvable L7
+records (T=1 on the remaining one). `u_cm` is zero on all resolvable L1
+records, so the missing within-slice variance remains structural rather than
+an estimator or representation artifact.
+
+This remains a rehearsal; Phase F has not started.
+
+### Why typed clustering cannot differ from exact-key on this instrument
+
+No item co-asserts IPC and BNS within its ten stored samples: 182 items are
+IPC-only, 3 are IPC plus no provision, and 15 are BNS-only. All 10
+`successor_of` rows in `data/relations/crosswalk_v1.jsonl` are IPC -> BNS.
+Across 962 within-item co-occurrence pairs (368 distinct pairs), 0 are
+`successor_of`, 19 are `different_offence`, and 943 (98%) are unknown to the
+crosswalk.
+
+The typed cluster-count distribution is 33/54/39/38/14/13/7/2, while the
+exact-key distribution is 33/53/39/38/15/13/7/2. They match on 199/200
+items. G2's typed-clustering criterion is structurally unsatisfiable on this
+instrument, independent of relation-model quality.

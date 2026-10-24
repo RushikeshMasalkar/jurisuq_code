@@ -5,7 +5,7 @@ import math
 from dataclasses import dataclass
 from typing import Sequence
 
-from .features import BASE_FEATURES, design_vector, feature_names
+from .features import BASE_FEATURES, LEGAL_FEATURES, design_vector, feature_names
 
 
 def _sigmoid(z: float) -> float:
@@ -101,20 +101,26 @@ def fit_monotone_logistic(components: Sequence[dict], labels: Sequence[int],
 def score_features(model: MonotoneLogistic, components: dict,
                    *, drop_components: Sequence[str] = ()) -> float:
     """Score features; ablation removes coefficients, never imputes nulls."""
-    x = design_vector(components)
-    if len(x) != len(model.weights):
+    if len(model.names) != len(model.weights):
         raise ValueError("model and feature schema are incompatible")
     dropped = set(drop_components)
     total = model.intercept
-    for name, weight, value in zip(model.names, model.weights, x):
+    for name, weight in zip(model.names, model.weights):
         factors = name.split("*")
         if any(factor in dropped for factor in factors):
             continue
+        value = 1.0
+        for factor in factors:
+            component = components.get(factor)
+            if component is None:
+                raise ValueError(f"component {factor!r} is required for score")
+            value *= float(component)
         total += weight * value
     return _sigmoid(total)
 
 
-def estimate(extracted: dict, model: MonotoneLogistic | None) -> dict:
+def estimate(extracted: dict, model: MonotoneLogistic | None,
+             *, degraded_fallback: bool = False) -> dict:
     """Apply the legal-aware head or the explicit sample-only fallback.
 
     This function accepts feature output only, not the source record or labels.
@@ -123,6 +129,16 @@ def estimate(extracted: dict, model: MonotoneLogistic | None) -> dict:
         return {"score": score_features(model, extracted["components"]),
                 "mode": "legal_aware", "semantics": "uncalibrated_monotone_risk_score",
                 "fallback_reason": None}
+    if (degraded_fallback and model is not None and model.trained
+            and extracted.get("components", {}).get("u_prov") is not None
+            and extracted.get("components", {}).get("u_text") is not None):
+        return {
+            "score": score_features(model, extracted["components"],
+                                    drop_components=LEGAL_FEATURES),
+            "mode": "sample_only_degraded",
+            "semantics": "fitted_sample_only_submodel",
+            "fallback_reason": extracted.get("fallback_reason"),
+        }
     fallback = extracted.get("fallback_score")
     if fallback is not None:
         reason = extracted.get("fallback_reason")

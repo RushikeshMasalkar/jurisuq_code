@@ -16,6 +16,24 @@ Nothing in Phase D learns, samples or reads a correctness label on the
 query path. It is a deterministic lookup over stored answers, so it is
 cheap, re-runnable and reproducible from the record alone.
 
+## Compute and cost
+
+Inference runs locally through LM Studio on this machine. No accelerator is
+used: PyTorch reports `2.9.1+cpu`, with CUDA, MPS, and XPU unavailable, so
+inference and relation-model training run on CPU. The project spent nothing:
+there were no paid API calls, subscriptions, or billing. The primary Phase A
+run remains the frozen `qwen2.5-7b-instruct` run. Qwen3-14B Q4_K_M was a local
+screen only (reasoning on and off); it answered IPC 379 to a
+post-1-July-2024 theft question and scored 0% on L7. Gemini 2.5-flash was
+unavailable, 3.8-flash returned 503, and 3.6-flash hit the free-tier daily
+quota (HTTP 429), so no API model was used.
+
+Under this zero-cost local-compute constraint L7 has no correct items. G5 is
+therefore **NOT_EVALUABLE**, and the L1-L7 comparison cannot be made. Per
+master-guide section 16.4, the failed G2 directs the project to its
+diagnostic contribution: Phase A plus the Phase D temporal detector. This is
+a finding about the model class under test, not a defect in the instrument.
+
 ---
 
 ## 0. What is in this drop
@@ -36,6 +54,24 @@ PHASE-D.md                    # this file
 PHASE-D.md            # the consolidated result record
 PHASE-D.md       # the authoritative result note
 ```
+
+## Field and script registry
+
+| Field | Type | Producer | Consumer | Status |
+|---|---|---|---|---|
+| `clusters` | `list[int]` | `scripts/13_attach_typed.py` | Phase D, E | registered |
+| `cluster_provisions` | `list[str]` | `scripts/13_attach_typed.py` | Phase D | registered |
+| `relation_matrix` | `list[list[str]]` | `scripts/13_attach_typed.py` | Phase D (K) | registered |
+| `relation_scores` | `list[list[float]]` | `scripts/13_attach_typed.py` | audit / figures | registered |
+| `typed_stats` | object | `scripts/13_attach_typed.py` | Phase E (`u_prov`) | registered |
+| `scripts/23_detect_warrant.py --cluster-source {auto,exact,typed}` | CLI flag; default `auto` | Phase D | Phase D evaluation | registered; implemented and evaluated |
+| `scripts/23_detect_warrant.py --contradiction-source {auto,rule,model,none}` | CLI flag; default `auto` | Phase D | Phase D evaluation | registered; Block 4 |
+
+The shipped field names remain authoritative. The master-guide aliases are
+recorded explicitly: `warrant_A/T/J/K` maps to the shipped warrant factor
+fields, `warrant_W` maps to `warrant_warranted_agreement`,
+`common_mode` maps to `warrant_common_mode_score`, and `u_combined` maps to
+`uq_uncertainty`. No field is renamed.
 
 The Phase D run is **not** written into the frozen Phase A or Phase C
 runs. Like Phase C it writes a new sibling directory
@@ -635,3 +671,57 @@ tree-hashed before and after detection and is unchanged. The warrant
 fields are registered additively (`warrant_*`); no frozen field was
 renamed, retyped or deleted. Phase E consumes the four-tuple and must
 not recompute it.
+
+## Block 6b status and supersession
+
+Blocks 4 and 5 are superseded, not deleted. Their reported numbers were
+computed under relations_v1 (tau 0.45, DIFFERENT_PROVISION F1 0.00);
+superseded by relations_v2; see Block 6b.
+
+The Block 6b rehearsal re-ran typed attachment and warrant detection on
+current data with the `relations_v2` checkpoint. The new typed run produced
+the following cluster-size distribution: 1: 33, 2: 54, 3: 39, 4: 38,
+5: 14, 6: 13, 7: 7, and 9: 2. Thus the typed one-cluster collision count
+is 33, equal to the exact-key collision count (33), rather than the
+superseded typed count of 106.
+
+The new warrant run detected 117 fires and 83 silent items; common-mode was
+defined for 172/200 records. G4 was recomputed on the 33-item collision
+population: AUROC 0.9412, bootstrap 95% CI [0.8529, 1.0000], with
+TP=16, FP=0, TN=15, FN=2. The per-factor ablation was temporal T pinned
+to 1: AUROC 0.5000 (drop 0.4412), jurisdiction J pinned to 1: AUROC
+0.9412 (drop 0.0000), and contradiction K pinned to 0: AUROC 0.9412
+(drop 0.0000). G4 remains PASS.
+
+The new run ids are
+`phaseA-laptop-v2-rejudged+ctx-r2+typed-v2-r3` and
+`phaseA-laptop-v2-rejudged+ctx-r2+typed-v2-r3+warrant-v2-r3`; all are
+new siblings and the source runs remain unchanged. This is a rehearsal
+only; Phase F has not started.
+
+## L7 composition finding
+
+The frozen instrument has `majority_correct = 43/100` on L1 and `0/100` on
+L7. Every L7 item is resolved by the judge (`frac_unresolved = 0.000` on all
+100 items). Across the 1,000 L7 stored answers, the verdict mix is
+`stale_law = 832`, `wrong_section = 150`, and `other_provision = 18`.
+
+The 150 `wrong_section` answers are exactly the 15 L7 items whose modal key is
+BNS. They cite sections that mostly exceed BNS 2023's 358 sections, treating
+IPC numbers as if they were BNS sections. The missing second correctness class
+on L7 is a property of the model under test, not of the judge and not of the
+statute store.
+
+## Model-cutoff explanation for the L7 result
+
+The frozen Phase A run was generated by `qwen2.5-7b-instruct`, with provider
+`openai-compat:qwen2.5-7b-instruct`, temperature `1.0`, `max_tokens = 220`,
+and `n_samples = 10` (see `runs/phaseA-laptop-v2-rejudged/meta.json`). The
+model's training data ends near the IPC/BNS transition, and it answers IPC
+379 to a post-1 July 2024 theft question.
+
+Accordingly, the L7 result — 0/100 items correct and 832/1,000 stored answers
+labelled `stale_law` — is partly a model-cutoff artefact, not purely a
+legal-reasoning failure. A model with post-2024 training data is required
+before any L7-based gate, including G5, can be evaluated. This limitation is
+a property of the model under test, not a defect in the instrument.

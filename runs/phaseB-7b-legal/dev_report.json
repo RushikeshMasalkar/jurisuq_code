@@ -1,0 +1,74 @@
+{
+  "dataset_content_hash": "6e39a85276af8136bdfb4b2a5831862bbf85c662d232e29515d68386b3e9a94b",
+  "dataset_files": {
+    "dev": "449e38cd89e803944847bbd5f09911cc8928ad6c0cec3e282e148a0cb968de04",
+    "test": "fce1d5c0272366f167689c84e4a0295f1ee4031d58feadb834ca5a978d84c3be",
+    "train": "d81e7a097a3e1413796d4fd73950c75cfb589ac2c80797ea697b7827f088414a"
+  },
+  "dataset_version": "relations_v2",
+  "dev": {
+    "exact_key_baseline_macro_f1": 0.7949,
+    "macro_f1": 0.9556,
+    "merge_f1": 0.9459,
+    "n": 294,
+    "per_class": {
+      "AMBIGUOUS": {
+        "f1": 0.8,
+        "precision": 0.6667,
+        "recall": 1.0,
+        "support": 4
+      },
+      "CONDITIONALLY_EQUIVALENT": {
+        "f1": 1.0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "support": 8
+      },
+      "DIFFERENT_PROVISION": {
+        "f1": 0.9912,
+        "precision": 0.9825,
+        "recall": 1.0,
+        "support": 112
+      },
+      "LEGALLY_EQUIVALENT": {
+        "f1": 1.0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "support": 18
+      },
+      "SAME_PROVISION": {
+        "f1": 0.9867,
+        "precision": 1.0,
+        "recall": 0.9737,
+        "support": 152
+      }
+    }
+  },
+  "encoder": "law-ai/InLegalBERT",
+  "labels": [
+    "SAME_PROVISION",
+    "LEGALLY_EQUIVALENT",
+    "CONDITIONALLY_EQUIVALENT",
+    "DIFFERENT_PROVISION",
+    "AMBIGUOUS"
+  ],
+  "merge_threshold": 0.3,
+  "run_id": "phaseB-7b-legal",
+  "seed": 20261005,
+  "segment_tokens": {
+    "a": 120,
+    "b": 120,
+    "ctx": 60
+  },
+  "serialisation_version": "ser1",
+  "threshold_stats": {
+    "f1": 0.9887640449438202,
+    "fn": 2,
+    "fp": 2,
+    "precision": 0.9887640449438202,
+    "recall": 0.9887640449438202,
+    "tn": 114,
+    "tp": 176
+  },
+  "trained_at": "2026-10-24T13:48:24"
+}

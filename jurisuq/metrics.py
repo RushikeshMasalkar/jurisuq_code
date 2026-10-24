@@ -52,6 +52,24 @@ def auroc(uncertainty: Sequence[float], correct: Sequence[int]) -> float:
     return (rank_sum_pos - n_pos * (n_pos + 1) / 2.0) / (n_pos * n_neg)
 
 
+def auprc(uncertainty: Sequence[float], incorrect: Sequence[int]) -> float:
+    """Average precision for identifying incorrect answers by uncertainty."""
+    if not uncertainty or len(uncertainty) != len(incorrect):
+        return float("nan")
+    positives = sum(int(v) for v in incorrect)
+    if positives == 0:
+        return float("nan")
+    order = sorted(range(len(uncertainty)),
+                   key=lambda i: (-float(uncertainty[i]), i))
+    hits = 0
+    total = 0.0
+    for rank, index in enumerate(order, 1):
+        if int(incorrect[index]) == 1:
+            hits += 1
+            total += hits / rank
+    return total / positives
+
+
 # ----------------------------------------------------------------------
 # Selective prediction
 # ----------------------------------------------------------------------

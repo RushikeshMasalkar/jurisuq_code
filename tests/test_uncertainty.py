@@ -1,4 +1,5 @@
 import importlib.util
+import inspect
 import json
 import math
 from pathlib import Path
@@ -54,6 +55,20 @@ def test_extracts_phase_a_and_phase_d_components_without_recomputing_warrant():
     assert result["components"]["u_contra"] == pytest.approx(0.2)
 
 
+def test_typed_provision_entropy_is_used_when_valid():
+    record = sample_record()
+    record["typed_stats"] = {"entropy_norm": 0.25}
+    result = extract_features(record, provision_variant="typed")
+    assert result["components"]["u_prov"] == pytest.approx(0.25)
+    assert result["provision_entropy_source"] == "typed_stats.entropy_norm"
+
+
+def test_typed_provision_entropy_falls_back_when_missing():
+    result = extract_features(sample_record(), provision_variant="typed")
+    assert result["components"]["u_prov"] == pytest.approx(0.5)
+    assert result["provision_entropy_source"] == "methods.prov_se / log2(n_samples)"
+
+
 @pytest.mark.parametrize("field", [
     "warrant_warranted_agreement", "warrant_common_mode_score",
     "warrant_contradiction_mass",
@@ -88,6 +103,25 @@ def test_missing_warrant_schema_uses_sample_only_fallback():
     assert "model head unavailable" in scored["fallback_reason"]
 
 
+def test_missing_legal_factors_use_fitted_sample_only_degradation():
+    model = fit_monotone_logistic(
+        [{"u_prov": 0.1, "u_text": 0.2, "u_warrant": 0.3,
+          "u_cm": 0.4, "u_contra": 0.0},
+         {"u_prov": 0.8, "u_text": 0.7, "u_warrant": 0.3,
+          "u_cm": 0.4, "u_contra": 0.0}],
+        [0, 1],
+        epochs=20,
+    )
+    extracted = extract_features(sample_record())
+    extracted["legal_complete"] = False
+    extracted["components"]["u_warrant"] = None
+    extracted["components"]["u_cm"] = None
+    extracted["components"]["u_contra"] = None
+    scored = estimate(extracted, model, degraded_fallback=True)
+    assert scored["mode"] == "sample_only_degraded"
+    assert scored["semantics"] == "fitted_sample_only_submodel"
+
+
 def test_invalid_nan_or_out_of_range_phase_d_fields_are_unresolved():
     record = sample_record()
     record["warrant_warranted_agreement"] = float("nan")
@@ -120,6 +154,18 @@ def test_feature_extraction_never_reads_correctness_labels():
     record = LabelGuard(sample_record())
     del record["majority_correct"]
     assert extract_features(record)["legal_complete"] is True
+
+
+def test_label_blind_scoring_whitelist_excludes_correctness_fields():
+    source = inspect.getsource(
+        importlib.import_module("scripts.26_estimate_uncertainty")
+    )
+    start = source.index('allowed = (')
+    end = source.index(')', start)
+    whitelist = source[start:end]
+    assert "majority_correct" not in whitelist
+    assert "gold" not in whitelist
+    assert "trap" not in whitelist
 
 
 def test_projected_logistic_is_monotone_and_component_ablation_is_defined():

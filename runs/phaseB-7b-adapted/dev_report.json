@@ -1,0 +1,74 @@
+{
+  "dataset_content_hash": "6e39a85276af8136bdfb4b2a5831862bbf85c662d232e29515d68386b3e9a94b",
+  "dataset_files": {
+    "dev": "449e38cd89e803944847bbd5f09911cc8928ad6c0cec3e282e148a0cb968de04",
+    "test": "fce1d5c0272366f167689c84e4a0295f1ee4031d58feadb834ca5a978d84c3be",
+    "train": "d81e7a097a3e1413796d4fd73950c75cfb589ac2c80797ea697b7827f088414a"
+  },
+  "dataset_version": "relations_v2",
+  "dev": {
+    "exact_key_baseline_macro_f1": 0.7949,
+    "macro_f1": 0.9648,
+    "merge_f1": 0.9272,
+    "n": 294,
+    "per_class": {
+      "AMBIGUOUS": {
+        "f1": 0.8889,
+        "precision": 0.8,
+        "recall": 1.0,
+        "support": 4
+      },
+      "CONDITIONALLY_EQUIVALENT": {
+        "f1": 1.0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "support": 8
+      },
+      "DIFFERENT_PROVISION": {
+        "f1": 0.9652,
+        "precision": 0.9407,
+        "recall": 0.9911,
+        "support": 112
+      },
+      "LEGALLY_EQUIVALENT": {
+        "f1": 1.0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "support": 18
+      },
+      "SAME_PROVISION": {
+        "f1": 0.9697,
+        "precision": 0.9931,
+        "recall": 0.9474,
+        "support": 152
+      }
+    }
+  },
+  "encoder": "models/phaseC-inlegalbert-adapted-7a",
+  "labels": [
+    "SAME_PROVISION",
+    "LEGALLY_EQUIVALENT",
+    "CONDITIONALLY_EQUIVALENT",
+    "DIFFERENT_PROVISION",
+    "AMBIGUOUS"
+  ],
+  "merge_threshold": 0.5,
+  "run_id": "phaseB-7b-adapted",
+  "seed": 20261005,
+  "segment_tokens": {
+    "a": 120,
+    "b": 120,
+    "ctx": 60
+  },
+  "serialisation_version": "ser1",
+  "threshold_stats": {
+    "f1": 0.9743589743589745,
+    "fn": 7,
+    "fp": 2,
+    "precision": 0.9884393063583815,
+    "recall": 0.9606741573033708,
+    "tn": 114,
+    "tp": 171
+  },
+  "trained_at": "2026-10-24T14:50:02"
+}
