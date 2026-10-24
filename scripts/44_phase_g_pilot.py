@@ -40,10 +40,10 @@ from jurisuq import pilot
 from jurisuq.cluster import make_clusterer
 from jurisuq.generators import PROMPT_VERSION, OpenAICompatGenerator
 from jurisuq.judge import UNRESOLVED_LABELS, make_judge
-from jurisuq.pilot import (COST_CAP_USD, build_plan, classify_slice, enforce_cost_cap,
-                           estimate_cost, g7_from_pilot, redact_secret, require_approval,
-                           select_items, selection_summary, verify_frozen_inputs,
-                           verify_no_drift)
+from jurisuq.pilot import (COST_CAP_USD, build_plan, build_smoke_plan, classify_slice,
+                           enforce_cost_cap, estimate_cost, g7_from_pilot, redact_secret,
+                           require_approval, select_items, selection_summary,
+                           verify_frozen_inputs, verify_no_drift)
 
 DEFAULT_CONFIG = ROOT / "configs" / "phase_g_pilot.json"
 PLAN_PATH = ROOT / "runs" / "phaseG_pilot_plan.json"
@@ -177,10 +177,174 @@ def _print_plan(plan: dict) -> None:
           f"(< {rules['on_sparse_class']['threshold_items']} items)")
     print(f"    slices            : {rules['slices']}")
     print()
+    smoke = build_smoke_plan(plan)
+    print("  smoke check (2 requests, recommended before the 240)")
+    print(f"    compares    : {smoke['item_ids']}  ({smoke['n_requests']} requests, "
+          f"max ${smoke['cost_estimate']['total_cost_usd']:.6f})")
+    print(f"    learns      : {smoke['purpose']}")
+    print(f"    SMOKE SHA256: {smoke['plan_sha256']}")
+    print()
     print(f"  PLAN SHA256: {plan['plan_sha256']}")
     print()
-    print("  Approve verbatim with:")
+    print("  Approve verbatim with, in this order:")
+    print(f"    python scripts/44_phase_g_pilot.py --smoke --approve {smoke['plan_sha256']}")
     print(f"    python scripts/44_phase_g_pilot.py --run --approve {plan['plan_sha256']}")
+
+
+# ----------------------------------------------------------------------
+# the smoke check: two requests, and it reports what the provider really did
+# ----------------------------------------------------------------------
+def _smoke(plan: dict, config: dict, args) -> int:
+    """Send one request per slice and inspect the raw response.
+
+    Deliberately bypasses the generator's abstraction: the questions worth
+    answering here are about the wire format (is there a ``reasoning_content``
+    field, are there ``logprobs``, does ``usage`` report reasoning tokens), and
+    the abstraction discards exactly those fields.
+    """
+    import requests
+
+    smoke = build_smoke_plan(plan)
+    require_approval(smoke, args.approve, mode="--smoke")
+    enforce_cost_cap(smoke["cost_estimate"], plan["cost_cap_usd"])
+
+    gen_cfg = config["generator"]
+    api_key = os.environ.get(gen_cfg["api_key_env"], "").strip()
+    if not api_key:
+        raise SystemExit(f"ERROR: {gen_cfg['api_key_env']} is not set.")
+
+    probe = pilot.fetch_models(smoke["base_url"], api_key)
+    if not probe["reachable"]:
+        raise SystemExit(f"ERROR: cannot reach {smoke['base_url']}/models: "
+                         f"{redact_secret(str(probe['error']), api_key)}")
+
+    run_dir = ROOT / "runs" / smoke["run_id"]
+    if run_dir.exists() and any(run_dir.iterdir()):
+        raise SystemExit(f"ERROR: {run_dir} already exists; refusing to overwrite")
+    run_dir.mkdir(parents=True, exist_ok=True)
+
+    by_id = {i["item_id"]: i for i in _load_items()}
+    cfg = smoke["request_configuration"]
+    results = []
+    print(f"smoke: {smoke['n_requests']} requests against {smoke['base_url']}")
+    print("-" * 70)
+    for item_id in smoke["item_ids"]:
+        item = by_id[item_id]
+        payload = {
+            "model": smoke["model"],
+            "messages": [{"role": "system", "content": OpenAICompatGenerator.SYSTEM},
+                         {"role": "user", "content": item["question"]}],
+            "temperature": cfg["temperature"],
+            "top_p": cfg["top_p"],
+            "max_tokens": cfg["max_tokens"],
+            "stream": False,
+            "logprobs": True,
+            "top_logprobs": 1,
+        }
+        t0 = time.time()
+        response = requests.post(f"{smoke['base_url'].rstrip('/')}/chat/completions",
+                                 json=payload, timeout=120,
+                                 headers={"Authorization": f"Bearer {api_key}",
+                                          "Content-Type": "application/json"})
+        elapsed = time.time() - t0
+        entry = {"item_id": item_id, "slice": item["slice"],
+                 "http_status": response.status_code, "latency_s": round(elapsed, 2)}
+        if response.status_code != 200:
+            entry["error"] = redact_secret(response.text[:400], api_key)
+            results.append(entry)
+            print(f"  {item_id}: HTTP {response.status_code}  {entry['error'][:100]}")
+            continue
+
+        data = response.json()
+        choice = (data.get("choices") or [{}])[0]
+        message = choice.get("message") or {}
+        usage = data.get("usage") or {}
+        logprob_field = (choice.get("logprobs") or {}).get("content")
+        entry.update({
+            "served_model": data.get("model"),
+            "finish_reason": choice.get("finish_reason"),
+            "prompt_tokens": usage.get("prompt_tokens"),
+            "completion_tokens": usage.get("completion_tokens"),
+            "reasoning_tokens": (usage.get("completion_tokens_details") or {}).get("reasoning_tokens"),
+            "has_reasoning_content": bool(message.get("reasoning_content")),
+            "logprobs_returned": bool(logprob_field),
+            "answer_preview": (message.get("content") or "")[:160],
+        })
+        results.append(entry)
+        print(f"  {item_id}: {entry['prompt_tokens']} in / {entry['completion_tokens']} out, "
+              f"finish={entry['finish_reason']}, reasoning={entry['reasoning_tokens']}, "
+              f"logprobs={entry['logprobs_returned']}")
+
+    thinking = any(r.get("has_reasoning_content") or (r.get("reasoning_tokens") or 0) > 0
+                   for r in results)
+    logprobs = all(r.get("logprobs_returned") for r in results if "error" not in r)         if any("error" not in r for r in results) else None
+    truncated = any(r.get("finish_reason") == "length" for r in results)
+    observed_prompt = max([r["prompt_tokens"] for r in results
+                           if isinstance(r.get("prompt_tokens"), int)] or [0])
+    findings = {
+        "thinking_mode_active": thinking,
+        "logprobs_returned": logprobs,
+        "output_truncated_at_max_tokens": truncated,
+        "served_model_ids": sorted({r.get("served_model") for r in results if r.get("served_model")}),
+        "observed_prompt_tokens_max": observed_prompt,
+        "planned_prompt_token_ceiling": plan["prompt_token_estimate"]["max_per_request"],
+        "prompt_estimate_held": (observed_prompt <= plan["prompt_token_estimate"]["max_per_request"]
+                                 if observed_prompt else None),
+    }
+    findings["implications"] = {
+        "p_true": ("logprobs available; the p_true column can be computed"
+                   if logprobs else
+                   "no logprobs returned: p_true stays undefined with reason logprobs_absent"),
+        "cost": ("reasoning tokens appear, so completions may be longer than the pilot "
+                 "assumes and the cost ceiling should be re-checked"
+                 if thinking else "no reasoning tokens observed"),
+        "answers": ("some completion hit max_tokens and was cut off; the answer may be "
+                    "truncated, which depresses accuracy for a reason unrelated to the model"
+                    if truncated else "no completion was truncated"),
+    }
+
+    actual = estimate_cost(
+        sum(r.get("prompt_tokens") or 0 for r in results),
+        sum(r.get("completion_tokens") or 0 for r in results),
+        plan["pricing"]["rates_used"])
+
+    report = {
+        "phase": "G",
+        "report": "smoke check",
+        "run_id": smoke["run_id"],
+        "generated_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+        "plan_sha256": smoke["plan_sha256"],
+        "parent_plan_sha256": smoke["parent_plan_sha256"],
+        "provider": smoke["provider"],
+        "base_url": smoke["base_url"],
+        "model": smoke["model"],
+        "request_configuration": smoke["request_configuration"],
+        "endpoint_models_visible": probe["model_ids"][:25],
+        "results": results,
+        "findings": findings,
+        "cost": {"actual": actual,
+                 "estimated_max": smoke["cost_estimate"]["total_cost_usd"]},
+        "note": ("a smoke check measures the provider's behaviour, not the model's "
+                 "accuracy; no correctness or gate claim follows from it"),
+    }
+    (run_dir / "smoke_report.json").write_text(json.dumps(report, indent=2) + "\n",
+                                               encoding="utf-8")
+
+    print("-" * 70)
+    print(f"  thinking mode : {'ACTIVE' if thinking else 'not observed'}")
+    print(f"  logprobs      : {'returned' if logprobs else 'NOT returned'}")
+    print(f"  truncation    : {'some answers hit max_tokens' if truncated else 'none'}")
+    print(f"  served model  : {findings['served_model_ids']}")
+    print(f"  prompt tokens : observed max {observed_prompt}, "
+          f"planned ceiling {plan['prompt_token_estimate']['max_per_request']}  "
+          f"({'held' if findings['prompt_estimate_held'] else 'EXCEEDED'})")
+    print(f"  cost          : ${actual['total_cost_usd']:.6f} actual "
+          f"(max ${smoke['cost_estimate']['total_cost_usd']:.6f} authorised)")
+    for key, text in findings["implications"].items():
+        print(f"  {key:<13} : {text}")
+    print(f"\n  report: {run_dir / 'smoke_report.json'}")
+    print("  The main run is still gated: --run --approve " + plan["plan_sha256"])
+    return 0
 
 
 # ----------------------------------------------------------------------
@@ -416,6 +580,8 @@ def main() -> int:
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--config", default=str(DEFAULT_CONFIG))
     ap.add_argument("--plan", action="store_true", help="print the plan; sends nothing")
+    ap.add_argument("--smoke", action="store_true",
+                    help="send 2 requests to check thinking mode and logprobs")
     ap.add_argument("--run", action="store_true", help="execute the approved plan")
     ap.add_argument("--approve", default=None, help="the plan_sha256 the user approved")
     ap.add_argument("--approved-plan", default=None,
@@ -423,8 +589,9 @@ def main() -> int:
     ap.add_argument("--out", default=str(PLAN_PATH))
     args = ap.parse_args()
 
-    if not args.plan and not args.run:
-        ap.error("choose --plan (free) or --run (paid, needs --approve)")
+    if not args.plan and not args.run and not args.smoke:
+        ap.error("choose --plan (free), --smoke (2 paid requests) or --run "
+                 "(240 paid requests, needs --approve)")
 
     config = _load_config(Path(args.config))
     verify_frozen_inputs()
@@ -438,6 +605,9 @@ def main() -> int:
         print(f"\n  plan file: {out}")
         print("  Nothing was sent. Generation requires --run --approve <sha256>.")
         return 0
+
+    if args.smoke:
+        return _smoke(plan, config, args)
 
     require_approval(plan, args.approve)
     return _run(plan, config, args)

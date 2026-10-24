@@ -99,6 +99,12 @@
     "max_tokens_per_request": 220,
     "basis": "upper bound: the measured prompt length for every request and max_tokens for every completion"
   },
+  "prompt_token_estimate": {
+    "max_per_request": 204,
+    "mean_per_request": 184,
+    "method": "ceil(len(system_prompt + question) / 4), max taken for the ceiling"
+  },
+  "cost_cap_usd": 0.5,
   "dataset_sha256": {
     "data/lexuq_slice.jsonl": "89bc1180a4df76287768ce59432aa7ff0aa9d38c16d5f296ed16c3e45449bd53",
     "data/lexuq_slice_summary.json": "0bd5186d767714b2f0f23d76eddbecb28c0b3ebd0edbe26c3617d914c9e37a84"
@@ -138,11 +144,6 @@
     "pools_slices": false
   },
   "plan_sha256": "eb06ed62db637c89110a4a2a511f65164d3ff990638c66832c1a6aa16e30ecc9",
-  "prompt_token_estimate": {
-    "max_per_request": 204,
-    "mean_per_request": 184,
-    "method": "ceil(len(system_prompt + question) / 4), max taken for the ceiling"
-  },
   "privacy": {
     "what_is_sent": "the system prompt and one synthetic legal question per request, plus the model's own replies",
     "what_is_not_sent": [
@@ -153,6 +154,5 @@
     "data_origin": "synthetic items generated from the published IPC/BNS successor mapping; the slice is flagged verified=false",
     "provider_retention": "governed by the chosen provider's API terms; DeepSeek and OpenAI both retain request data for abuse monitoring under their standard terms unless a zero-retention arrangement is in place",
     "residual_risk": "the questions themselves are not confidential, but they would leave the machine; the legal caveat is that the dataset is unverified, so the answers are not legal advice and must not be published as such"
-  },
-  "cost_cap_usd": 0.5
+  }
 }

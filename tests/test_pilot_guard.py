@@ -343,3 +343,59 @@ def test_the_config_never_stores_an_api_key():
     assert "api_key_env" in config["generator"]
     assert "api_key" not in config["generator"]
     assert config["generator"]["api_key_env"].isupper()
+
+
+# ----------------------------------------------------------------------
+# the smoke check
+# ----------------------------------------------------------------------
+def _smoke():
+    return pilot.build_smoke_plan(_plan())
+
+
+def test_smoke_plan_is_two_requests_one_per_slice():
+    smoke = _smoke()
+    assert smoke["n_requests"] == 2
+    assert len(smoke["item_ids"]) == 2
+    slices = sorted(item_id.split("-", 1)[0] for item_id in smoke["item_ids"])
+    assert slices == ["L1", "L7"]
+
+
+def test_smoke_plan_inherits_the_approved_configuration():
+    plan = _plan()
+    smoke = pilot.build_smoke_plan(plan)
+    assert smoke["model"] == plan["model"]
+    assert smoke["base_url"] == plan["base_url"]
+    assert smoke["request_configuration"] == plan["request_configuration"]
+    assert smoke["parent_plan_sha256"] == plan["plan_sha256"]
+
+
+def test_smoke_plan_costs_almost_nothing():
+    smoke = _smoke()
+    assert smoke["cost_estimate"]["total_cost_usd"] < 0.01
+    enforce_cost_cap(smoke["cost_estimate"])       # must not raise
+
+
+def test_smoke_plan_has_its_own_hash_distinct_from_the_pilot():
+    plan = _plan()
+    smoke = pilot.build_smoke_plan(plan)
+    assert smoke["plan_sha256"] != plan["plan_sha256"]
+
+
+def test_smoke_plan_changes_if_the_model_changes():
+    a = pilot.build_smoke_plan(_plan())
+    b = pilot.build_smoke_plan(_plan(model="deepseek-v4-pro"))
+    assert a["plan_sha256"] != b["plan_sha256"]
+
+
+def test_smoke_requires_its_own_approval():
+    smoke = _smoke()
+    with pytest.raises(SystemExit, match="without approval"):
+        require_approval(smoke, None, mode="--smoke")
+    with pytest.raises(SystemExit, match="does not match"):
+        require_approval(smoke, _plan()["plan_sha256"], mode="--smoke")
+    require_approval(smoke, smoke["plan_sha256"], mode="--smoke")
+
+
+def test_smoke_plan_states_what_it_is_for():
+    assert "thinking" in _smoke()["purpose"]
+    assert "logprobs" in _smoke()["purpose"]

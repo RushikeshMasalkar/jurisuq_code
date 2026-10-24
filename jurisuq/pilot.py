@@ -40,6 +40,50 @@ COST_CAP_USD = 0.50
 ITEMS_PER_SLICE = 12
 SAMPLES_PER_ITEM = 10
 
+#: The smoke check: one request on one item per slice, to learn what the
+#: provider actually does (thinking tokens, logprobs, served model id) before
+#: spending on the full pilot. Two requests, two items, one slice each.
+SMOKE_ITEMS = ("L1", "L7")
+
+
+def build_smoke_plan(plan: dict) -> dict:
+    """A two-request pre-flight derived from the approved pilot plan.
+
+    It inherits every setting from the main plan so the smoke check measures the
+    configuration that will actually run, and it carries its own hash because it
+    is its own spending decision.
+    """
+    per_slice = {}
+    for item_id in plan["selection"]["item_ids"]:
+        slice_name = item_id.split("-", 1)[0]
+        if slice_name in SMOKE_ITEMS and slice_name not in per_slice:
+            per_slice[slice_name] = item_id
+    missing = [s for s in SMOKE_ITEMS if s not in per_slice]
+    if missing:
+        raise ValueError(f"the pilot selection has no item for slice(s) {missing}")
+
+    smoke = {
+        "phase": "G",
+        "kind": "smoke check (2 requests)",
+        "run_id": plan["run_id"] + "-smoke",
+        "provider": plan["provider"],
+        "base_url": plan["base_url"],
+        "model": plan["model"],
+        "request_configuration": dict(plan["request_configuration"]),
+        "n_requests": len(SMOKE_ITEMS),
+        "item_ids": [per_slice[s] for s in SMOKE_ITEMS],
+        "purpose": ("confirm the served model id, whether thinking tokens appear, "
+                    "whether logprobs are returned, and the real prompt-token count"),
+        "parent_plan_sha256": plan["plan_sha256"],
+        "cost_estimate": estimate_plan_cost(
+            len(SMOKE_ITEMS),
+            plan["prompt_token_estimate"]["max_per_request"],
+            plan["request_configuration"]["max_tokens"],
+            plan["pricing"]["rates_used"]),
+    }
+    smoke["plan_sha256"] = plan_digest(smoke)
+    return smoke
+
 #: A correctness class with fewer than this many items is "sparse" and must be
 #: reported as such rather than treated as a usable comparison class.
 SPARSE_CLASS_BELOW = 5
@@ -199,6 +243,14 @@ def build_plan(*, provider: str, base_url: str, model: str, temperature: float,
         "n_requests": n_requests,
         "pricing": pricing,
         "cost_estimate": estimate,
+        # recorded here so a plan is self-contained: the smoke check and any
+        # reviewer downstream read these fields rather than recomputing them
+        "prompt_token_estimate": {
+            "max_per_request": prompt_tokens_per_request,
+            "mean_per_request": prompt_tokens_per_request,
+            "method": "supplied by the caller",
+        },
+        "cost_cap_usd": COST_CAP_USD,
         "dataset_sha256": dataset_sha256,
         "outcome_rules": outcome_rules(),
         "invariants": {
@@ -216,16 +268,18 @@ def build_plan(*, provider: str, base_url: str, model: str, temperature: float,
 
 def plan_digest(plan: dict) -> str:
     """Hash the fields that define what would actually be sent and paid for."""
+    item_ids = (plan["selection"]["item_ids"] if "selection" in plan
+                else plan.get("item_ids", []))
     decision = {
         "provider": plan["provider"],
         "base_url": plan["base_url"],
         "model": plan["model"],
         "request_configuration": plan["request_configuration"],
-        "judge": plan["judge"],
-        "selection_item_ids": plan["selection"]["item_ids"],
+        "judge": plan.get("judge"),
+        "selection_item_ids": item_ids,
         "n_requests": plan["n_requests"],
         "cost_estimate": plan["cost_estimate"],
-        "dataset_sha256": plan["dataset_sha256"],
+        "dataset_sha256": plan.get("dataset_sha256"),
     }
     blob = json.dumps(decision, sort_keys=True, separators=(",", ":")).encode()
     return hashlib.sha256(blob).hexdigest()
@@ -329,13 +383,13 @@ def g7_from_pilot(per_slice: dict) -> dict:
 # ----------------------------------------------------------------------
 # approval
 # ----------------------------------------------------------------------
-def require_approval(plan: dict, approved_sha: str | None) -> None:
+def require_approval(plan: dict, approved_sha: str | None, mode: str = "--run") -> None:
     """Execution is gated on the hash of the plan the user actually approved."""
     if not approved_sha:
         raise SystemExit(
             "ERROR: this script spends money and will not run without approval.\n"
             "       1) python scripts/44_phase_g_pilot.py --plan\n"
-            "       2) review the plan, then re-run with: --run --approve "
+            f"       2) review the plan, then re-run with: {mode} --approve "
             f"{plan.get('plan_sha256', '<plan-sha>')}\n"
             f"       The plan's current hash is {plan.get('plan_sha256')}.")
     if approved_sha.strip() != plan.get("plan_sha256"):
