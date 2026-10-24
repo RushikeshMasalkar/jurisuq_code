@@ -32,6 +32,8 @@ The phases are cumulative:
    with an explicit sample-only fallback.
 6. **Phase F** calibrates that score per stratum and applies a harm-weighted
    answer / verify / abstain policy with a conformal coverage layer.
+7. **Phase G** builds (and must first measure) the target population without
+   which G5 and the L7 half of G6 cannot be evaluated at all.
 
 The phases are deliberately separated: Phase C/D/E write sibling runs and
 leave their source runs unchanged. Phase E never recomputes Phase D outputs.
@@ -85,7 +87,8 @@ The full repository suite was run in this environment with
 | C | Engineering complete; four mappings corrected and eight target rows verified from documented statutory text | `runs/phaseA-laptop-v2-rejudged+ctx/` |
 | D | Typed-cluster rerun complete; G4 PASS; CM coverage limited by 13 unresolved records | `runs/phaseA-laptop-v2-rejudged+ctx-r2+typed+warrant/` |
 | E | Two-variant typed-run evaluation; G5 NOT_EVALUABLE | `runs/phaseA-laptop-v2-rejudged+ctx-r2+typed+warrant+uq-typed/` and `...+uq-exact/` |
-| F | Implemented and evaluated; G6 NOT_MET (control-slice calibration and selective risk fail, L7 stratum unevaluable) | `runs/phaseA-laptop-v2-rejudged+ctx-r2+typed+warrant+uq-exact+cal/` |
+| F | Implemented and evaluated; G6 NOT_MET (control-slice calibration and selective risk fail, L7 stratum unevaluable). Conformal figures superseded by the follow-up run `+cal-r2`; the original `+cal` is preserved unchanged | `runs/phaseA-laptop-v2-rejudged+ctx-r2+typed+warrant+uq-exact+cal/` (see also `...+cal-r2/`) |
+| G | Infrastructure implemented and audited; **no target population yet**, so G5 and the L7 half of G6 remain unevaluable. No Phase G gate is defined, because none is documented | `runs/phaseG_feasibility_audit.json` |
 
 Phase E's target holdout contains only incorrect L7 answers, so its L7 AUROC
 is undefined and no G5 pass is claimed. The score is an uncalibrated risk
@@ -221,6 +224,35 @@ constant changed. Full record:
 [`PHASE-F-FOLLOWUP.md`](PHASE-F-FOLLOWUP.md); suite is now **270 passed, 1
 skipped**.
 
+### Phase G — target population for G5 and the L7 half of G6
+
+Phase G is a data-availability phase, not a modelling phase. Both G5 and the L7
+half of G6 are blocked on one thing: no evaluation population has both
+correctness classes. The repository contains **no Phase G specification and no
+Phase G gate**; the only documented requirement is the one sentence repeated in
+`PHASE-E.md` §7.4, `PHASE-E.md`'s structural G5 finding, and `PHASE-F.md` §12.1
+— a target slice with both correctness classes on which the detector both fires
+and stays silent. The phase therefore implements that prerequisite as an
+executable check and defines no new gate.
+
+The audit (`scripts/40_audit_target_feasibility.py`, read-only) establishes that
+**no valid target population exists in the frozen artefacts**:
+
+| Population | correct / incorrect | detector fired / silent | detector AUROC | status |
+|---|---|---|---|---|
+| L1 | 43 / 57 | 0 / 61 (37 partial) | 0.4890 (chance) | NOT_READY |
+| L7 | 0 / 100 | 82 / 7 | undefined | NOT_READY |
+| L1 + L7 | 43 / 157 | 82 / 68 | 0.7720 | NOT_READY (confounded) |
+
+The pooled 0.772 is an artefact: the detector scores 0.9458 against
+`slice == L1`, and within the only two-class slice it is at chance. Separately,
+the L7 zero is not a comparator artefact — 0 of 1,000 samples across ten offences
+assert the gold section in any form. **G5 stays NOT_EVALUABLE and G6 stays
+NOT_MET.** Building the population needs new items and new generation, which is
+an open, costed checkpoint in `PHASE-G.md`.
+
+The suite is now **320 passed, 1 skipped** (50 new Phase G tests).
+
 ## Documentation map
 
 Canonical phase guides, each containing implementation details and the complete
@@ -238,6 +270,8 @@ historical results record:
   AUROC interval, G5 status, and separate environment test records.
 - [Phase F follow-up](PHASE-F-FOLLOWUP.md) — the four post-merge experiments,
   corrected conformal provenance, and clustered uncertainty.
+- [Phase G guide](PHASE-G.md) — specification gap, the target-population
+  readiness check, the feasibility audit, and the pending generation checkpoint.
 - [Phase F guide](PHASE-F.md) — calibration maps, grouped cross-fitting, the
   decision policy, the conformal layer, E6 results, and the G6 verdict with its
   failure conditions and limitations.
@@ -260,12 +294,14 @@ Phase D: context + stored answers -> A/T/J/K, W, CM, flags
 Phase E: sample statistics + stored W/CM/K -> monotone risk score/fallback
 Phase F: stored score + flags -> per-stratum p_reliable, conformal threshold,
          answer / verify / abstain with a reason
+Phase G: stored runs -> population readiness audit; candidate-item yield screen
 ```
 
 Primary modules are in [`jurisuq/`](jurisuq/): core pipeline and metrics,
 `relations/` for Phase B, `context/` for Phase C, `warrant/` for Phase D,
-`uncertainty/` for Phase E, and `calibration/` for Phase F. Scripts are numbered by phase:
-`00`–`06` (A), `10`–`13` (B), `20`–`22` (C), `23`–`27` (D/E) and `29`–`31` (F).
+`uncertainty/` for Phase E, `calibration/` for Phase F, and `target/` for Phase G.
+Scripts are numbered by phase: `00`–`06` (A), `10`–`13` (B), `20`–`22` (C),
+`23`–`27` (D/E), `29`–`31` (F, with follow-up experiments `32`–`34`) and `40`–`41` (G).
 
 ## Requirements and installation
 
