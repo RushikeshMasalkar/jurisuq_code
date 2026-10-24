@@ -389,8 +389,8 @@
   "run_id": "phaseA-laptop-v2-rejudged+ctx-r2+typed+warrant+uq-typed+cal",
   "source_run_id": "phaseA-laptop-v2-rejudged+ctx-r2+typed+warrant+uq-typed",
   "calibration_model_path": "runs/phaseA-laptop-v2-rejudged+ctx-r2+typed+warrant+uq-typed+cal/calibration_model.json",
-  "calibration_model_sha256": "50c2a5fc5131d8a558a0598ce5749947375ba5afe029936ad5feacadbcb9119b",
-  "scored_items_sha256": "928afc011acd7bdc0b66a919f02190cc25ebeba16c934ac971b01c57b586974c",
+  "calibration_model_sha256": "5263ef7496fe3db06e6595fd201382e74e187bc7cbfbba058496595c03dd92ab",
+  "scored_items_sha256": "fd3ecebc20a7025331d015abd931a744bf32c6c8b9ebeaaf0fe97e56bdd28960",
   "items_unchanged_by_validation": true,
   "interface_rule": {
     "path": "/home/user/jurisuq_code/scripts/30_apply_policy.py",
@@ -418,7 +418,7 @@
     "verify": 100,
     "abstain": 100
   },
-  "generated_utc": "2026-10-24T14:26:31Z",
+  "generated_utc": "2026-10-24T14:28:18Z",
   "label_access": "correctness labels are read only in this offline validation script, after scoring was written",
-  "source_tree_hash_after_validation": "10b5991ef639ee2f81f7f6698acf0160e354f4b7588623aa96117653b46df754"
+  "source_tree_hash_after_validation": "14cd33e45e7eeb464de267f11b86b71d8a78d20cb025b8bc5e0be8b40975d1fd"
 }

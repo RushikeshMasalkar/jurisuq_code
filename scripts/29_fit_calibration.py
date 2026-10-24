@@ -18,7 +18,6 @@ import argparse
 import hashlib
 import json
 import sys
-import time
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -107,7 +106,10 @@ def main() -> int:
         "modules": ["M9", "M10"],
         "source_run_id": run_id,
         "source_tree_sha256": before,
-        "generated_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+        # No generation timestamp: the model content is what the scored rows
+        # record (calibration_model_sha256), so keeping it timestamp-free makes
+        # items.jsonl byte-reproducible. Wall-clock provenance lives in the
+        # +cal run's meta.json and in calibration_report.json.
         "score_field": score_field,
         "label_field": "majority_correct",
         "label_use": "read here to fit the maps; never read by the scoring path",

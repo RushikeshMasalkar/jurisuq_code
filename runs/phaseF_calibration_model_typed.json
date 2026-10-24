@@ -7,7 +7,6 @@
   ],
   "source_run_id": "phaseA-laptop-v2-rejudged+ctx-r2+typed+warrant+uq-typed",
   "source_tree_sha256": "e5a9f5d9ecb7de059e0d3148434354e809d32efc11b7c18803162bc5defd8af0",
-  "generated_utc": "2026-10-24T14:26:28Z",
   "score_field": "uq_uncertainty",
   "label_field": "majority_correct",
   "label_use": "read here to fit the maps; never read by the scoring path",

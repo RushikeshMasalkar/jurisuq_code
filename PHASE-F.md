@@ -168,12 +168,13 @@ GATE G6: NOT_MET
 | Phase F run (primary) | `runs/phaseA-laptop-v2-rejudged+ctx-r2+typed+warrant+uq-exact+cal` |
 | Source run (read-only) | `runs/...typed+warrant+uq-exact` (Phase E, exact-key provision-entropy variant — the like-for-like frozen-pilot comparison) |
 | Supplementary run | `runs/...typed+warrant+uq-typed+cal` (typed-entropy variant) |
-| Calibration model (primary) | `runs/phaseF_calibration_model.json`, sha256 `96e3a83bbcf297fb45649af41e78fc29014f60e4849359f238b0cc5e15ea742e` |
-| Calibration model (typed) | `runs/phaseF_calibration_model_typed.json`, sha256 `50c2a5fc5131d8a558a0598ce5749947375ba5afe029936ad5feacadbcb9119b` |
-| Scored items (primary) | `items.jsonl`, sha256 `3213a6b16d3150063e4b6d697e2beb8e295747d815173f0390c7c603fe7a34cb` |
-| Scored items (typed) | `items.jsonl`, sha256 `928afc011acd7bdc0b66a919f02190cc25ebeba16c934ac971b01c57b586974c` |
+| Calibration model (primary) | `runs/phaseF_calibration_model.json`, sha256 `f1095036d5f016c05656b80bf972f85f2bb01b114f724bf39e865182422b969a` |
+| Calibration model (typed) | `runs/phaseF_calibration_model_typed.json`, sha256 `5263ef7496fe3db06e6595fd201382e74e187bc7cbfbba058496595c03dd92ab` |
+| Scored items (primary) | `items.jsonl`, sha256 `5d2fc388600a3b4cd5b48ab0a2b0962b1a7699de9ef2b103c2ec67993f860c32` |
+| Scored items (typed) | `items.jsonl`, sha256 `fd3ecebc20a7025331d015abd931a744bf32c6c8b9ebeaaf0fe97e56bdd28960` |
 | Gate record | `<run>/calibration_report.json` (`gate: G6`, per-condition detail, per-stratum tables) |
 | Source runs modified | **None** — tree hash identical before and after fitting and scoring |
+| Byte-reproducibility | `items.jsonl` and the calibration model are deterministic (no timestamps): two consecutive full re-runs produced identical SHA-256 for both. `meta.json` and `calibration_report.json` carry `generated_utc` and are generation-specific; their content apart from that field is identical |
 
 The split is the Phase E pair-grouped SHA-256 holdout (`phaseE-v1`, 20 %), 156
 development / 44 holdout records, recomputed from `data/lexuq_slice.jsonl`; the
@@ -362,6 +363,9 @@ python scripts/31_validate_calibration.py \
   aborts the step.
 * The calibration model records the statute-store hash and the scored items
   record the model hash, so a mismatched pair is detected rather than trusted.
+* The model file deliberately carries no generation timestamp, so the scored
+  `items.jsonl` is byte-reproducible; wall-clock provenance lives in `meta.json`
+  and the gate report.
 * Do not relax `ace_max`, `c_verify`, `c_abstain` or the conformal target to
   change the verdict. Any change to a gate constant is a new experiment with a
   new run id and its own record.

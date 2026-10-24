@@ -9,7 +9,7 @@
   "source_tree_sha256_before": "e5a9f5d9ecb7de059e0d3148434354e809d32efc11b7c18803162bc5defd8af0",
   "source_tree_sha256_after": "e5a9f5d9ecb7de059e0d3148434354e809d32efc11b7c18803162bc5defd8af0",
   "source_unchanged": true,
-  "generated_utc": "2026-10-24T14:26:31Z",
+  "generated_utc": "2026-10-24T14:28:18Z",
   "n_items": 200,
   "query_fields_read": [
     "item_id",
@@ -48,6 +48,6 @@
     "custodial": 200
   },
   "model_path": "runs/phaseF_calibration_model_typed.json",
-  "model_sha256": "50c2a5fc5131d8a558a0598ce5749947375ba5afe029936ad5feacadbcb9119b",
+  "model_sha256": "5263ef7496fe3db06e6595fd201382e74e187bc7cbfbba058496595c03dd92ab",
   "calibration_semantics": "p_reliable estimates P(returned majority answer correct) under the fitting population; not a guarantee"
 }
