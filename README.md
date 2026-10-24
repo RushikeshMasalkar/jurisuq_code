@@ -205,6 +205,22 @@ record, the descriptive isotonic-versus-Platt sensitivity, and the limitations.
 With Phase F added the suite is **216 passed, 1 skipped** (57 new Phase F tests;
 the skip is the pre-existing torch-gated Phase B test).
 
+#### Phase F follow-up (post-merge audit)
+
+Four follow-up experiments re-examined the E6 record. The conformal threshold
+had been taken from the same holdout items its coverage was measured on; that is
+corrected in a **new sibling run** (`+cal-r2`, original `+cal` preserved), which
+moves coverage from 0.8636 to 0.6818 and the threshold from 0.3855 to 0.4702
+**without changing the G6 verdict**. The other three: an L1-only refit of the
+Phase E legal head raises within-slice AUROC from 0.687 to 0.863 on the same 20
+items, a pre-registered input-range rule selects Platt over isotonic (dev
+cross-fit ACE 0.0911 vs 0.2797, both still above `ace_max = 0.05`), and
+topic-clustered bootstrap intervals show the ACE failure is stable under
+resampling while the selective-risk gap is unresolvable at n=78. No gate
+constant changed. Full record:
+[`PHASE-F-FOLLOWUP.md`](PHASE-F-FOLLOWUP.md); suite is now **270 passed, 1
+skipped**.
+
 ## Documentation map
 
 Canonical phase guides, each containing implementation details and the complete
@@ -220,6 +236,8 @@ historical results record:
   interval, ablation, G4, integrity hashes, and legal limits.
 - [Phase E guide](PHASE-E.md) — legal-aware scoring, fallback behavior, paired
   AUROC interval, G5 status, and separate environment test records.
+- [Phase F follow-up](PHASE-F-FOLLOWUP.md) — the four post-merge experiments,
+  corrected conformal provenance, and clustered uncertainty.
 - [Phase F guide](PHASE-F.md) — calibration maps, grouped cross-fitting, the
   decision policy, the conformal layer, E6 results, and the G6 verdict with its
   failure conditions and limitations.
