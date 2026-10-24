@@ -1,0 +1,46 @@
+{
+  "phase": "F",
+  "modules": ["M9", "M10"],
+  "source_run_id": "phaseA-laptop-v2-rejudged+ctx-r2+typed+warrant+uq-exact",
+  "model_out": "runs/phaseF_calibration_model.json",
+  "score_field": "uq_uncertainty",
+  "label_field": "majority_correct",
+
+  "split_seed": "phaseE-v1",
+  "test_fraction": 0.2,
+
+  "isotonic_min_n": 40,
+  "min_fit_n": 10,
+  "folds": 5,
+
+  "harm_rule": "max",
+  "conformal_target_coverage": 0.8,
+
+  "policy": {
+    "verify_cost": 0.15,
+    "abstain_cost": 0.35,
+    "on_undefined": "verify",
+    "harm_weights": {
+      "custodial": 5.0,
+      "both": 3.0,
+      "definition": 1.5,
+      "procedural": 1.0,
+      "unknown": 5.0
+    }
+  },
+
+  "gates": {
+    "ace_max": 0.05,
+    "selective_coverage": 0.5,
+    "min_stratum_n": 30,
+    "conformal_tolerance": "1.96*sqrt(target*(1-target)/n)"
+  },
+
+  "notes": [
+    "The split is the Phase E pair-grouped holdout; Phase F never re-splits.",
+    "Isotonic is the default map; Platt is the small-stratum fallback.",
+    "Calibration maps are fitted per slice; stratification is not pooled across L1 and L7.",
+    "Policy costs are design constants recorded in every model and run, never tuned on the holdout.",
+    "A stratum with one correctness class is uncalibratable and is reported as such; no value is imputed."
+  ]
+}
