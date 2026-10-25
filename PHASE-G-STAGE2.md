@@ -1,12 +1,24 @@
 # JURIS-UQ — Phase G Stage 2: candidate population, and where the measurement stops
 
-**Status: PARTIAL.** The candidate item set is built and contract-valid. The
-target-yield screen **has been run**, on the principal investigator's machine
-(Qwen3 14B via LM Studio), and its figures reproduce exactly under this
-repository's own code. Its **report file is not in this repository**, so the
-numbers are recorded as reported-and-corroborated rather than as a verified
-in-repo artefact. Gate G7 is **unchanged** — a yield screen is not a gate
-evaluation.
+**Status: PARTIAL — screening complete, L7 investigation outstanding.** The
+candidate item set is built and contract-valid. The target-yield screen has been
+run on Qwen3 14B via LM Studio, and **all three artefacts are committed in this
+repository**:
+
+| Artefact | Scope |
+|---|---|
+| [`runs/phaseG_screen_qwen3_14b_full.json`](runs/phaseG_screen_qwen3_14b_full.json) | full run, 24 items × 10 samples |
+| [`runs/phaseG_screen_qwen3_14b_sliced.json`](runs/phaseG_screen_qwen3_14b_sliced.json) | full run **with a per-slice breakdown** |
+| [`runs/phaseG_screen_qwen3_14b_smoke.json`](runs/phaseG_screen_qwen3_14b_smoke.json) | smoke test, **2 items only — not an evaluation** |
+
+The full and sliced files are **two separate runs of the same 24 items**, not one
+run reported twice: they agree on majority-correct items (3/24) and differ on
+individual correct samples (34 vs 32). Their sample-level counts must not be
+merged or substituted for one another.
+
+The sliced run answers the question the full run could not: **all 3 correct items
+are L1 (3/12); L7 produced 0 correct samples out of 120.** Gate G5/G6/G7 are
+**unchanged** — a yield screen is not a gate evaluation.
 
 Machine-readable record: [`runs/phaseG_stage2_status.json`](runs/phaseG_stage2_status.json).
 Source and review record: [`runs/phaseG_candidate_sources_v1.json`](runs/phaseG_candidate_sources_v1.json).
@@ -30,10 +42,11 @@ ranking is defined" (`jurisuq/evaluation/matrix.py::gate_g7`).
 | 1. Author candidate set, Phase A schema, `verified: false` | **done** — 24 items |
 | 2. Source the candidates, record provenance | **done** — per-item source, section pair, authority level |
 | 3. Candidate-contract validation | **done** — `jurisuq/target/candidates.py`, all 24 pass |
-| 4. Candidate-yield screening (24 × 10 samples) | **DONE remotely** — reported complete; artifact pending |
-| 5. Affordability decision from `items_needed` | **DONE** — defer, pending the per-slice question (§6a) |
-| 6. Gate G7 evaluation | **not evaluable from a screen** — needs a stored run (§8) |
-| 7. Human legal review of the items | **OUTSTANDING** |
+| 4. Candidate-yield screening (24 × 10 samples) | **done** — three artefacts committed (§6a–6c) |
+| 5. Affordability decision from `items_needed` | **done** — defer, pending L7 investigation (§6d) |
+| 6. Investigate the L7 zero | **outstanding** — the reason is not established (§6e) |
+| 7. Gate G7 evaluation | **not evaluable from a screen** — needs a stored run (§8) |
+| 8. Human legal review of the items | **outstanding** |
 
 ## 2. The dataset
 
@@ -162,7 +175,7 @@ BNS 105 or 305); that the fact pattern actually falls in the intended offence
 rather than a neighbouring one; and the L1/L7 era direction. Items marked
 `subsection_confidence: medium` need this most.
 
-## 6. The screen: reported result, and the one question left open
+## 6. The screen: what the runs measured, and what they leave open
 
 **Generation guard — works.**
 
@@ -173,11 +186,10 @@ ERROR: this script calls a model when provider != 'mock'. ...
 report written? NO
 ```
 
-### 6a. The reported measurement
+### 6a. The full run
 
-The screen was run locally on Qwen3 14B. The figures below were supplied by the
-principal investigator; **the report file is not in this repository**, and it was
-not reconstructed from this summary.
+`runs/phaseG_screen_qwen3_14b_full.json` — generator `openai-compat:qwen3-14b`,
+`is_mock: false`, 24 items × 10 samples, 9,474.5 s wall clock, $0.00 (local model).
 
 | Measurement | Value |
 |---|---|
@@ -186,45 +198,98 @@ not reconstructed from this summary.
 | Majority-correct items | **3 / 24** |
 | Majority rate | **0.1250** |
 | 95% interval (Wilson) | **[0.0434, 0.3100]** |
-| Per-sample correct rate | 0.1417 |
+| Individual correct samples | **34 / 240** |
+| Sample-level rate | **0.1417** |
 | Projection | **172 items** for 15 correct at 95% confidence |
-| Cost | $0.00 (local model) |
+| Cost | $0.00 |
 
-**Corroboration performed here.** Every figure was recomputed with this
-repository's own code, without regenerating anything:
+**This report has no per-slice breakdown** (`yield_by_slice` is absent). It
+predates the change to `scripts/41` that added one, which is why a second run was
+needed to answer the per-slice question.
 
-| Claim | Repo value | Match |
-|---|---|---|
-| rate 0.1250 for 3 of 24 | `0.125` via `yield_report` | ✅ |
-| interval [0.0434, 0.3100] | `[0.043443340766555705, 0.31003881288351376]` | ✅ |
-| 172 items for 15 correct | `items_needed(0.125, 15, 0.95)` → `items_for_confidence 172`, `expected_items 120` | ✅ |
-| per-sample 0.1417 | 34/240 = `0.14166…` | ✅ arithmetic only |
+### 6b. Majority-correct yield is not sample-level accuracy
 
-That is strong evidence the summary came from this codebase's method — but it is
-**not** the artefact, and it does not establish what the model actually answered.
+The two numbers measure different things and must not be interchanged:
 
-### 6b. The question the aggregate cannot answer
+* **Majority-correct yield (3/24, 0.1250)** — the fraction of *items* whose
+  majority answer across 10 samples is correct. This is the quantity Stage 2
+  needs, because an item whose samples are sometimes right but whose majority is
+  wrong still contributes an **incorrect** item to the evaluation population.
+  `yield_report` says so directly: "Using the sample rate alone would overstate
+  yield."
+* **Sample-level rate (34/240, 0.1417)** — the fraction of individual generations
+  that are correct. It is a property of the generator's sampling, not of the
+  population you can build.
 
-`yield_report` breaks down **per topic**, not per slice, and the report carries no
-per-item records. So **the 3 correct items cannot be attributed to L1 or L7.**
+Reporting 0.1417 as "the yield" would overstate the usable population by roughly
+13%, so the majority figure is the headline and the sample figure is supporting
+detail.
 
-This matters more than it looks. G7's condition is per slice. The frozen
-evidence has **L7 at 0 correct of 100**. If all three correct candidates are L1,
-a 172-item full run would still leave L7 single-class and **G7 would remain
-`NOT_MET`** however much generation was spent.
+### 6c. The sliced run — and what it settles
 
-`scripts/41` now emits `yield_by_slice` on every run, so this cannot recur. The
-existing report predates the change and must be treated as unable to answer it.
+`runs/phaseG_screen_qwen3_14b_sliced.json` — a **separate run** of the same 24
+items (10,684.6 s), identical in configuration but emitting `yield_by_slice`.
 
-### 6c. Affordability decision
+| Metric | L1 | L7 | Overall |
+|---|---:|---:|---:|
+| Candidate items | 12 | 12 | 24 |
+| Majority-correct items | **3** | **0** | 3 |
+| Majority-correct rate | 0.250 | 0.000 | 0.125 |
+| Individual correct samples | 32/120 | **0/120** | 32/240 |
+| Sample-level rate | 0.267 | 0.000 | 0.133 |
+
+**Established for this run:** the L7 arm produced **no correct majority answer
+and no correct sample at all** across 120 generations. The 3 correct items are
+entirely L1.
+
+**Not established:** why. Zero-yield on L7 is a finding that requires
+investigation, not a diagnosis. A zero at both the majority *and* the sample level
+is at least consistent with the model consistently selecting the repealed IPC
+provision — which is exactly the trap L7 is built around — but this repository
+holds no per-item records in either report, so that remains a hypothesis.
+
+**The full and sliced runs disagree slightly and must be kept apart:** 34 vs 32
+correct samples. Both report 3/24 majority. They are independent draws from the
+same stochastic process, not a correction of one by the other.
+
+### 6d. Affordability decision
 
 Stage 2 asks for a decision from the measured `items_needed`. **Decision: defer
-the full run pending the per-slice question.**
+the full target run pending the L7 investigation.**
 
-A 172-item run is 1,720 generations — roughly **7.2×** the completed screen — and
-the summary cannot show that it would fix the L7 arm that actually blocks G7.
+The projection (172 items for 15 correct) is computed from the *aggregate* rate of
+0.125. But the sliced result shows the aggregate is carried entirely by L1: L7's
+own rate is 0.00, and `items_needed` cannot project from a zero rate — it returns
+`reachable: false` with the note "a zero observed rate cannot be projected; a
+zero would be indistinguishable from an even lower unobserved rate."
 
-### 6d. Earlier blocker, retained
+So a 172-item run at 1,720 generations (~7.2× the completed screen) would be
+buying more L1 items. It cannot be expected to create an L7 correct class, and
+without one **G7 remains `NOT_MET`** however much generation is spent.
+
+### 6e. The smoke test
+
+`runs/phaseG_screen_qwen3_14b_smoke.json` — **2 items, 20 generations, 0 correct**,
+723.8 s. It exercises connectivity and the report path against the local endpoint
+before committing to a long run.
+
+**It is a smoke test, not an evaluation.** Two items cannot estimate a yield; its
+projection is `reachable: false` because a zero rate is not projectable. It is
+cited here only to record that the harness was checked end to end, and its 0/2
+must never be pooled with, averaged against, or reported alongside the full or
+sliced runs.
+
+### 6f. Dataset hash
+
+All three reports record
+`data_sha256 f49f4d91946387eb0534718945092cc2f840bd9f2aee053ed9ac13c3f296d341`,
+which equals `jurisuq.target.content_sha256()` on the committed
+`data/lexuq_target_candidates_v1.jsonl`. In this Linux checkout the file is LF, so
+the raw-byte and normalised hashes coincide; on a Windows `core.autocrlf` checkout
+the raw bytes differ but the normalised hash — the one recorded in the reports —
+still matches. That was the previously reported hash discrepancy.
+
+### 6g. Earlier blocker, retained
 
 The failure below is why the screen could not run in *this* environment, and is
 kept as the record of that attempt.
@@ -258,11 +323,16 @@ contract-valid file end to end and writes a report — nothing more.
 
 ## 7. Tests
 
-`tests/test_target_screen_report.py` holds the checks for the real report. While
-the file is absent, seven of them **skip** with a reason naming the missing path;
-the four that always run assert that the status record agrees with the repository
-about the artefact's absence and that the reported summary is reproducible. The
-moment the file is added, the skipped checks activate and verify that it is a
+`tests/test_target_screen_report.py` holds the checks for the real reports. With
+the artefacts now committed, **all of its checks run** — none skip. They verify
+that each report is a real (non-mock) Qwen3 run, that its `data_sha256` matches
+the candidate dataset committed here, that its arithmetic is self-consistent,
+that its projection matches this repository's planning code, and that the sliced
+report carries both L1 and L7 buckets whose counts reconcile with the aggregate.
+They also pin the run-to-run distinction: a report without `yield_by_slice` must
+not be treated as having answered the per-slice question.
+
+They verify that it is a
 real (non-mock) run over the dataset in this repository, with self-consistent
 arithmetic and a projection matching this repository's planning code.
 
@@ -305,25 +375,32 @@ python -X utf8 scripts/41_screen_target_yield.py --data data/lexuq_target_candid
 python -X utf8 scripts/41_screen_target_yield.py --data data/lexuq_target_candidates_v1.jsonl \
     --out runs/phaseG_screen_mock_candidates_v1.json --set provider=mock --set n_samples=3
 
-# 5. the real screen, once a generator is available
+# 5. the real screen (needs LM Studio + a loaded model; ~2.6 h for 24 items)
 python -X utf8 scripts/41_screen_target_yield.py --data data/lexuq_target_candidates_v1.jsonl \
-    --allow-generation
+    --out runs/phaseG_screen_<model>_full.json --allow-generation
+
+# 6. inspect the committed reports without regenerating anything
+python -X utf8 -m pytest tests/test_target_screen_report.py -q
 ```
 
-Step 5 is the single blocked command. It needs a running LM Studio with a loaded
-model, or an approved paid endpoint. Nothing else in this stage is blocked.
+Step 5 was already run and its artefacts are committed, so **no regeneration is
+needed** to reproduce this document's analysis. Re-running it would spend about
+2.6 hours of local compute.
 
 ## 10. Limitations
 
-1. **The measurement is reported, not in-repo.** The screen ran, but its report
-   is absent from the repository, so the numbers are corroborated rather than
-   verified against an artefact.
-2. **The per-slice split is unknown** (6b) — the central limitation of this
-   stage, because it decides whether a full run can change G7.
+1. **The L7 zero is unexplained** (§6c) — the central limitation of this stage.
+   Zero correct samples in 120 generations is a finding, not a diagnosis, and no
+   per-item records exist to attribute it to item difficulty, label error, or the
+   model taking the trap.
+2. **Two runs, slightly different sample counts.** The full run found 34 correct
+   samples and the sliced run 32, both at 3/24 majority. Neither supersedes the
+   other and they must not be pooled.
 3. **No human legal review.** `verified: false` everywhere, by design.
-4. **Item quality is unvalidated.** Whether the fact patterns are answerable, and
-   whether a model actually falls into the trap, is exactly what the blocked
-   screen would measure.
+4. **Item quality is unvalidated.** The screen measured how often an answer was
+   correct *against the item's own gold*, not whether that gold is legally right.
+   A wrong gold label would register as a model error, and an unanswerable item
+   would register as an incorrect answer.
 5. **Eight offences only.** The frozen benchmark has ten topics including
    criminal intimidation and attempt to murder; those two were left out because
    their punishment sub-section pairings were not directly confirmed here.
@@ -335,19 +412,21 @@ model, or an approved paid endpoint. Nothing else in this stage is blocked.
 
 ## 11. Next action
 
-Two things, in this order.
+**Investigate the L7 zero before authorising any further generation.**
 
-1. **Add the report file** to `runs/phaseG_screen_qwen3_14b_full.json` in the
-   repository. Everything needed to check it is already committed. Once it is
-   added, `python -m pytest tests/test_target_screen_report.py -q` activates the
-   seven provenance checks — and if the file retains per-item records, the per-slice
-   question in 6b can be answered from it directly.
-2. **Answer the per-slice question** before authorising any 172-item run. If the
-   3 correct items are all L1, a full run cannot fix L7 and G7 stays `NOT_MET`
-   regardless of the compute spent. A cheap way to settle it: re-run the screen
-   at a small `--items` on L7 only with the updated script, whose
-   `yield_by_slice` block answers it directly.
+1. **Find out what the model actually answers on L7.** Neither committed report
+   retains per-item records, so this needs a small diagnostic run that writes
+   them — roughly 12 L7 items × a few samples, minutes rather than hours.
+   Classify each failure as: the repealed IPC trap provision, an unrelated
+   provision, or no usable answer. (The 0/120 sample result is consistent with the
+   trap being taken, but that is a hypothesis, not an established explanation.)
+2. **Check the L7 gold labels** against the cited sources, by hand. If a gold
+   label is wrong, the model may be right and the item wrong, which would change
+   the interpretation entirely. This is human legal review and it is outstanding.
+3. **Only then** decide whether a larger run is justified. The 172-item projection
+   comes from an aggregate rate that L7 contributes nothing to, so it does not
+   describe the population Stage 2 needs.
 
-Stage 2 remains **partial**: item authoring, contract validation, the screen and
-the affordability decision are done; human legal review and any G7 re-evaluation
-are not.
+Stage 2 remains **partial**: item authoring, contract validation, screening and
+the affordability decision are done; the L7 investigation, human legal review and
+any G7 re-evaluation are not.

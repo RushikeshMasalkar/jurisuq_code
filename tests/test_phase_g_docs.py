@@ -427,8 +427,8 @@ def test_the_published_test_counts_match_the_files():
     expected = {
         "test_target_population": 34, "test_target_screen": 23,
         "test_target_candidates": 52,
-        "test_target_screen_report": 11, "test_eval_matrix": 39,
-        "test_deployment_metrics": 32, "test_phase_g_docs": 44,
+        "test_target_screen_report": 18, "test_eval_matrix": 39,
+        "test_deployment_metrics": 32, "test_phase_g_docs": 46,
         "test_pilot_guard": 57,
     }
     text = GUIDE.read_text(encoding="utf-8")
@@ -459,11 +459,32 @@ def README_TEXT():
     return (ROOT / "README.md").read_text(encoding="utf-8")
 
 
-def test_the_stage_2_report_states_the_blocker_not_a_result():
+def test_the_stage_2_report_separates_runs_from_the_l7_finding():
+    """Screening is complete, so the doc must no longer describe it as blocked.
+    It must record the L7 zero as a finding that is unexplained, and it must keep
+    the historical sandbox blocker as history rather than present tense."""
     text = STAGE2.read_text(encoding="utf-8").lower()
-    assert "blocked" in text
+    assert "report file is not in this repository" not in text
+    assert "artifact pending" not in text
+    # the L7 zero is stated, and stated as unexplained
+    assert "l7" in text and "0/120" in text.replace(" ", "")
+    assert "not a diagnosis" in text or "unexplained" in text
+    # the earlier blocker is retained as history
     assert "connection refused" in text
-    assert "0 generations" in text or "no generation" in text
+
+
+def test_the_stage_2_report_does_not_pool_the_two_full_size_runs():
+    """34 and 32 correct samples come from different runs and must stay apart."""
+    text = STAGE2.read_text(encoding="utf-8")
+    assert "must not be pooled" in text or "must not be merged" in text
+    assert "34" in text and "32" in text
+
+
+def test_the_stage_2_report_distinguishes_majority_yield_from_sample_rate():
+    text = STAGE2.read_text(encoding="utf-8").lower()
+    assert "majority-correct yield" in text
+    assert "sample-level" in text
+    assert "0.1250" in text and "0.1417" in text
 
 
 def test_the_stage_2_report_does_not_claim_g7_moved():
