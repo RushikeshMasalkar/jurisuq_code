@@ -66,11 +66,19 @@ def test_the_reported_summary_matches_this_repositorys_own_mathematics():
     assert projection["items_for_confidence"] == record["projection_items_for_15_correct"]
 
 
-def test_the_per_slice_question_is_declared_unanswered():
-    """The one question G7 depends on cannot be answered from an aggregate."""
+def test_the_per_slice_question_is_answerable_from_sliced_report():
+    """The sliced report answers the L1/L7 yield question."""
     gap = _status()["per_slice_question"]
-    assert gap["answerable_from_reported_summary"] is False
-    assert "L7" in gap["reason"]
+    sliced_report = ROOT / "runs" / "phaseG_screen_qwen3_14b_sliced.json"
+
+    assert sliced_report.is_file()
+    assert gap["answerable_from_reported_summary"] is True
+    assert gap["resolved_by"] == "runs/phaseG_screen_qwen3_14b_sliced.json"
+
+    report = json.loads(sliced_report.read_text(encoding="utf-8"))
+    assert set(report["yield_by_slice"]) == {"L1", "L7"}
+    assert report["yield_by_slice"]["L1"]["overall"]["majority_correct"] == 3
+    assert report["yield_by_slice"]["L7"]["overall"]["majority_correct"] == 0
 
 
 # ----------------------------------------------------------------------
@@ -122,14 +130,14 @@ def test_the_reports_projection_matches_this_repositorys_planning_code():
 
 @MISSING
 def test_per_slice_yield_is_present_or_its_absence_is_declared():
-    """Per-slice yield is what decides the L7 question. A report made before the
-    breakdown existed must be declared as unable to answer it."""
+    """The sliced report must contain both L1 and L7 yield breakdowns."""
     report = _report()
-    if "yield_by_slice" in report:
-        assert set(report["yield_by_slice"]) <= {"L1", "L7"}
-        assert set(report["yield_by_slice"]) == {"L1", "L7"}
-    else:
-        assert _status()["per_slice_question"]["answerable_from_reported_summary"] is False
+    sliced_path = ROOT / "runs" / "phaseG_screen_qwen3_14b_sliced.json"
+
+    assert sliced_path.is_file()
+    sliced_report = json.loads(sliced_path.read_text(encoding="utf-8"))
+    assert "yield_by_slice" in sliced_report
+    assert set(sliced_report["yield_by_slice"]) == {"L1", "L7"}
 
 
 @MISSING

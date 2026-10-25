@@ -1,0 +1,342 @@
+{
+  "phase": "G",
+  "experiment": "candidate-yield screen",
+  "generator": "openai-compat:qwen3-14b",
+  "provider": "openai",
+  "is_mock": false,
+  "data_path": "data/lexuq_target_candidates_v1.jsonl",
+  "data_sha256": "f49f4d91946387eb0534718945092cc2f840bd9f2aee053ed9ac13c3f296d341",
+  "candidate_contract": {
+    "schema": "Phase A item schema",
+    "source_document": "PHASE-G.md, 'Remaining work: all of it blocked on the pilot' (Stage 2, step 1)",
+    "n_items": 24,
+    "slices": {
+      "L1": 12,
+      "L7": 12
+    },
+    "provenance_verified": false,
+    "provenance_sources": [
+      "authored for the Phase G Stage 2 screen, from the official BNS-to-IPC corresponding section table"
+    ],
+    "checked": [
+      "required_fields",
+      "slice",
+      "gold.act",
+      "gold.provision",
+      "unique_item_id",
+      "provenance.verified",
+      "provenance.source"
+    ],
+    "not_checked": [
+      "legal correctness of gold",
+      "answerability",
+      "duplicate questions across items",
+      "any gate"
+    ]
+  },
+  "n_items": 24,
+  "n_samples_per_item": 10,
+  "elapsed_seconds": 10684.6,
+  "seconds_per_item": 445.19,
+  "yield": {
+    "topics": {
+      "murder": {
+        "items": 3,
+        "majority_correct": 1,
+        "samples": 30,
+        "correct_samples": 10,
+        "majority_rate": 0.3333333333333333,
+        "sample_rate": 0.3333333333333333
+      },
+      "culpable_homicide": {
+        "items": 3,
+        "majority_correct": 0,
+        "samples": 30,
+        "correct_samples": 0,
+        "majority_rate": 0.0,
+        "sample_rate": 0.0
+      },
+      "theft": {
+        "items": 3,
+        "majority_correct": 1,
+        "samples": 30,
+        "correct_samples": 10,
+        "majority_rate": 0.3333333333333333,
+        "sample_rate": 0.3333333333333333
+      },
+      "theft_in_dwelling": {
+        "items": 3,
+        "majority_correct": 0,
+        "samples": 30,
+        "correct_samples": 0,
+        "majority_rate": 0.0,
+        "sample_rate": 0.0
+      },
+      "criminal_breach_of_trust": {
+        "items": 3,
+        "majority_correct": 0,
+        "samples": 30,
+        "correct_samples": 0,
+        "majority_rate": 0.0,
+        "sample_rate": 0.0
+      },
+      "cheating": {
+        "items": 3,
+        "majority_correct": 0,
+        "samples": 30,
+        "correct_samples": 2,
+        "majority_rate": 0.0,
+        "sample_rate": 0.06666666666666667
+      },
+      "wrongful_restraint": {
+        "items": 3,
+        "majority_correct": 0,
+        "samples": 30,
+        "correct_samples": 0,
+        "majority_rate": 0.0,
+        "sample_rate": 0.0
+      },
+      "cruelty_by_husband": {
+        "items": 3,
+        "majority_correct": 1,
+        "samples": 30,
+        "correct_samples": 10,
+        "majority_rate": 0.3333333333333333,
+        "sample_rate": 0.3333333333333333
+      }
+    },
+    "overall": {
+      "items": 24,
+      "majority_correct": 3,
+      "majority_rate": 0.125,
+      "majority_interval": {
+        "method": "wilson",
+        "estimate": 0.125,
+        "n": 24,
+        "successes": 3,
+        "lo": 0.043443340766555705,
+        "hi": 0.31003881288351376,
+        "confidence": 0.95
+      },
+      "samples": 240,
+      "correct_samples": 32,
+      "sample_rate": 0.13333333333333333,
+      "sample_interval": {
+        "method": "wilson",
+        "estimate": 0.13333333333333333,
+        "n": 240,
+        "successes": 32,
+        "lo": 0.09605375827473966,
+        "hi": 0.18216578303407138,
+        "confidence": 0.95
+      }
+    },
+    "confidence": 0.95,
+    "unit_note": "majority_rate is the planning quantity: a target population needs items whose *majority* answer is correct, not items with at least one correct sample."
+  },
+  "yield_by_slice": {
+    "L1": {
+      "topics": {
+        "murder": {
+          "items": 2,
+          "majority_correct": 1,
+          "samples": 20,
+          "correct_samples": 10,
+          "majority_rate": 0.5,
+          "sample_rate": 0.5
+        },
+        "culpable_homicide": {
+          "items": 2,
+          "majority_correct": 0,
+          "samples": 20,
+          "correct_samples": 0,
+          "majority_rate": 0.0,
+          "sample_rate": 0.0
+        },
+        "theft": {
+          "items": 1,
+          "majority_correct": 1,
+          "samples": 10,
+          "correct_samples": 10,
+          "majority_rate": 1.0,
+          "sample_rate": 1.0
+        },
+        "theft_in_dwelling": {
+          "items": 1,
+          "majority_correct": 0,
+          "samples": 10,
+          "correct_samples": 0,
+          "majority_rate": 0.0,
+          "sample_rate": 0.0
+        },
+        "criminal_breach_of_trust": {
+          "items": 1,
+          "majority_correct": 0,
+          "samples": 10,
+          "correct_samples": 0,
+          "majority_rate": 0.0,
+          "sample_rate": 0.0
+        },
+        "cheating": {
+          "items": 2,
+          "majority_correct": 0,
+          "samples": 20,
+          "correct_samples": 2,
+          "majority_rate": 0.0,
+          "sample_rate": 0.1
+        },
+        "wrongful_restraint": {
+          "items": 1,
+          "majority_correct": 0,
+          "samples": 10,
+          "correct_samples": 0,
+          "majority_rate": 0.0,
+          "sample_rate": 0.0
+        },
+        "cruelty_by_husband": {
+          "items": 2,
+          "majority_correct": 1,
+          "samples": 20,
+          "correct_samples": 10,
+          "majority_rate": 0.5,
+          "sample_rate": 0.5
+        }
+      },
+      "overall": {
+        "items": 12,
+        "majority_correct": 3,
+        "majority_rate": 0.25,
+        "majority_interval": {
+          "method": "wilson",
+          "estimate": 0.25,
+          "n": 12,
+          "successes": 3,
+          "lo": 0.08894166832259362,
+          "hi": 0.53230533515312,
+          "confidence": 0.95
+        },
+        "samples": 120,
+        "correct_samples": 32,
+        "sample_rate": 0.26666666666666666,
+        "sample_interval": {
+          "method": "wilson",
+          "estimate": 0.26666666666666666,
+          "n": 120,
+          "successes": 32,
+          "lo": 0.19568455041693206,
+          "hi": 0.3521243939344129,
+          "confidence": 0.95
+        }
+      },
+      "confidence": 0.95,
+      "unit_note": "majority_rate is the planning quantity: a target population needs items whose *majority* answer is correct, not items with at least one correct sample."
+    },
+    "L7": {
+      "topics": {
+        "murder": {
+          "items": 1,
+          "majority_correct": 0,
+          "samples": 10,
+          "correct_samples": 0,
+          "majority_rate": 0.0,
+          "sample_rate": 0.0
+        },
+        "culpable_homicide": {
+          "items": 1,
+          "majority_correct": 0,
+          "samples": 10,
+          "correct_samples": 0,
+          "majority_rate": 0.0,
+          "sample_rate": 0.0
+        },
+        "theft": {
+          "items": 2,
+          "majority_correct": 0,
+          "samples": 20,
+          "correct_samples": 0,
+          "majority_rate": 0.0,
+          "sample_rate": 0.0
+        },
+        "theft_in_dwelling": {
+          "items": 2,
+          "majority_correct": 0,
+          "samples": 20,
+          "correct_samples": 0,
+          "majority_rate": 0.0,
+          "sample_rate": 0.0
+        },
+        "criminal_breach_of_trust": {
+          "items": 2,
+          "majority_correct": 0,
+          "samples": 20,
+          "correct_samples": 0,
+          "majority_rate": 0.0,
+          "sample_rate": 0.0
+        },
+        "cheating": {
+          "items": 1,
+          "majority_correct": 0,
+          "samples": 10,
+          "correct_samples": 0,
+          "majority_rate": 0.0,
+          "sample_rate": 0.0
+        },
+        "wrongful_restraint": {
+          "items": 2,
+          "majority_correct": 0,
+          "samples": 20,
+          "correct_samples": 0,
+          "majority_rate": 0.0,
+          "sample_rate": 0.0
+        },
+        "cruelty_by_husband": {
+          "items": 1,
+          "majority_correct": 0,
+          "samples": 10,
+          "correct_samples": 0,
+          "majority_rate": 0.0,
+          "sample_rate": 0.0
+        }
+      },
+      "overall": {
+        "items": 12,
+        "majority_correct": 0,
+        "majority_rate": 0.0,
+        "majority_interval": {
+          "method": "wilson",
+          "estimate": 0.0,
+          "n": 12,
+          "successes": 0,
+          "lo": 0.0,
+          "hi": 0.2424940069514271,
+          "confidence": 0.95
+        },
+        "samples": 120,
+        "correct_samples": 0,
+        "sample_rate": 0.0,
+        "sample_interval": {
+          "method": "wilson",
+          "estimate": 0.0,
+          "n": 120,
+          "successes": 0,
+          "lo": 0.0,
+          "hi": 0.031019166467167902,
+          "confidence": 0.95
+        }
+      },
+      "confidence": 0.95,
+      "unit_note": "majority_rate is the planning quantity: a target population needs items whose *majority* answer is correct, not items with at least one correct sample."
+    }
+  },
+  "projection": {
+    "rate": 0.125,
+    "needed_correct": 15,
+    "expected_items": 120,
+    "items_for_confidence": 172,
+    "confidence": 0.95,
+    "reachable": true
+  },
+  "projection_basis": "a usable two-class evaluation population needs enough correct items for an AUROC interval to be meaningful; 15 is the planning floor used for the Phase G cost estimate and is NOT a threshold from the engineering guide",
+  "verdict_note": "This is a yield estimate, not a gate. A zero rate means no two-class population can be built from this item set with this generator; it does not license changing any Phase E/F constant.",
+  "generated_utc": "2026-10-25T19:50:39Z"
+}

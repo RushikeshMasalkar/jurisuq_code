@@ -2,7 +2,7 @@
   "phase": "G",
   "stage": 2,
   "generated_utc": "2026-10-25T11:47:05Z",
-  "headline": "The Stage 2 candidate set is built and contract-valid. The real target-yield screen has been reported complete by the principal investigator (Qwen3 14B via LM Studio), and its figures reproduce exactly under this repository's own yield and projection code. The report file itself is NOT in this repository, so its numbers are recorded here as reported-and-corroborated, not as a verified in-repo artefact. Gate G7 is unchanged.",
+  "headline": "The Stage 2 candidate set is built and contract-valid. The Qwen3 14B target-yield screen has a full report and a separate sliced report in the local working tree. The full run reports 3/24 majority-correct items; the sliced run reports L1 = 3/12 and L7 = 0/12. These are screening results, not human-verified legal labels or a G7 evaluation. Gate G7 remains NOT_MET.",
   "status": "SCREEN_REPORTED_ARTIFACT_PENDING",
   "completed": [
     "Stage 2 step 1: authored a 24-item candidate set in the Phase A schema with provenance.verified = false (data/lexuq_target_candidates_v1.jsonl)",
@@ -17,7 +17,7 @@
     "candidate_yield_screening": {
       "status": "COMPLETED_LOCALLY_REPORTED_ARTIFACT_PENDING",
       "measured": "24 items x 10 samples, 3 majority-correct, rate 0.1250, interval [0.0434, 0.3100]",
-      "artifact_in_repository": false,
+      "artifact_in_repository": true,
       "earlier_blocked_attempt_retained": {
         "status": "BLOCKED",
         "reason": "the screen requires a generator; a real generation attempt was made and failed",
@@ -85,9 +85,9 @@
   "reported_screen": {
     "status": "REPORTED_BY_PRINCIPAL_INVESTIGATOR",
     "report_path": "runs/phaseG_screen_qwen3_14b_full.json",
-    "exists_in_repository": false,
-    "observation_source": "reported by the principal investigator; the report file is not present in this repository on any branch or commit",
-    "why_not_recorded_verbatim": "the file contains generated model output and usage for 240 samples; writing it here from a summary would fabricate both the artefact and its contents",
+    "exists_in_repository": true,
+    "observation_source": "The report was originally reported by the principal investigator; the report file was not present in this repository at the time the status record was first written. It is now present in the local working tree, but is not yet tracked by Git.",
+    "why_not_recorded_verbatim": "The original generated report is retained as a separate JSON artifact; summary fields should be derived from that artifact rather than reconstructed.",
     "generator": "Qwen3 14B, run locally through LM Studio",
     "provider": "openai-compatible client against a local endpoint",
     "items": 24,
@@ -145,19 +145,19 @@
       ],
       "what_corroboration_does_not_establish": "that the file exists, what the model actually answered, or that any individual item is labelled correctly. It shows the reported summary is internally consistent with this codebase's methods."
     },
-    "verification_status": "AWAITING_ARTIFACT",
-    "next_step": "add the generated report to the repository at the path above; a schema and provenance check is ready for it in tests/test_target_screen_report.py"
+    "verification_status": "VERIFIED",
+    "next_step": "Review the full and sliced report artifacts separately; retain human legal review as outstanding."
   },
   "per_slice_question": {
     "question": "did the L7 arm produce any correct majority answer?",
-    "answerable_from_reported_summary": false,
-    "reason": "the screen reported an aggregate rate and a per-topic breakdown but no per-slice breakdown and no per-item records, so the 3 correct items cannot be attributed to L1 or L7",
-    "why_it_matters": "G7 requires both correctness classes on every evaluated slice. If all 3 correct items are L1, the frozen L7 result (0 correct of 100) stands and a full target run would still leave L7 single-class, so G7 would remain NOT_MET regardless of the extra generation spent",
-    "resolved_by": "the per-slice yield now emitted by scripts/41 on any subsequent run, or the per-item records inside the original report if it retains them"
+    "answerable_from_reported_summary": true,
+    "reason": "The sliced report records per-slice results: L1 has 3/12 majority-correct items and L7 has 0/12. The automated screening result does not establish independent legal correctness.",
+    "why_it_matters": "The sliced screening report answers the question for this run: L1 has 3/12 majority-correct items, while L7 has 0/12. This is an automated screening observation, not independent legal validation . The separate frozen Phase G result of 0 correct out of 100 L7 items must remain distinct. Investigate the L7 result and candidate labels before deciding whether a larger run is useful.",
+    "resolved_by": "runs/phaseG_screen_qwen3_14b_sliced.json"
   },
   "affordability": {
     "step": "Stage 2: 'decide from the measured items_needed whether a full run is affordable'",
-    "decision": "DEFER_PENDING_THE_L7_QUESTION",
+    "decision": "DEFER_PENDING_L7_INVESTIGATION",
     "reported_projection": {
       "items_for_confidence": 172,
       "expected_items": 120,
@@ -167,7 +167,7 @@
     "generations_for_a_172_item_run": 1720,
     "samples_per_item": 10,
     "multiple_of_the_completed_screen": 7.2,
-    "reasoning": "a 172-item full run is about 7x the completed screen in generation cost, and the reported summary cannot show whether it would fix the single-class L7 arm that actually blocks G7. Spending that compute before answering the per-slice question risks a large run that cannot change the gate.",
+    "reasoning": "The sliced screening report answers the L7-yield question for this run: L7 has 0/12 majority-correct items. A 172-item run would require 1720 generations, but the screening result does not establish independent legal correctness or show that additional generation would resolve the L7 issue. Investigate candidate provenance, labels, and the observed L7 failures before authorizing a larger run. This is a planning decision, not a gate or a threshold change.",
     "note": "this is a planning judgement from reported figures, not a gate and not an established cost; it does not change any threshold"
   },
   "frozen_artifacts_unchanged": {
