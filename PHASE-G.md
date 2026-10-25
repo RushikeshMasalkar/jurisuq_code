@@ -246,7 +246,7 @@ calls a model, and no frozen artefact is modified.
 | `configs/phase_g_target.json` | audit inputs, screen parameters, planning assumptions, and the recorded forbidden operations |
 | `tests/test_target_population.py` | 34 tests: state classification, every readiness condition, the pooled trap, missing-value handling, confound diagnostic, yield estimation, planning projection |
 | `tests/test_target_screen.py` | 22 tests: item-schema validation, the provenance refusals, slice-stratified capping, the generation guard, end-to-end mock run, and the recorded `data_sha256` |
-| `tests/test_target_candidates.py` | 38 tests: every required field, the slice rule, `gold.act`/`gold.provision`, unique ids, every provenance refusal (`verified: true`, a non-boolean flag, no flag, no source), a real Phase A record passing the schema, and a line-ending-agnostic content hash |
+| `tests/test_target_candidates.py` | 52 tests: every required field, the slice rule, `gold.act`/`gold.provision`, unique ids, every provenance refusal (`verified: true`, a non-boolean flag, no flag, no source), a real Phase A record passing the schema, and a line-ending-agnostic content hash |
 | `jurisuq/evaluation/matrix.py` | the §21.2 grid: 9 methods × per-slice matrices, all ten metrics, per-slice judge coverage, reason-coded undefineds, confident-wrong, harm-weighted risk, `gate_g7`, and the no-pooling guard |
 | `jurisuq/evaluation/deployment.py` | §21.3 measurements: stage-1 latency, full-cascade median/p95, peak RSS, the measured-configuration record, and the §27.1 ladder check |
 | `scripts/42_build_eval_matrix.py` | builds `runs/phaseG_eval_matrix.json` from the frozen runs (offline) |
@@ -414,10 +414,11 @@ ERROR: this script calls a model when provider != 'mock'.
 | After the pilot harness | 455 passed, 1 skipped |
 | After the hold documentation and its guards | 476 passed, 1 skipped |
 | After the cross-platform integrity fix (PR #6) | 482 passed, 1 skipped |
-| After the Stage 2 candidate-set contract (this change) | 531 passed, 1 skipped |
+| After the Stage 2 candidate-set contract | 531 passed, 1 skipped |
+| After the Stage 2 candidate dataset and its report guards | 550 passed, 1 skipped |
 | New tests | 206 (34 population + 16 screen + 39 matrix + 32 deployment + 32 doc guards + 53 pilot guards) |
 | New tests, Stage 2 contract | 44 (38 candidate contract + 6 screen) |
-| Phase G tests now | 261 (34 population + 22 screen + 38 candidates + 39 matrix + 32 deployment + 39 doc guards + 57 pilot guards) |
+| Phase G tests now | 280 (34 population + 22 screen + 52 candidates + 39 matrix + 32 deployment + 44 doc guards + 57 pilot guards) |
 | Skipped | `tests/test_relations.py:236` — `torch not installed`; pre-existing |
 | User's Windows environment | torch present, so the skip runs there (271 passed at baseline) |
 
@@ -475,6 +476,18 @@ item set in the Phase A schema with `verified: false` provenance; run the yield
 screen (`scripts/41`, ~24 items × 10 samples); decide from the measured
 `items_needed` whether a full run is affordable; and only then run full
 generation under a new run id (`phaseG-target-v1…`).
+
+### Stage 2 — candidate set built; screening and G7 blocked
+
+Stage 2 is reported in full in **[`PHASE-G-STAGE2.md`](PHASE-G-STAGE2.md)**: a
+24-item candidate set (`data/lexuq_target_candidates_v1.jsonl`, 12 L1 / 12 L7,
+8 offences, all `verified: false`, all `PENDING_HUMAN_REVIEW`), the per-item
+source record, and the exact blocker that stops the screen. A real generation
+attempt failed with `Connection refused` on the configured endpoint: no LM
+Studio, no API key, 0 generations, $0.00. **G7 is unchanged at `NOT_MET`** —
+authoring item sets cannot move a gate defined over measured answers.
+
+The contract below is what makes that dataset admissible to the screen.
 
 ### Stage 2, step 1 — the candidate-set contract (implemented offline)
 

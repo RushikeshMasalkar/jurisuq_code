@@ -296,6 +296,20 @@ assert the gold section in any form. **G5 stays NOT_EVALUABLE and G6 stays
 NOT_MET.** Building the population needs new items and new generation, which is
 an open, costed checkpoint in `PHASE-G.md`.
 
+**Stage 2 status: partial / blocked.** A 24-item candidate set now exists
+(`data/lexuq_target_candidates_v1.jsonl`, 12 L1 / 12 L7, 8 offences, every item
+`provenance.verified = false` and `PENDING_HUMAN_REVIEW`), with a per-item source
+record in `runs/phaseG_candidate_sources_v1.json`. The candidate-yield screen and
+Gate G7 **could not be run**: a real generation attempt failed with
+`Connection refused` against the configured endpoint (no LM Studio, no API key,
+no hosted access), so there are 0 generations and $0.00 spent. G7 remains
+`NOT_MET`. Full report: [`PHASE-G-STAGE2.md`](PHASE-G-STAGE2.md).
+
+Authoring items cannot move G7 on its own — the gate is defined over *measured*
+correctness classes from a stored run, and a set of questions with no answers
+cannot enter that grid. Correctness is computed (`pipeline.py`, `majority_correct`),
+never authored, so the dataset deliberately carries no correctness labels.
+
 Building the population is Stage 2, and its first step is now enforced in code
 rather than left to prose. Stage 2 begins by authoring a candidate item set "in
 the Phase A schema with `verified: false` provenance"; `jurisuq/target/candidates.py`
@@ -306,9 +320,9 @@ establish — legal correctness, answerability and every gate are outside it. No
 candidate item set exists yet and none was invented, so Stage 2 remains blocked
 on authoring input.
 
-The suite is now **531 passed, 1 skipped** (261 Phase G tests: 34 population
-screening + 22 yield screen + 38 candidate-set contract + 39 evaluation matrix +
-32 deployment + 39 documentation guards + 57 pilot guards). Reports:
+The suite is now **550 passed, 1 skipped** (280 Phase G tests: 34 population
+screening + 22 yield screen + 52 candidate-set contract and dataset + 39
+evaluation matrix + 32 deployment + 44 documentation guards + 57 pilot guards). Reports:
 `runs/phaseG_eval_matrix.json`, `runs/phaseG_deployment.json`,
 `runs/phaseG_pilot_status.json`.
 
@@ -329,6 +343,9 @@ historical results record:
   AUROC interval, G5 status, and separate environment test records.
 - [Phase F follow-up](PHASE-F-FOLLOWUP.md) — the four post-merge experiments,
   corrected conformal provenance, and clustered uncertainty.
+- [Phase G Stage 2 report](PHASE-G-STAGE2.md) — the candidate item set, its
+  data card and source record, the review that was and was not performed, the
+  blocked screen, and why G7 is unchanged.
 - [Phase G guide](PHASE-G.md) — the corrected specification status and Gate G7,
   the §21.2 evaluation matrix with its undefined reason codes, the §21.3
   deployment measurements, the target-population readiness check, the

@@ -1,0 +1,77 @@
+{
+  "phase": "G",
+  "stage": 2,
+  "generated_utc": "2026-10-25T11:47:05Z",
+  "headline": "The Stage 2 candidate item set is built and contract-valid; yield screening and Gate G7 remain blocked because no generator is reachable in this environment. This is a resource and environment blocker, not a scientific finding and not evidence about any detector.",
+  "status": "PARTIAL_BLOCKED",
+  "completed": [
+    "Stage 2 step 1: authored a 24-item candidate set in the Phase A schema with provenance.verified = false (data/lexuq_target_candidates_v1.jsonl)",
+    "per-item source record with BNS-to-IPC section pairs and an explicit authority level per source (runs/phaseG_candidate_sources_v1.json)",
+    "candidate-contract validation of the whole set via jurisuq/target/candidates.py (no alternative validation path)",
+    "the screen's generation guard was exercised and refused a real provider without --allow-generation",
+    "the mock plumbing check was run end to end against the real 24-item file and recorded as non-evidence"
+  ],
+  "not_completed": {
+    "candidate_yield_screening": {
+      "status": "BLOCKED",
+      "reason": "the screen requires a generator; a real generation attempt was made and failed",
+      "attempt": {
+        "command": "python scripts/41_screen_target_yield.py --data data/lexuq_target_candidates_v1.jsonl --items 2 --out /tmp/screen_real_attempt.json --set provider=openai --allow-generation",
+        "provider": "openai-compatible client pointed at the configured LM Studio endpoint http://127.0.0.1:1234/v1",
+        "outcome": "RuntimeError: generation request failed after 3 tries: HTTPConnectionPool(host='127.0.0.1', port=1234): Max retries exceeded ... Connection refused",
+        "requests_succeeded": 0,
+        "generations_obtained": 0,
+        "cost_incurred_usd": 0.0,
+        "note": "No paid endpoint was contacted. No API key is present in this environment and the sandbox has no outbound access to the hosted providers."
+      },
+      "consequences": [
+        "no majority answers, therefore no majority_correct, therefore no correctness classes",
+        "no yield rate and no items_needed projection from measured data"
+      ]
+    },
+    "gate_g7_evaluation": {
+      "status": "NOT_EVALUABLE_FROM_THIS_WORK",
+      "verdict_unchanged": "NOT_MET",
+      "reason": "G7 requires a target slice on which a ranking is defined, which requires measured correctness classes on both sides. No generation occurred, so this work provides no new measured population. The standing NOT_MET verdict rests on the frozen run (L7 has 0 correct of 100) and is unchanged by this stage.",
+      "must_not_be_read_as": "a fresh G7 evaluation, a pass, or an improvement"
+    },
+    "human_legal_review": {
+      "status": "OUTSTANDING",
+      "reason": "the source checks in this environment are machine-assisted and were made by the same system that authored the items; they are not qualified legal approval",
+      "provenance_verified": false
+    }
+  },
+  "gates_unchanged": {
+    "G5": "NOT_EVALUABLE",
+    "G6": "NOT_MET",
+    "G7": "NOT_MET"
+  },
+  "pilot_unchanged": {
+    "status": "ON_HOLD",
+    "generations": 0,
+    "cost_incurred_usd": 0.0,
+    "api_calls_made_in_this_stage": 0
+  },
+  "candidate_dataset": {
+    "path": "data/lexuq_target_candidates_v1.jsonl",
+    "sha256": "f49f4d91946387eb0534718945092cc2f840bd9f2aee053ed9ac13c3f296d341",
+    "n_items": 24,
+    "slices": {
+      "L1": 12,
+      "L7": 12
+    },
+    "topics": 8,
+    "distinct_questions": 24,
+    "provenance_verified": false,
+    "review_status": "PENDING_HUMAN_REVIEW"
+  },
+  "observations_for_review": [
+    "The Section 21.2 grid and G7 are defined over evaluated partitions of a stored run; a candidate item set with no answers cannot enter that grid at all, so authoring items cannot by itself move G7.",
+    "The Bill version of the BNS (as introduced) numbered punishment for murder as s.101 and punishment for culpable homicide as s.103. The enacted Act renumbers these to s.103 and s.105. Items here cite the enacted numbering. This is a documented source-confusion risk for any reviewer using Bill-era tables.",
+    "for cruelty_by_husband the official BNS-to-IPC correspondence table was read only up to Chapter V in this environment, so the BNS 85 <- IPC 498A pairing rests on section titles plus the standard published mapping and needs human confirmation"
+  ],
+  "no_network_during_cleanup": {
+    "api_requests_made": 0,
+    "paid_credits_used": 0.0
+  }
+}
