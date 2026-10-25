@@ -212,3 +212,24 @@ def test_screen_report_flags_the_mock_as_not_a_measurement(tmp_path):
     assert proc.returncode == 0
     assert "plumbing check" in proc.stdout
     assert json.loads(out.read_text(encoding="utf-8"))["is_mock"] is True
+
+
+def test_the_screen_reports_yield_per_slice(tmp_path):
+    """G7 asks about both classes *per slice*, so an aggregate rate alone cannot
+    show whether the L7 arm produced any correct majority answer."""
+    data = _write(tmp_path, [_item(f"L7-{i}") for i in range(2)]
+                  + [_item(f"L1-{i}", "L1") for i in range(2)])
+    out = tmp_path / "screen.json"
+    proc = _run(["--data", str(data), "--out", str(out),
+                 "--set", "provider=mock", "--set", "n_samples=2"])
+    assert proc.returncode == 0, proc.stdout + proc.stderr
+    report = json.loads(out.read_text(encoding="utf-8"))
+    by_slice = report["yield_by_slice"]
+    assert set(by_slice) == {"L1", "L7"}
+    assert by_slice["L1"]["overall"]["items"] == 2
+    assert by_slice["L7"]["overall"]["items"] == 2
+    # the slice breakdown must reconcile with the aggregate
+    assert (by_slice["L1"]["overall"]["items"]
+            + by_slice["L7"]["overall"]["items"]) == report["yield"]["overall"]["items"]
+    # and it is printed, so a reader of the console sees it
+    assert "L7" in proc.stdout

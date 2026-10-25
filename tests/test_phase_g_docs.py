@@ -425,8 +425,9 @@ def test_the_published_test_counts_match_the_files():
     import subprocess
     import sys as _sys
     expected = {
-        "test_target_population": 34, "test_target_screen": 22,
-        "test_target_candidates": 52, "test_eval_matrix": 39,
+        "test_target_population": 34, "test_target_screen": 23,
+        "test_target_candidates": 52,
+        "test_target_screen_report": 11, "test_eval_matrix": 39,
         "test_deployment_metrics": 32, "test_phase_g_docs": 44,
         "test_pilot_guard": 57,
     }

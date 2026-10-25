@@ -245,7 +245,7 @@ calls a model, and no frozen artefact is modified.
 | `jurisuq/target/candidates.py` | the Stage 2 candidate-set contract: Phase A schema fields, the two-slice rule, unique ids, and `provenance.verified` required to be exactly `False` with a non-empty `source`; returns a summary that records what it did and did not check |
 | `configs/phase_g_target.json` | audit inputs, screen parameters, planning assumptions, and the recorded forbidden operations |
 | `tests/test_target_population.py` | 34 tests: state classification, every readiness condition, the pooled trap, missing-value handling, confound diagnostic, yield estimation, planning projection |
-| `tests/test_target_screen.py` | 22 tests: item-schema validation, the provenance refusals, slice-stratified capping, the generation guard, end-to-end mock run, and the recorded `data_sha256` |
+| `tests/test_target_screen.py` | 23 tests: item-schema validation, the provenance refusals, slice-stratified capping, the generation guard, end-to-end mock run, and the recorded `data_sha256` |
 | `tests/test_target_candidates.py` | 52 tests: every required field, the slice rule, `gold.act`/`gold.provision`, unique ids, every provenance refusal (`verified: true`, a non-boolean flag, no flag, no source), a real Phase A record passing the schema, and a line-ending-agnostic content hash |
 | `jurisuq/evaluation/matrix.py` | the §21.2 grid: 9 methods × per-slice matrices, all ten metrics, per-slice judge coverage, reason-coded undefineds, confident-wrong, harm-weighted risk, `gate_g7`, and the no-pooling guard |
 | `jurisuq/evaluation/deployment.py` | §21.3 measurements: stage-1 latency, full-cascade median/p95, peak RSS, the measured-configuration record, and the §27.1 ladder check |
@@ -416,9 +416,10 @@ ERROR: this script calls a model when provider != 'mock'.
 | After the cross-platform integrity fix (PR #6) | 482 passed, 1 skipped |
 | After the Stage 2 candidate-set contract | 531 passed, 1 skipped |
 | After the Stage 2 candidate dataset and its report guards | 550 passed, 1 skipped |
+| After the reported Qwen3 screen (artifact pending) | 555 passed, 8 skipped |
 | New tests | 206 (34 population + 16 screen + 39 matrix + 32 deployment + 32 doc guards + 53 pilot guards) |
 | New tests, Stage 2 contract | 44 (38 candidate contract + 6 screen) |
-| Phase G tests now | 280 (34 population + 22 screen + 52 candidates + 39 matrix + 32 deployment + 44 doc guards + 57 pilot guards) |
+| Phase G tests now | 292 (34 population + 23 screen + 52 candidates + 11 screen-report + 39 matrix + 32 deployment + 44 doc guards + 57 pilot guards) |
 | Skipped | `tests/test_relations.py:236` — `torch not installed`; pre-existing |
 | User's Windows environment | torch present, so the skip runs there (271 passed at baseline) |
 
@@ -477,15 +478,23 @@ screen (`scripts/41`, ~24 items × 10 samples); decide from the measured
 `items_needed` whether a full run is affordable; and only then run full
 generation under a new run id (`phaseG-target-v1…`).
 
-### Stage 2 — candidate set built; screening and G7 blocked
+### Stage 2 — candidate set built, screen reported, G7 unchanged
 
 Stage 2 is reported in full in **[`PHASE-G-STAGE2.md`](PHASE-G-STAGE2.md)**: a
 24-item candidate set (`data/lexuq_target_candidates_v1.jsonl`, 12 L1 / 12 L7,
-8 offences, all `verified: false`, all `PENDING_HUMAN_REVIEW`), the per-item
-source record, and the exact blocker that stops the screen. A real generation
-attempt failed with `Connection refused` on the configured endpoint: no LM
-Studio, no API key, 0 generations, $0.00. **G7 is unchanged at `NOT_MET`** —
-authoring item sets cannot move a gate defined over measured answers.
+8 offences, all `verified: false`, all `PENDING_HUMAN_REVIEW`) and the per-item
+source record.
+
+The screen ran on Qwen3 14B (reported): 3/24 majority-correct, rate 0.1250,
+interval [0.0434, 0.3100], projection 172 items, $0.00. Every figure is
+reproduced by this repository's own code. The report file itself is **not** in
+the repository, so the numbers are recorded as reported-and-corroborated; the
+status record says so and a provenance check activates when the file is added.
+
+`scripts/41` now also emits `yield_by_slice`, because the aggregate could not show
+whether the L7 arm produced any correct answer — the condition G7 turns on.
+**G7 is unchanged at `NOT_MET`**: a yield screen carries no detector fields, no
+method scores and no evaluated partition, so it cannot enter the §21.2 grid.
 
 The contract below is what makes that dataset admissible to the screen.
 

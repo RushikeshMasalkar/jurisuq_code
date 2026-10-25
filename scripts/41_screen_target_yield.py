@@ -127,6 +127,16 @@ def main() -> int:
 
     elapsed = time.time() - started
     report = yield_report(records)
+    # Per-slice yield, using the same function over the same records. G7's
+    # condition is per slice ("both_classes_on_every_evaluated_slice"), so an
+    # aggregate rate cannot tell a reader whether the L7 arm produced any correct
+    # majority answer -- the single question the screen exists to answer. This
+    # changes no metric; it reports the measurement already taken, grouped by the
+    # slice field the candidate dataset already carries.
+    yield_by_slice = {name: yield_report([record for record in records
+                                          if record.get("slice") == name])
+                      for name in sorted({record.get("slice") for record in records
+                                          if record.get("slice")})}
     planning = cfg_g.get("yield_planning", {})
     needed = items_needed(float(report["overall"]["majority_rate"]),
                           int(planning.get("needed_correct", 15)),
@@ -148,6 +158,7 @@ def main() -> int:
         "elapsed_seconds": round(elapsed, 1),
         "seconds_per_item": round(elapsed / len(items), 2) if items else None,
         "yield": report,
+        "yield_by_slice": yield_by_slice,
         "projection": needed,
         "projection_basis": planning.get("basis"),
         "verdict_note": ("This is a yield estimate, not a gate. A zero rate means no "
@@ -185,6 +196,13 @@ def main() -> int:
               f"confidence (expectation {needed['expected_items']})")
     else:
         print(f"  projection: not reachable from this item set - {needed.get('note')}")
+    print()
+    print(f"  {'slice':7s} {'items':>6s} {'correct':>8s} {'rate':>7s}")
+    for name, block in yield_by_slice.items():
+        overall_slice = block["overall"]
+        print(f"  {name:7s} {overall_slice['items']:6d} "
+              f"{overall_slice['majority_correct']:8d} "
+              f"{overall_slice['majority_rate']:7.3f}")
     print(f"  report written: {out}")
     return 0 if overall["majority_correct"] > 0 else 1
 

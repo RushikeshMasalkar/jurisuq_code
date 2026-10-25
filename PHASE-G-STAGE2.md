@@ -1,10 +1,12 @@
 # JURIS-UQ — Phase G Stage 2: candidate population, and where the measurement stops
 
-**Status: PARTIAL / BLOCKED.** The candidate item set is built and
-contract-valid. The candidate-yield screen and the Gate G7 evaluation **were not
-and could not be run here**, because this environment has no reachable
-generator. That is a resource blocker. It is not a scientific finding and it is
-not evidence about any detector.
+**Status: PARTIAL.** The candidate item set is built and contract-valid. The
+target-yield screen **has been run**, on the principal investigator's machine
+(Qwen3 14B via LM Studio), and its figures reproduce exactly under this
+repository's own code. Its **report file is not in this repository**, so the
+numbers are recorded as reported-and-corroborated rather than as a verified
+in-repo artefact. Gate G7 is **unchanged** — a yield screen is not a gate
+evaluation.
 
 Machine-readable record: [`runs/phaseG_stage2_status.json`](runs/phaseG_stage2_status.json).
 Source and review record: [`runs/phaseG_candidate_sources_v1.json`](runs/phaseG_candidate_sources_v1.json).
@@ -28,9 +30,10 @@ ranking is defined" (`jurisuq/evaluation/matrix.py::gate_g7`).
 | 1. Author candidate set, Phase A schema, `verified: false` | **done** — 24 items |
 | 2. Source the candidates, record provenance | **done** — per-item source, section pair, authority level |
 | 3. Candidate-contract validation | **done** — `jurisuq/target/candidates.py`, all 24 pass |
-| 4. Candidate-yield screening (24 × 10 samples) | **BLOCKED** — no generator reachable |
-| 5. Gate G7 evaluation | **BLOCKED** — depends on step 4 |
-| 6. Follow-up experiments | not applicable while step 4 is blocked |
+| 4. Candidate-yield screening (24 × 10 samples) | **DONE remotely** — reported complete; artifact pending |
+| 5. Affordability decision from `items_needed` | **DONE** — defer, pending the per-slice question (§6a) |
+| 6. Gate G7 evaluation | **not evaluable from a screen** — needs a stored run (§8) |
+| 7. Human legal review of the items | **OUTSTANDING** |
 
 ## 2. The dataset
 
@@ -159,7 +162,7 @@ BNS 105 or 305); that the fact pattern actually falls in the intended offence
 rather than a neighbouring one; and the L1/L7 era direction. Items marked
 `subsection_confidence: medium` need this most.
 
-## 6. What was run, and the blocker
+## 6. The screen: reported result, and the one question left open
 
 **Generation guard — works.**
 
@@ -170,7 +173,63 @@ ERROR: this script calls a model when provider != 'mock'. ...
 report written? NO
 ```
 
-**Real generation attempt — fails, no cost.**
+### 6a. The reported measurement
+
+The screen was run locally on Qwen3 14B. The figures below were supplied by the
+principal investigator; **the report file is not in this repository**, and it was
+not reconstructed from this summary.
+
+| Measurement | Value |
+|---|---|
+| Items / samples | 24 items × 10 samples = **240 generations** |
+| Slices | 12 L1 / 12 L7 |
+| Majority-correct items | **3 / 24** |
+| Majority rate | **0.1250** |
+| 95% interval (Wilson) | **[0.0434, 0.3100]** |
+| Per-sample correct rate | 0.1417 |
+| Projection | **172 items** for 15 correct at 95% confidence |
+| Cost | $0.00 (local model) |
+
+**Corroboration performed here.** Every figure was recomputed with this
+repository's own code, without regenerating anything:
+
+| Claim | Repo value | Match |
+|---|---|---|
+| rate 0.1250 for 3 of 24 | `0.125` via `yield_report` | ✅ |
+| interval [0.0434, 0.3100] | `[0.043443340766555705, 0.31003881288351376]` | ✅ |
+| 172 items for 15 correct | `items_needed(0.125, 15, 0.95)` → `items_for_confidence 172`, `expected_items 120` | ✅ |
+| per-sample 0.1417 | 34/240 = `0.14166…` | ✅ arithmetic only |
+
+That is strong evidence the summary came from this codebase's method — but it is
+**not** the artefact, and it does not establish what the model actually answered.
+
+### 6b. The question the aggregate cannot answer
+
+`yield_report` breaks down **per topic**, not per slice, and the report carries no
+per-item records. So **the 3 correct items cannot be attributed to L1 or L7.**
+
+This matters more than it looks. G7's condition is per slice. The frozen
+evidence has **L7 at 0 correct of 100**. If all three correct candidates are L1,
+a 172-item full run would still leave L7 single-class and **G7 would remain
+`NOT_MET`** however much generation was spent.
+
+`scripts/41` now emits `yield_by_slice` on every run, so this cannot recur. The
+existing report predates the change and must be treated as unable to answer it.
+
+### 6c. Affordability decision
+
+Stage 2 asks for a decision from the measured `items_needed`. **Decision: defer
+the full run pending the per-slice question.**
+
+A 172-item run is 1,720 generations — roughly **7.2×** the completed screen — and
+the summary cannot show that it would fix the L7 arm that actually blocks G7.
+
+### 6d. Earlier blocker, retained
+
+The failure below is why the screen could not run in *this* environment, and is
+kept as the record of that attempt.
+
+**Real generation attempt (in this sandbox) — fails, no cost.**
 
 ```
 python scripts/41_screen_target_yield.py --data data/lexuq_target_candidates_v1.jsonl \
@@ -199,6 +258,14 @@ contract-valid file end to end and writes a report — nothing more.
 
 ## 7. Tests
 
+`tests/test_target_screen_report.py` holds the checks for the real report. While
+the file is absent, seven of them **skip** with a reason naming the missing path;
+the four that always run assert that the status record agrees with the repository
+about the artefact's absence and that the reported summary is reproducible. The
+moment the file is added, the skipped checks activate and verify that it is a
+real (non-mock) run over the dataset in this repository, with self-consistent
+arithmetic and a projection matching this repository's planning code.
+
 Dataset-level tests live in `tests/test_target_candidates.py` and cover: the file
 exists and parses; 24 items; 12/12 slice balance; 24 distinct questions and ids;
 `provenance.verified is False` on every item; every item cites a source and a
@@ -208,13 +275,18 @@ and the sources record marks non-primary retrieval honestly.
 
 ## 8. G7
 
-**Unchanged at `NOT_MET`.** This stage produced no measured population, so it
-cannot re-evaluate G7, let alone pass it. The standing verdict rests on the
-frozen run, where L7 has 0 correct of 100 items and no ranking is defined.
+**Unchanged at `NOT_MET`.** No gate was edited, and no evaluation code was run
+that could legitimately change it.
 
-Authoring a candidate set cannot move G7 on its own: the §21.2 grid and G7 are
-defined over *evaluated partitions of a stored run*, and a set of questions with
-no answers cannot enter that grid.
+A screen report cannot move G7 even once added. G7 is computed by
+`jurisuq/evaluation/matrix.py::gate_g7` over *evaluated partitions of a stored
+run* — records carrying detector fields, uncertainty scores and calibration. A
+yield report carries none of those: it has no `majority_correct` per item joined
+to a detector state, no method scores, and no evaluated partition. Passing it to
+the matrix would not produce a defined ranking; it would produce nothing.
+
+The standing L7 finding — 0 correct of 100 — is untouched by the candidate work,
+and the reported screen cannot say whether it has changed, because 6b.
 
 ## 9. Reproduction
 
@@ -243,23 +315,39 @@ model, or an approved paid endpoint. Nothing else in this stage is blocked.
 
 ## 10. Limitations
 
-1. **No measurement was made.** There is no yield estimate, no correctness
-   class, and no G7 evidence from this work.
-2. **No human legal review.** `verified: false` everywhere, by design.
-3. **Item quality is unvalidated.** Whether the fact patterns are answerable, and
+1. **The measurement is reported, not in-repo.** The screen ran, but its report
+   is absent from the repository, so the numbers are corroborated rather than
+   verified against an artefact.
+2. **The per-slice split is unknown** (6b) — the central limitation of this
+   stage, because it decides whether a full run can change G7.
+3. **No human legal review.** `verified: false` everywhere, by design.
+4. **Item quality is unvalidated.** Whether the fact patterns are answerable, and
    whether a model actually falls into the trap, is exactly what the blocked
    screen would measure.
-4. **Eight offences only.** The frozen benchmark has ten topics including
+5. **Eight offences only.** The frozen benchmark has ten topics including
    criminal intimidation and attempt to murder; those two were left out because
    their punishment sub-section pairings were not directly confirmed here.
    Coverage is narrower than the frozen slice by design, not by oversight.
-5. **Sub-section confidence is uneven.** Recorded per offence above; nothing here
+6. **Sub-section confidence is uneven.** Recorded per offence above; nothing here
    should be treated as settled statutory text without human checking.
-6. **Punishment text is deliberately thin.** Graduated terms for BNS 105 and 305
+7. **Punishment text is deliberately thin.** Graduated terms for BNS 105 and 305
    are described, not restated, to avoid asserting figures not checked here.
 
 ## 11. Next action
 
-Run step 5 above on a machine with a loaded local model. That single command
-turns this dataset into a measured yield, which is the prerequisite for any G7
-re-evaluation. Until it runs, G7 stays `NOT_MET` and Stage 2 stays partial.
+Two things, in this order.
+
+1. **Add the report file** to `runs/phaseG_screen_qwen3_14b_full.json` in the
+   repository. Everything needed to check it is already committed. Once it is
+   added, `python -m pytest tests/test_target_screen_report.py -q` activates the
+   seven provenance checks — and if the file retains per-item records, the per-slice
+   question in 6b can be answered from it directly.
+2. **Answer the per-slice question** before authorising any 172-item run. If the
+   3 correct items are all L1, a full run cannot fix L7 and G7 stays `NOT_MET`
+   regardless of the compute spent. A cheap way to settle it: re-run the screen
+   at a small `--items` on L7 only with the updated script, whose
+   `yield_by_slice` block answers it directly.
+
+Stage 2 remains **partial**: item authoring, contract validation, the screen and
+the affordability decision are done; human legal review and any G7 re-evaluation
+are not.

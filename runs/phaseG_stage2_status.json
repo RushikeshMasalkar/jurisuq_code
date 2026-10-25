@@ -2,37 +2,44 @@
   "phase": "G",
   "stage": 2,
   "generated_utc": "2026-10-25T11:47:05Z",
-  "headline": "The Stage 2 candidate item set is built and contract-valid; yield screening and Gate G7 remain blocked because no generator is reachable in this environment. This is a resource and environment blocker, not a scientific finding and not evidence about any detector.",
-  "status": "PARTIAL_BLOCKED",
+  "headline": "The Stage 2 candidate set is built and contract-valid. The real target-yield screen has been reported complete by the principal investigator (Qwen3 14B via LM Studio), and its figures reproduce exactly under this repository's own yield and projection code. The report file itself is NOT in this repository, so its numbers are recorded here as reported-and-corroborated, not as a verified in-repo artefact. Gate G7 is unchanged.",
+  "status": "SCREEN_REPORTED_ARTIFACT_PENDING",
   "completed": [
     "Stage 2 step 1: authored a 24-item candidate set in the Phase A schema with provenance.verified = false (data/lexuq_target_candidates_v1.jsonl)",
     "per-item source record with BNS-to-IPC section pairs and an explicit authority level per source (runs/phaseG_candidate_sources_v1.json)",
     "candidate-contract validation of the whole set via jurisuq/target/candidates.py (no alternative validation path)",
     "the screen's generation guard was exercised and refused a real provider without --allow-generation",
-    "the mock plumbing check was run end to end against the real 24-item file and recorded as non-evidence"
+    "the mock plumbing check was run end to end against the real 24-item file and recorded as non-evidence",
+    "the real target-yield screen was run locally by the principal investigator on Qwen3 14B via LM Studio: 24 items x 10 samples = 240 generations (reported, artifact not yet in the repository)",
+    "the screen now emits a per-slice yield breakdown; before this change an aggregate rate could not show whether the L7 arm produced any correct majority answer, which is the one question G7 depends on"
   ],
   "not_completed": {
     "candidate_yield_screening": {
-      "status": "BLOCKED",
-      "reason": "the screen requires a generator; a real generation attempt was made and failed",
-      "attempt": {
-        "command": "python scripts/41_screen_target_yield.py --data data/lexuq_target_candidates_v1.jsonl --items 2 --out /tmp/screen_real_attempt.json --set provider=openai --allow-generation",
-        "provider": "openai-compatible client pointed at the configured LM Studio endpoint http://127.0.0.1:1234/v1",
-        "outcome": "RuntimeError: generation request failed after 3 tries: HTTPConnectionPool(host='127.0.0.1', port=1234): Max retries exceeded ... Connection refused",
-        "requests_succeeded": 0,
-        "generations_obtained": 0,
-        "cost_incurred_usd": 0.0,
-        "note": "No paid endpoint was contacted. No API key is present in this environment and the sandbox has no outbound access to the hosted providers."
-      },
-      "consequences": [
-        "no majority answers, therefore no majority_correct, therefore no correctness classes",
-        "no yield rate and no items_needed projection from measured data"
-      ]
+      "status": "COMPLETED_LOCALLY_REPORTED_ARTIFACT_PENDING",
+      "measured": "24 items x 10 samples, 3 majority-correct, rate 0.1250, interval [0.0434, 0.3100]",
+      "artifact_in_repository": false,
+      "earlier_blocked_attempt_retained": {
+        "status": "BLOCKED",
+        "reason": "the screen requires a generator; a real generation attempt was made and failed",
+        "attempt": {
+          "command": "python scripts/41_screen_target_yield.py --data data/lexuq_target_candidates_v1.jsonl --items 2 --out /tmp/screen_real_attempt.json --set provider=openai --allow-generation",
+          "provider": "openai-compatible client pointed at the configured LM Studio endpoint http://127.0.0.1:1234/v1",
+          "outcome": "RuntimeError: generation request failed after 3 tries: HTTPConnectionPool(host='127.0.0.1', port=1234): Max retries exceeded ... Connection refused",
+          "requests_succeeded": 0,
+          "generations_obtained": 0,
+          "cost_incurred_usd": 0.0,
+          "note": "No paid endpoint was contacted. No API key is present in this environment and the sandbox has no outbound access to the hosted providers."
+        },
+        "consequences": [
+          "no majority answers, therefore no majority_correct, therefore no correctness classes",
+          "no yield rate and no items_needed projection from measured data"
+        ]
+      }
     },
     "gate_g7_evaluation": {
       "status": "NOT_EVALUABLE_FROM_THIS_WORK",
       "verdict_unchanged": "NOT_MET",
-      "reason": "G7 requires a target slice on which a ranking is defined, which requires measured correctness classes on both sides. No generation occurred, so this work provides no new measured population. The standing NOT_MET verdict rests on the frozen run (L7 has 0 correct of 100) and is unchanged by this stage.",
+      "reason": "G7 requires a stored run with measured correctness classes on both sides of an evaluated slice. A 24-item screen report, even once added, is a yield estimate, not an evaluated partition: it carries no detector fields, no uncertainty scores and no calibration, so it cannot enter the Section 21.2 grid. G7 is unchanged.",
       "must_not_be_read_as": "a fresh G7 evaluation, a pass, or an improvement"
     },
     "human_legal_review": {
@@ -72,6 +79,101 @@
   ],
   "no_network_during_cleanup": {
     "api_requests_made": 0,
-    "paid_credits_used": 0.0
+    "paid_credits_used": 0.0,
+    "note": "no model was called and no API was contacted while preparing this record; the screen figures were supplied by the principal investigator and were checked only arithmetically"
+  },
+  "reported_screen": {
+    "status": "REPORTED_BY_PRINCIPAL_INVESTIGATOR",
+    "report_path": "runs/phaseG_screen_qwen3_14b_full.json",
+    "exists_in_repository": false,
+    "observation_source": "reported by the principal investigator; the report file is not present in this repository on any branch or commit",
+    "why_not_recorded_verbatim": "the file contains generated model output and usage for 240 samples; writing it here from a summary would fabricate both the artefact and its contents",
+    "generator": "Qwen3 14B, run locally through LM Studio",
+    "provider": "openai-compatible client against a local endpoint",
+    "items": 24,
+    "slices": {
+      "L1": 12,
+      "L7": 12
+    },
+    "samples_per_item": 10,
+    "generations": 240,
+    "majority_correct": 3,
+    "majority_rate": 0.125,
+    "majority_interval": {
+      "method": "wilson",
+      "lo": 0.0434,
+      "hi": 0.31,
+      "confidence": 0.95
+    },
+    "per_sample_correct_rate": 0.1417,
+    "projection_items_for_15_correct": 172,
+    "cost_incurred_usd": 0.0,
+    "corroboration": {
+      "performed_here": true,
+      "method": "the reported figures were recomputed with this repository's own code, without regenerating anything",
+      "checks": [
+        {
+          "claim": "majority rate 0.1250 for 3 of 24",
+          "repo_value": 0.125,
+          "match": true,
+          "via": "jurisuq.target.yield_report on 3 correct and 21 incorrect records"
+        },
+        {
+          "claim": "95% interval [0.0434, 0.3100]",
+          "repo_value": {
+            "lo": 0.043443340766555705,
+            "hi": 0.31003881288351376
+          },
+          "match": true,
+          "via": "jurisuq.target.yield_report (Wilson)"
+        },
+        {
+          "claim": "172 items for 15 correct at 95% confidence",
+          "repo_value": {
+            "expected_items": 120,
+            "items_for_confidence": 172
+          },
+          "match": true,
+          "via": "jurisuq.target.items_needed(0.125, 15, 0.95) with the planning parameters in configs/phase_g_target.json"
+        },
+        {
+          "claim": "per-sample correct rate 0.1417",
+          "repo_value": 0.14166666666666666,
+          "match": true,
+          "via": "34/240; the report's own sample-level count is not in this repository, so this is an arithmetic consistency check only"
+        }
+      ],
+      "what_corroboration_does_not_establish": "that the file exists, what the model actually answered, or that any individual item is labelled correctly. It shows the reported summary is internally consistent with this codebase's methods."
+    },
+    "verification_status": "AWAITING_ARTIFACT",
+    "next_step": "add the generated report to the repository at the path above; a schema and provenance check is ready for it in tests/test_target_screen_report.py"
+  },
+  "per_slice_question": {
+    "question": "did the L7 arm produce any correct majority answer?",
+    "answerable_from_reported_summary": false,
+    "reason": "the screen reported an aggregate rate and a per-topic breakdown but no per-slice breakdown and no per-item records, so the 3 correct items cannot be attributed to L1 or L7",
+    "why_it_matters": "G7 requires both correctness classes on every evaluated slice. If all 3 correct items are L1, the frozen L7 result (0 correct of 100) stands and a full target run would still leave L7 single-class, so G7 would remain NOT_MET regardless of the extra generation spent",
+    "resolved_by": "the per-slice yield now emitted by scripts/41 on any subsequent run, or the per-item records inside the original report if it retains them"
+  },
+  "affordability": {
+    "step": "Stage 2: 'decide from the measured items_needed whether a full run is affordable'",
+    "decision": "DEFER_PENDING_THE_L7_QUESTION",
+    "reported_projection": {
+      "items_for_confidence": 172,
+      "expected_items": 120,
+      "needed_correct": 15,
+      "confidence": 0.95
+    },
+    "generations_for_a_172_item_run": 1720,
+    "samples_per_item": 10,
+    "multiple_of_the_completed_screen": 7.2,
+    "reasoning": "a 172-item full run is about 7x the completed screen in generation cost, and the reported summary cannot show whether it would fix the single-class L7 arm that actually blocks G7. Spending that compute before answering the per-slice question risks a large run that cannot change the gate.",
+    "note": "this is a planning judgement from reported figures, not a gate and not an established cost; it does not change any threshold"
+  },
+  "frozen_artifacts_unchanged": {
+    "data/lexuq_slice.jsonl": "89bc1180a4df76287768ce59432aa7ff0aa9d38c16d5f296ed16c3e45449bd53",
+    "data/lexuq_slice_summary.json": "0bd5186d767714b2f0f23d76eddbecb28c0b3ebd0edbe26c3617d914c9e37a84",
+    "runs/phaseG_pilot_plan.json": "77b5ce7c66c785107e532750ee408a54747c7eac4fb0b91936f3f3960b769f24",
+    "configs/phase_g_pilot.json": "fe77951adea8f0a3b3558ad4303c7412ae5973793c0d03f5df60da285d1c4045"
   }
 }
