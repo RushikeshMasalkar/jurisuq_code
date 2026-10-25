@@ -2,8 +2,8 @@
   "phase": "G",
   "stage": 2,
   "generated_utc": "2026-10-25T11:47:05Z",
-  "headline": "The Stage 2 candidate set is built and contract-valid. The Qwen3 14B target-yield screen has a full report and a separate sliced report in the local working tree. The full run reports 3/24 majority-correct items; the sliced run reports L1 = 3/12 and L7 = 0/12. These are screening results, not human-verified legal labels or a G7 evaluation. Gate G7 remains NOT_MET.",
-  "status": "SCREEN_REPORTED_ARTIFACT_PENDING",
+  "headline": "Stage 2 screening is complete: all three Qwen3 14B artefacts are committed in this repository. The full run reports 3/24 majority-correct items (rate 0.1250, Wilson interval [0.0434, 0.3100]). The separate sliced run shows every correct item is L1 (3/12) and L7 produced 0 correct samples out of 120. These are automated screening results, not human legal verification. The L7 zero is unexplained and must be investigated before any larger run. G5, G6 and G7 are unchanged.",
+  "status": "SCREEN_COMPLETE_L7_OUTSTANDING",
   "completed": [
     "Stage 2 step 1: authored a 24-item candidate set in the Phase A schema with provenance.verified = false (data/lexuq_target_candidates_v1.jsonl)",
     "per-item source record with BNS-to-IPC section pairs and an explicit authority level per source (runs/phaseG_candidate_sources_v1.json)",
@@ -15,9 +15,12 @@
   ],
   "not_completed": {
     "candidate_yield_screening": {
-      "status": "COMPLETED_LOCALLY_REPORTED_ARTIFACT_PENDING",
-      "measured": "24 items x 10 samples, 3 majority-correct, rate 0.1250, interval [0.0434, 0.3100]",
-      "artifact_in_repository": true,
+      "status": "COMPLETED",
+      "measured": "24 items x 10 samples; full run 3/24 majority-correct (0.1250, [0.0434, 0.3100]) with 34/240 correct samples; sliced run 3/24 with L1 3/12 and L7 0/12 (0/120 correct samples)",
+      "artifacts_in_repository": [
+        "runs/phaseG_screen_qwen3_14b_full.json",
+        "runs/phaseG_screen_qwen3_14b_sliced.json"
+      ],
       "earlier_blocked_attempt_retained": {
         "status": "BLOCKED",
         "reason": "the screen requires a generator; a real generation attempt was made and failed",
@@ -46,6 +49,13 @@
       "status": "OUTSTANDING",
       "reason": "the source checks in this environment are machine-assisted and were made by the same system that authored the items; they are not qualified legal approval",
       "provenance_verified": false
+    },
+    "l7_investigation": {
+      "status": "OUTSTANDING",
+      "question": "why did the L7 arm produce no correct answer at all?",
+      "not_established": "item difficulty, a wrong gold label, model failure to apply the transition, or the model taking the designed IPC trap",
+      "blocked_by": "neither committed report retains per-item records, so the failure mode cannot be classified without a small diagnostic run that writes them",
+      "remains_pending": "human legal review of the L7 gold labels"
     }
   },
   "gates_unchanged": {
@@ -83,11 +93,11 @@
     "note": "no model was called and no API was contacted while preparing this record; the screen figures were supplied by the principal investigator and were checked only arithmetically"
   },
   "reported_screen": {
-    "status": "REPORTED_BY_PRINCIPAL_INVESTIGATOR",
+    "status": "ARTIFACT_COMMITTED",
     "report_path": "runs/phaseG_screen_qwen3_14b_full.json",
     "exists_in_repository": true,
-    "observation_source": "The report was originally reported by the principal investigator; the report file was not present in this repository at the time the status record was first written. It is now present in the local working tree, but is not yet tracked by Git.",
-    "why_not_recorded_verbatim": "The original generated report is retained as a separate JSON artifact; summary fields should be derived from that artifact rather than reconstructed.",
+    "observation_source": "The report is committed in this repository at the path above (merged in PR #7). Its field values were read directly from the file while preparing this record.",
+    "why_not_recorded_verbatim": "Superseded: the generated report is committed as its own JSON artifact, so this record summarises it rather than duplicating it. The artifact is authoritative if the two disagree.",
     "generator": "Qwen3 14B, run locally through LM Studio",
     "provider": "openai-compatible client against a local endpoint",
     "items": 24,
@@ -145,35 +155,115 @@
       ],
       "what_corroboration_does_not_establish": "that the file exists, what the model actually answered, or that any individual item is labelled correctly. It shows the reported summary is internally consistent with this codebase's methods."
     },
-    "verification_status": "VERIFIED",
-    "next_step": "Review the full and sliced report artifacts separately; retain human legal review as outstanding."
+    "verification_status": "VERIFIED_AGAINST_ARTIFACT",
+    "next_step": "Review the full and sliced report artifacts separately; retain human legal review as outstanding.",
+    "verified_fields_read_from_artifact": {
+      "generator": "openai-compat:qwen3-14b",
+      "provider": "openai",
+      "is_mock": false,
+      "n_items": 24,
+      "n_samples_per_item": 10,
+      "elapsed_seconds": 9474.5,
+      "data_sha256": "f49f4d91946387eb0534718945092cc2f840bd9f2aee053ed9ac13c3f296d341",
+      "majority_correct": 3,
+      "majority_rate": 0.125,
+      "correct_samples": 34,
+      "sample_rate": 0.14166666666666666,
+      "has_yield_by_slice": false
+    },
+    "note": "This report has no per-slice breakdown; it predates the change to scripts/41 that added yield_by_slice. That is why the separate sliced run was made."
   },
   "per_slice_question": {
     "question": "did the L7 arm produce any correct majority answer?",
-    "answerable_from_reported_summary": true,
-    "reason": "The sliced report records per-slice results: L1 has 3/12 majority-correct items and L7 has 0/12. The automated screening result does not establish independent legal correctness.",
-    "why_it_matters": "The sliced screening report answers the question for this run: L1 has 3/12 majority-correct items, while L7 has 0/12. This is an automated screening observation, not independent legal validation . The separate frozen Phase G result of 0 correct out of 100 L7 items must remain distinct. Investigate the L7 result and candidate labels before deciding whether a larger run is useful.",
-    "resolved_by": "runs/phaseG_screen_qwen3_14b_sliced.json"
+    "answerable": true,
+    "answer": "No. L7 produced 0 majority-correct items out of 12, and 0 correct samples out of 120. All 3 correct majority answers are L1.",
+    "answered_by": "runs/phaseG_screen_qwen3_14b_sliced.json",
+    "not_answerable_from": "runs/phaseG_screen_qwen3_14b_full.json, which carries no yield_by_slice block and no per-item records",
+    "scope_limit": "this answers the question for the sliced screening run only. It does not establish legal correctness, and it does not explain the result.",
+    "why_it_matters": "G7 requires both correctness classes on every evaluated slice. The frozen evidence already has L7 at 0 correct of 100; the screen now shows the same pattern on new candidate items, so a larger run of these items cannot be expected to create an L7 correct class.",
+    "distinct_from_frozen_result": "the frozen Phase G finding (0 correct of 100 L7 items) and this screening result (0 of 12 candidate L7 items) are separate measurements on different item sets and must not be merged."
   },
   "affordability": {
     "step": "Stage 2: 'decide from the measured items_needed whether a full run is affordable'",
     "decision": "DEFER_PENDING_L7_INVESTIGATION",
-    "reported_projection": {
+    "projection": {
       "items_for_confidence": 172,
       "expected_items": 120,
       "needed_correct": 15,
-      "confidence": 0.95
+      "confidence": 0.95,
+      "derived_from": "the aggregate rate of 0.125, which L7 contributes nothing to"
     },
+    "l7_own_rate": 0.0,
+    "l7_projection_reachable": false,
     "generations_for_a_172_item_run": 1720,
     "samples_per_item": 10,
     "multiple_of_the_completed_screen": 7.2,
-    "reasoning": "The sliced screening report answers the L7-yield question for this run: L7 has 0/12 majority-correct items. A 172-item run would require 1720 generations, but the screening result does not establish independent legal correctness or show that additional generation would resolve the L7 issue. Investigate candidate provenance, labels, and the observed L7 failures before authorizing a larger run. This is a planning decision, not a gate or a threshold change.",
-    "note": "this is a planning judgement from reported figures, not a gate and not an established cost; it does not change any threshold"
+    "reasoning": "The 172-item projection is an aggregate figure that assumes a constant rate of 0.125 across items. The sliced run shows that rate is carried entirely by L1 and that L7 yields 0.00, from which items_needed cannot project at all. A 1,720-generation run would therefore buy more L1 items and could not be expected to create the L7 correct class G7 needs.",
+    "note": "a planning judgement from measured figures, not a gate and not a threshold change"
   },
   "frozen_artifacts_unchanged": {
     "data/lexuq_slice.jsonl": "89bc1180a4df76287768ce59432aa7ff0aa9d38c16d5f296ed16c3e45449bd53",
     "data/lexuq_slice_summary.json": "0bd5186d767714b2f0f23d76eddbecb28c0b3ebd0edbe26c3617d914c9e37a84",
     "runs/phaseG_pilot_plan.json": "77b5ce7c66c785107e532750ee408a54747c7eac4fb0b91936f3f3960b769f24",
     "configs/phase_g_pilot.json": "fe77951adea8f0a3b3558ad4303c7412ae5973793c0d03f5df60da285d1c4045"
+  },
+  "sliced_screen": {
+    "status": "ARTIFACT_COMMITTED",
+    "report_path": "runs/phaseG_screen_qwen3_14b_sliced.json",
+    "exists_in_repository": true,
+    "relationship_to_full_run": "a SEPARATE run of the same 24 items, not the same run re-reported. The two agree on majority-correct items (3/24) and differ on individual correct samples (34 vs 32). Do not pool, average, or substitute one for the other.",
+    "generator": "openai-compat:qwen3-14b",
+    "is_mock": false,
+    "n_items": 24,
+    "samples_per_item": 10,
+    "generations": 240,
+    "elapsed_seconds": 10684.6,
+    "data_sha256": "f49f4d91946387eb0534718945092cc2f840bd9f2aee053ed9ac13c3f296d341",
+    "overall": {
+      "majority_correct": 3,
+      "majority_rate": 0.125,
+      "correct_samples": 32,
+      "sample_rate": 0.13333333333333333
+    },
+    "by_slice": {
+      "L1": {
+        "items": 12,
+        "majority_correct": 3,
+        "majority_rate": 0.25,
+        "correct_samples": 32,
+        "samples": 120,
+        "sample_rate": 0.26666666666666666
+      },
+      "L7": {
+        "items": 12,
+        "majority_correct": 0,
+        "majority_rate": 0.0,
+        "correct_samples": 0,
+        "samples": 120,
+        "sample_rate": 0.0
+      }
+    },
+    "settles": "whether the L7 arm produced any correct majority answer in this screening run: it did not, and it produced no correct sample either",
+    "does_not_settle": "why. Zero yield at both the majority and the sample level is consistent with the model consistently selecting the repealed IPC trap provision, but no per-item records exist in either report to establish that."
+  },
+  "smoke_screen": {
+    "status": "ARTIFACT_COMMITTED",
+    "report_path": "runs/phaseG_screen_qwen3_14b_smoke.json",
+    "exists_in_repository": true,
+    "scope": "SMOKE TEST - connectivity and report-path check before the long run. Not an evaluation and not a yield estimate.",
+    "n_items": 2,
+    "samples_per_item": 10,
+    "generations": 20,
+    "majority_correct": 0,
+    "correct_samples": 0,
+    "elapsed_seconds": 723.8,
+    "projection": {
+      "reachable": false,
+      "note": "a zero observed rate cannot be projected; a zero would be indistinguishable from an even lower unobserved rate"
+    },
+    "must_not_be_pooled_with": [
+      "runs/phaseG_screen_qwen3_14b_full.json",
+      "runs/phaseG_screen_qwen3_14b_sliced.json"
+    ]
   }
 }

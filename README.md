@@ -301,18 +301,30 @@ an open, costed checkpoint in `PHASE-G.md`.
 `provenance.verified = false` and `PENDING_HUMAN_REVIEW`), with a per-item source
 record in `runs/phaseG_candidate_sources_v1.json`.
 
-The target-yield screen **has been run** on Qwen3 14B via LM Studio: 24 items ×
-10 samples, **3/24 majority-correct, rate 0.1250, 95% interval [0.0434, 0.3100]**,
-projection 172 items for 15 correct, $0.00. Those figures reproduce exactly under
-this repository's own `yield_report` and `items_needed` code. **The report file
-is not in this repository**, so the numbers are recorded as
-reported-and-corroborated, not as a verified artefact.
+The target-yield screen **has been run** on Qwen3 14B via LM Studio, and its
+three artefacts are committed:
 
-The open question is per-slice: the report carries no per-slice breakdown, so the
-3 correct items cannot be attributed to L1 or L7. Since the frozen L7 arm has 0
-correct of 100 and G7's condition is per slice, a 172-item run may not change the
-verdict at all. **G7 remains `NOT_MET`** and human legal review is outstanding.
-Full report: [`PHASE-G-STAGE2.md`](PHASE-G-STAGE2.md).
+| Report | Scope | Result |
+|---|---|---|
+| `runs/phaseG_screen_qwen3_14b_full.json` | 24 items × 10 samples | **3/24 majority-correct**, rate 0.1250, 95% interval [0.0434, 0.3100], 34/240 correct samples (0.1417), projection 172 items, $0.00 |
+| `runs/phaseG_screen_qwen3_14b_sliced.json` | same design, separate run, **per-slice** | **L1 3/12** (0.250, 32/120 samples); **L7 0/12** (0.000, **0/120 samples**) |
+| `runs/phaseG_screen_qwen3_14b_smoke.json` | **2 items only** | smoke test, not an evaluation; 0/2, not projectable |
+
+The full and sliced files are **two independent runs**, not one run reported
+twice: they agree on 3/24 majority and differ on correct samples (34 vs 32).
+Neither supersedes the other and their sample counts must not be pooled.
+
+The sliced run answers the question the full run could not: **every correct item
+is L1, and L7 produced no correct sample at all in 120 generations.** That is a
+finding requiring investigation, not a diagnosis — the reports retain no per-item
+records, so it cannot yet be attributed to item difficulty, a wrong gold label, or
+the model taking the designed IPC trap.
+
+Because the aggregate rate that produces the 172-item projection is carried
+entirely by L1, a larger run cannot be expected to create an L7 correct class, and
+without one **G7 remains `NOT_MET`**. Human legal review is outstanding
+(`provenance.verified = false` throughout). Full report:
+[`PHASE-G-STAGE2.md`](PHASE-G-STAGE2.md).
 
 Authoring items cannot move G7 on its own — the gate is defined over *measured*
 correctness classes from a stored run, and a set of questions with no answers
@@ -329,12 +341,12 @@ establish — legal correctness, answerability and every gate are outside it. No
 candidate item set exists yet and none was invented, so Stage 2 remains blocked
 on authoring input.
 
-The suite is now **555 passed, 8 skipped** (292 Phase G tests: 34 population
-screening + 23 yield screen + 52 candidate-set contract and dataset + 11
-screen-report provenance + 39 evaluation matrix + 32 deployment + 44
-documentation guards + 57 pilot guards). Seven of the skips are the screen-report
-checks, which activate when the report artefact is added; one is the pre-existing
-torch gate. Reports:
+The suite is now **571 passed, 1 skipped** (301 Phase G tests: 34 population
+screening + 23 yield screen + 52 candidate-set contract and dataset + 18
+screen-report provenance + 39 evaluation matrix + 32 deployment + 46
+documentation guards + 57 pilot guards). With the screening artefacts committed,
+none of the screen-report checks skip any more; the single remaining skip is the
+pre-existing torch gate. Reports:
 `runs/phaseG_eval_matrix.json`, `runs/phaseG_deployment.json`,
 `runs/phaseG_pilot_status.json`.
 

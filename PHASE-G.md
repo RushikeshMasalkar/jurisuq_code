@@ -416,10 +416,11 @@ ERROR: this script calls a model when provider != 'mock'.
 | After the cross-platform integrity fix (PR #6) | 482 passed, 1 skipped |
 | After the Stage 2 candidate-set contract | 531 passed, 1 skipped |
 | After the Stage 2 candidate dataset and its report guards | 550 passed, 1 skipped |
-| After the reported Qwen3 screen (artifact pending) | 555 passed, 8 skipped |
+| After the Qwen3 screen artefacts were committed (PR #7) | 562 passed, 1 skipped |
+| After the Stage 2 documentation synchronisation audit | 571 passed, 1 skipped |
 | New tests | 206 (34 population + 16 screen + 39 matrix + 32 deployment + 32 doc guards + 53 pilot guards) |
 | New tests, Stage 2 contract | 44 (38 candidate contract + 6 screen) |
-| Phase G tests now | 292 (34 population + 23 screen + 52 candidates + 11 screen-report + 39 matrix + 32 deployment + 44 doc guards + 57 pilot guards) |
+| Phase G tests now | 301 (34 population + 23 screen + 52 candidates + 18 screen-report + 39 matrix + 32 deployment + 46 doc guards + 57 pilot guards) |
 | Skipped | `tests/test_relations.py:236` — `torch not installed`; pre-existing |
 | User's Windows environment | torch present, so the skip runs there (271 passed at baseline) |
 
@@ -478,23 +479,31 @@ screen (`scripts/41`, ~24 items × 10 samples); decide from the measured
 `items_needed` whether a full run is affordable; and only then run full
 generation under a new run id (`phaseG-target-v1…`).
 
-### Stage 2 — candidate set built, screen reported, G7 unchanged
+### Stage 2 — candidate set built, screening complete, L7 outstanding
 
 Stage 2 is reported in full in **[`PHASE-G-STAGE2.md`](PHASE-G-STAGE2.md)**: a
 24-item candidate set (`data/lexuq_target_candidates_v1.jsonl`, 12 L1 / 12 L7,
 8 offences, all `verified: false`, all `PENDING_HUMAN_REVIEW`) and the per-item
 source record.
 
-The screen ran on Qwen3 14B (reported): 3/24 majority-correct, rate 0.1250,
-interval [0.0434, 0.3100], projection 172 items, $0.00. Every figure is
-reproduced by this repository's own code. The report file itself is **not** in
-the repository, so the numbers are recorded as reported-and-corroborated; the
-status record says so and a provenance check activates when the file is added.
+The screen ran on Qwen3 14B and **all three artefacts are committed**:
 
-`scripts/41` now also emits `yield_by_slice`, because the aggregate could not show
-whether the L7 arm produced any correct answer — the condition G7 turns on.
-**G7 is unchanged at `NOT_MET`**: a yield screen carries no detector fields, no
-method scores and no evaluated partition, so it cannot enter the §21.2 grid.
+| Report | Result |
+|---|---|
+| `phaseG_screen_qwen3_14b_full.json` | 3/24 majority-correct, 0.1250, [0.0434, 0.3100], 34/240 correct samples, projection 172 |
+| `phaseG_screen_qwen3_14b_sliced.json` | **L1 3/12 (0.250); L7 0/12 with 0/120 correct samples** |
+| `phaseG_screen_qwen3_14b_smoke.json` | 2 items, smoke test only — not an evaluation |
+
+The full and sliced files are **separate runs** (34 vs 32 correct samples, both
+3/24 majority) and must not be pooled. The sliced run answers the question the
+aggregate could not: **every correct item is L1, and L7 yielded nothing.** Why is
+unexplained — neither report keeps per-item records — so the L7 investigation is
+the outstanding step, alongside human legal review.
+
+`scripts/41` now emits `yield_by_slice` on every run, so an aggregate can no
+longer hide this. **G5/G6/G7 are unchanged**: a yield screen carries no detector
+fields, no method scores and no evaluated partition, so it cannot enter the §21.2
+grid.
 
 The contract below is what makes that dataset admissible to the screen.
 
