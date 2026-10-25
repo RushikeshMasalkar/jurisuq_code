@@ -35,37 +35,23 @@ from jurisuq.config import add_common_args, config_from_args
 from jurisuq.generators import make_generator
 from jurisuq.judge import make_judge
 from jurisuq.pipeline import build_record
-from jurisuq.target import items_needed, yield_report
+from jurisuq.target import candidates as _candidates
+from jurisuq.target import content_sha256, items_needed, yield_report
 from jurisuq.uncertainty.io import write_json
 
-REQUIRED_ITEM_FIELDS = ("item_id", "pair_id", "slice", "question", "gold")
-ALLOWED_SLICES = ("L1", "L7")
+#: The contract moved to ``jurisuq/target/candidates.py`` so the screen, the
+#: tests and the documentation all cite one implementation. Re-exported here
+#: because earlier callers (and the tests) import them from this module.
+REQUIRED_ITEM_FIELDS = _candidates.REQUIRED_ITEM_FIELDS
+ALLOWED_SLICES = _candidates.ALLOWED_SLICES
 
 
 def load_candidates(path: Path) -> list[dict]:
-    """Read and validate a candidate item file against the Phase A item schema."""
-    if not path.is_file():
-        raise SystemExit(f"ERROR: candidate file not found: {path}")
-    items = [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines()
-             if line.strip()]
-    if not items:
-        raise SystemExit(f"ERROR: {path} contains no items")
-    seen = set()
-    for item in items:
-        missing = [field for field in REQUIRED_ITEM_FIELDS if not item.get(field)]
-        if missing:
-            raise SystemExit(f"ERROR: item {item.get('item_id')!r} is missing {missing}")
-        if item["slice"] not in ALLOWED_SLICES:
-            raise SystemExit(f"ERROR: item {item['item_id']!r} has slice "
-                             f"{item['slice']!r}; expected one of {ALLOWED_SLICES}")
-        if item["item_id"] in seen:
-            raise SystemExit(f"ERROR: duplicate item_id {item['item_id']!r}")
-        seen.add(item["item_id"])
-        gold = item["gold"]
-        if not isinstance(gold, dict) or not gold.get("act") or not gold.get("provision"):
-            raise SystemExit(f"ERROR: item {item['item_id']!r} needs gold.act and "
-                             "gold.provision")
-    return items
+    """Read and validate a candidate item file against the Stage 2 contract."""
+    try:
+        return _candidates.load_candidates(path)
+    except _candidates.CandidateContractError as exc:
+        raise SystemExit(str(exc)) from exc
 
 
 def main() -> int:
@@ -98,6 +84,11 @@ def main() -> int:
             "the cost is approved, or use --set provider=mock for a plumbing check.")
 
     items = load_candidates(data_path)
+    # `load_candidates` already validated this set. Re-running the pure check is
+    # how the report obtains its summary; it must happen before the cap so a bad
+    # item cannot be hidden by capping, and the summary describes the whole set.
+    contract = _candidates.validate_candidates(items)
+    data_sha256 = content_sha256(data_path)
     items = _limit(items, args.items if args.items is not None
                    else int(screen_cfg.get("items", len(items))))
 
@@ -136,6 +127,16 @@ def main() -> int:
 
     elapsed = time.time() - started
     report = yield_report(records)
+    # Per-slice yield, using the same function over the same records. G7's
+    # condition is per slice ("both_classes_on_every_evaluated_slice"), so an
+    # aggregate rate cannot tell a reader whether the L7 arm produced any correct
+    # majority answer -- the single question the screen exists to answer. This
+    # changes no metric; it reports the measurement already taken, grouped by the
+    # slice field the candidate dataset already carries.
+    yield_by_slice = {name: yield_report([record for record in records
+                                          if record.get("slice") == name])
+                      for name in sorted({record.get("slice") for record in records
+                                          if record.get("slice")})}
     planning = cfg_g.get("yield_planning", {})
     needed = items_needed(float(report["overall"]["majority_rate"]),
                           int(planning.get("needed_correct", 15)),
@@ -148,11 +149,16 @@ def main() -> int:
         "provider": cfg.provider,
         "is_mock": cfg.provider == "mock",
         "data_path": _relative(data_path),
+        # Provenance: the exact bytes screened, and the contract they satisfy.
+        # Without this a reported yield cannot be tied back to an item set.
+        "data_sha256": data_sha256,
+        "candidate_contract": contract,
         "n_items": len(items),
         "n_samples_per_item": cfg.n_samples,
         "elapsed_seconds": round(elapsed, 1),
         "seconds_per_item": round(elapsed / len(items), 2) if items else None,
         "yield": report,
+        "yield_by_slice": yield_by_slice,
         "projection": needed,
         "projection_basis": planning.get("basis"),
         "verdict_note": ("This is a yield estimate, not a gate. A zero rate means no "
@@ -190,6 +196,13 @@ def main() -> int:
               f"confidence (expectation {needed['expected_items']})")
     else:
         print(f"  projection: not reachable from this item set - {needed.get('note')}")
+    print()
+    print(f"  {'slice':7s} {'items':>6s} {'correct':>8s} {'rate':>7s}")
+    for name, block in yield_by_slice.items():
+        overall_slice = block["overall"]
+        print(f"  {name:7s} {overall_slice['items']:6d} "
+              f"{overall_slice['majority_correct']:8d} "
+              f"{overall_slice['majority_rate']:7.3f}")
     print(f"  report written: {out}")
     return 0 if overall["majority_correct"] > 0 else 1
 

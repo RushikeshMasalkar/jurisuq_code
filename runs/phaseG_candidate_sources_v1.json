@@ -1,0 +1,260 @@
+{
+  "phase": "G",
+  "experiment": "Stage 2 candidate item set (step 1)",
+  "source_document": "PHASE-G.md, 'Remaining work: all of it blocked on the pilot' (Stage 2, step 1)",
+  "dataset": "data/lexuq_target_candidates_v1.jsonl",
+  "dataset_sha256": "f49f4d91946387eb0534718945092cc2f840bd9f2aee053ed9ac13c3f296d341",
+  "n_items": 24,
+  "slices": {
+    "L1": 12,
+    "L7": 12
+  },
+  "topics": [
+    "cheating",
+    "criminal_breach_of_trust",
+    "cruelty_by_husband",
+    "culpable_homicide",
+    "murder",
+    "theft",
+    "theft_in_dwelling",
+    "wrongful_restraint"
+  ],
+  "templates": [
+    "T1",
+    "T2",
+    "T6"
+  ],
+  "contract": {
+    "schema": "Phase A item schema",
+    "source_document": "PHASE-G.md, 'Remaining work: all of it blocked on the pilot' (Stage 2, step 1)",
+    "n_items": 24,
+    "slices": {
+      "L1": 12,
+      "L7": 12
+    },
+    "provenance_verified": false,
+    "provenance_sources": [
+      "authored for the Phase G Stage 2 screen, from the official BNS-to-IPC corresponding section table"
+    ],
+    "checked": [
+      "required_fields",
+      "slice",
+      "gold.act",
+      "gold.provision",
+      "unique_item_id",
+      "provenance.verified",
+      "provenance.source"
+    ],
+    "not_checked": [
+      "legal correctness of gold",
+      "answerability",
+      "duplicate questions across items",
+      "any gate"
+    ]
+  },
+  "provenance_verified": false,
+  "verification_statement": "Every item is provenance.verified = false. The section pairs were checked against official government sources in this environment, but that is a machine-assisted source check, not human legal approval. No item has been approved by a qualified legal reviewer.",
+  "correctness_classes": {
+    "authored": "none",
+    "reason": "correctness is measured by the judge against gold from generated samples (jurisuq/pipeline.py, majority_correct); it is not an authored field, so authoring one would fabricate the measurement G7 depends on"
+  },
+  "sources": {
+    "NCRB_BNS_2023": {
+      "title": "Bharatiya Nyaya Sanhita, 2023 (bare act, with corresponding section table of BNS with the repealed Act)",
+      "issuing_authority": "National Crime Records Bureau, Ministry of Home Affairs, Government of India",
+      "url": "https://www.ncrb.mha.gov.in/uploads/SankalanPortal/DownloadPDF/BNS2023.pdf",
+      "authority_type": "official_government_publication",
+      "retrieved": "full_text",
+      "supports": "BNS section numbering and titles; the official BNS-to-IPC corresponding section table (Chapters I-V read in full here; later chapters read via the arrangement-of-sections list)."
+    },
+    "BPRD_COMPARISON": {
+      "title": "Comparison Summary BNS to IPC",
+      "issuing_authority": "Bureau of Police Research and Development, Ministry of Home Affairs, Government of India",
+      "url": "https://bprd.nic.in/uploads/pdf/COMPARISON%20SUMMARY%20BNS%20to%20IPC%20.pdf",
+      "authority_type": "official_government_publication",
+      "retrieved": "search_excerpt",
+      "supports": "Section-level BNS-to-IPC mapping and change notes for s.103(1), s.126, s.305, s.306, s.307, s.318.",
+      "caveat": "The PDF could not be opened from this environment (HTTP 500); only search-engine excerpts were read. A human reviewer should open the document before relying on it."
+    },
+    "UPPOLICE_COMPARATIVE": {
+      "title": "Corresponding Section Table of Bharatiya Nyaya Sanhita 2023",
+      "issuing_authority": "Uttar Pradesh Police",
+      "url": "https://uppolice.gov.in/site/writereaddata/siteContent/Three%20New%20Major%20Acts/202406281710564823BNS_IPC_Comparative.pdf",
+      "authority_type": "official_government_publication",
+      "retrieved": "search_excerpt",
+      "supports": "s.305 <- 380, s.318(1) <- 415, s.318(2) <- 417, s.318(3) <- 418.",
+      "caveat": "Read via search excerpt only; document not opened here."
+    },
+    "EGAZETTE_BNS": {
+      "title": "The Bharatiya Nyaya Sanhita, 2023, No. 45 of 2023 (Gazette of India)",
+      "issuing_authority": "Government of India (e-Gazette)",
+      "url": "https://egazette.gov.in/WriteReadData/2023/250883.pdf",
+      "authority_type": "primary_legislation",
+      "retrieved": "search_excerpt",
+      "supports": "Enacted text of s.103(1) (punishment for murder: death or imprisonment for life and fine) and s.103(2).",
+      "caveat": "Search excerpt only; the gazette PDF was not opened here."
+    },
+    "MHA_REFERENCE_2023": {
+      "title": "Reference Material on New Criminal Laws, 2023",
+      "issuing_authority": "Ministry of Home Affairs, Government of India",
+      "url": "https://cdnbbsr.s3waas.gov.in/s3ec02907edb0aa6986220dbffb79a7885/uploads/2024/05/2024052146.pdf",
+      "authority_type": "official_government_publication",
+      "retrieved": "search_excerpt",
+      "supports": "Enforcement date 1 July 2024; Act 45 of 2023; assent 25 December 2023.",
+      "caveat": "Read via search excerpt only."
+    }
+  },
+  "section_pairs": {
+    "murder": {
+      "bns": "103(1)",
+      "bns_label": "punishment for murder",
+      "ipc": "302",
+      "ipc_label": "punishment for murder",
+      "distractor": {
+        "act": "BNS",
+        "provision": "101",
+        "label": "murder (definition)"
+      },
+      "punishment": "death or imprisonment for life, and fine",
+      "sources": [
+        "NCRB_BNS_2023",
+        "BPRD_COMPARISON",
+        "EGAZETTE_BNS"
+      ],
+      "subsection_confidence": "high",
+      "note": "BNS 103(1) carries IPC 302 verbatim; BNS 103(2) (group murder on protected grounds) is new and has no IPC counterpart."
+    },
+    "culpable_homicide": {
+      "bns": "105",
+      "bns_label": "punishment for culpable homicide not amounting to murder",
+      "ipc": "304",
+      "ipc_label": "punishment for culpable homicide not amounting to murder",
+      "distractor": {
+        "act": "BNS",
+        "provision": "103(1)",
+        "label": "punishment for murder"
+      },
+      "punishment": "see BNS 105(1)-(2); the graduated terms are cited, not reproduced",
+      "sources": [
+        "NCRB_BNS_2023"
+      ],
+      "subsection_confidence": "medium",
+      "note": "BNS 100 (culpable homicide) and 101 (murder) restate IPC 299 and 300. BNS 105(1) is read as the successor of IPC 304, supported here by the official arrangement-of-sections titles. The sub-section terms differ from IPC 304 in detail and are NOT reproduced in this dataset."
+    },
+    "theft": {
+      "bns": "303(2)",
+      "bns_label": "punishment for theft",
+      "ipc": "379",
+      "ipc_label": "punishment for theft",
+      "distractor": {
+        "act": "BNS",
+        "provision": "304",
+        "label": "snatching"
+      },
+      "punishment": "up to three years, or fine, or both; separate tiers for repeat conviction and for low-value first offences",
+      "sources": [
+        "NCRB_BNS_2023"
+      ],
+      "subsection_confidence": "high",
+      "note": "BNS 303(1) is the theft definition (IPC 378); 303(2) is the punishment. The community-service proviso has no IPC counterpart."
+    },
+    "theft_in_dwelling": {
+      "bns": "305",
+      "bns_label": "theft in a dwelling house, or means of transportation or place of worship",
+      "ipc": "380",
+      "ipc_label": "theft in a dwelling house",
+      "distractor": {
+        "act": "BNS",
+        "provision": "303(2)",
+        "label": "punishment for theft"
+      },
+      "punishment": "not reproduced here; BNS 305 is subdivided and the added sub-sections have no IPC counterpart",
+      "sources": [
+        "NCRB_BNS_2023",
+        "BPRD_COMPARISON",
+        "UPPOLICE_COMPARATIVE"
+      ],
+      "subsection_confidence": "medium",
+      "note": "BNS 305 enlarges IPC 380 to cover means of transportation and places of worship, and adds new sub-sections (b)-(e)."
+    },
+    "criminal_breach_of_trust": {
+      "bns": "316(2)",
+      "bns_label": "punishment for criminal breach of trust",
+      "ipc": "406",
+      "ipc_label": "punishment for criminal breach of trust",
+      "distractor": {
+        "act": "BNS",
+        "provision": "318(4)",
+        "label": "cheating"
+      },
+      "punishment": "up to five years, or fine, or both (raised from three years under IPC 406)",
+      "sources": [
+        "NCRB_BNS_2023",
+        "BPRD_COMPARISON"
+      ],
+      "subsection_confidence": "medium",
+      "note": "BNS 316 consolidates IPC 405-409 into one section; the general punishment in 316(2) is read as the successor of IPC 406. The aggregated structure means the IPC 406/407/408/409 distinctions are partly lost, which is recorded as a limitation."
+    },
+    "cheating": {
+      "bns": "318(4)",
+      "bns_label": "cheating and dishonestly inducing delivery of property",
+      "ipc": "420",
+      "ipc_label": "cheating and dishonestly inducing delivery of property",
+      "distractor": {
+        "act": "BNS",
+        "provision": "316(2)",
+        "label": "criminal breach of trust"
+      },
+      "punishment": "up to seven years, and fine",
+      "sources": [
+        "NCRB_BNS_2023",
+        "UPPOLICE_COMPARATIVE"
+      ],
+      "subsection_confidence": "medium",
+      "note": "BNS 318(1) is the cheating definition (IPC 415); 318(2)-(4) carry IPC 417, 418 and 420. The 318(4) <- 420 pairing is standard but the UP Police excerpt read here showed only 318(1)-(3)."
+    },
+    "wrongful_restraint": {
+      "bns": "126(2)",
+      "bns_label": "punishment for wrongful restraint",
+      "ipc": "341",
+      "ipc_label": "punishment for wrongful restraint",
+      "distractor": {
+        "act": "BNS",
+        "provision": "127",
+        "label": "wrongful confinement"
+      },
+      "punishment": "up to one month, or fine up to five thousand rupees, or both",
+      "sources": [
+        "NCRB_BNS_2023",
+        "BPRD_COMPARISON"
+      ],
+      "subsection_confidence": "high",
+      "note": "BNS 126(1) is wrongful restraint (IPC 339); 126(2) is the punishment (IPC 341). The fine ceiling rose from five hundred to five thousand rupees."
+    },
+    "cruelty_by_husband": {
+      "bns": "85",
+      "bns_label": "husband or relative of husband subjecting a woman to cruelty",
+      "ipc": "498A",
+      "ipc_label": "husband or relative of husband subjecting a woman to cruelty",
+      "distractor": {
+        "act": "BNS",
+        "provision": "80",
+        "label": "dowry death"
+      },
+      "punishment": "up to three years, and fine",
+      "sources": [
+        "NCRB_BNS_2023"
+      ],
+      "subsection_confidence": "medium",
+      "note": "BNS 85 and 86 correspond to IPC 498A and its Explanation. The official correspondence table was read only up to Chapter V here, so this pair rests on the BNS titles plus the standard published mapping and needs human confirmation."
+    }
+  },
+  "not_done": [
+    "no generation",
+    "no yield measurement",
+    "no correctness label",
+    "no human legal review",
+    "no gate verdict"
+  ],
+  "generated_by": "scripts/45_build_target_candidates.py"
+}

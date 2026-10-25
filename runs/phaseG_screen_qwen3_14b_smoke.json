@@ -1,0 +1,93 @@
+{
+  "phase": "G",
+  "experiment": "candidate-yield screen",
+  "generator": "openai-compat:qwen3-14b",
+  "provider": "openai",
+  "is_mock": false,
+  "data_path": "data/lexuq_target_candidates_v1.jsonl",
+  "data_sha256": "f49f4d91946387eb0534718945092cc2f840bd9f2aee053ed9ac13c3f296d341",
+  "candidate_contract": {
+    "schema": "Phase A item schema",
+    "source_document": "PHASE-G.md, 'Remaining work: all of it blocked on the pilot' (Stage 2, step 1)",
+    "n_items": 24,
+    "slices": {
+      "L1": 12,
+      "L7": 12
+    },
+    "provenance_verified": false,
+    "provenance_sources": [
+      "authored for the Phase G Stage 2 screen, from the official BNS-to-IPC corresponding section table"
+    ],
+    "checked": [
+      "required_fields",
+      "slice",
+      "gold.act",
+      "gold.provision",
+      "unique_item_id",
+      "provenance.verified",
+      "provenance.source"
+    ],
+    "not_checked": [
+      "legal correctness of gold",
+      "answerability",
+      "duplicate questions across items",
+      "any gate"
+    ]
+  },
+  "n_items": 2,
+  "n_samples_per_item": 10,
+  "elapsed_seconds": 723.8,
+  "seconds_per_item": 361.92,
+  "yield": {
+    "topics": {
+      "murder": {
+        "items": 2,
+        "majority_correct": 0,
+        "samples": 20,
+        "correct_samples": 0,
+        "majority_rate": 0.0,
+        "sample_rate": 0.0
+      }
+    },
+    "overall": {
+      "items": 2,
+      "majority_correct": 0,
+      "majority_rate": 0.0,
+      "majority_interval": {
+        "method": "wilson",
+        "estimate": 0.0,
+        "n": 2,
+        "successes": 0,
+        "lo": 0.0,
+        "hi": 0.6576197728563925,
+        "confidence": 0.95
+      },
+      "samples": 20,
+      "correct_samples": 0,
+      "sample_rate": 0.0,
+      "sample_interval": {
+        "method": "wilson",
+        "estimate": 0.0,
+        "n": 20,
+        "successes": 0,
+        "lo": 0.0,
+        "hi": 0.16112515827076002,
+        "confidence": 0.95
+      }
+    },
+    "confidence": 0.95,
+    "unit_note": "majority_rate is the planning quantity: a target population needs items whose *majority* answer is correct, not items with at least one correct sample."
+  },
+  "projection": {
+    "rate": 0.0,
+    "needed_correct": 15,
+    "expected_items": null,
+    "items_for_confidence": null,
+    "confidence": 0.95,
+    "reachable": false,
+    "note": "a zero observed rate cannot be projected; a zero would be indistinguishable from an even lower unobserved rate"
+  },
+  "projection_basis": "a usable two-class evaluation population needs enough correct items for an AUROC interval to be meaningful; 15 is the planning floor used for the Phase G cost estimate and is NOT a threshold from the engineering guide",
+  "verdict_note": "This is a yield estimate, not a gate. A zero rate means no two-class population can be built from this item set with this generator; it does not license changing any Phase E/F constant.",
+  "generated_utc": "2026-10-25T12:24:53Z"
+}

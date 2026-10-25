@@ -296,10 +296,47 @@ assert the gold section in any form. **G5 stays NOT_EVALUABLE and G6 stays
 NOT_MET.** Building the population needs new items and new generation, which is
 an open, costed checkpoint in `PHASE-G.md`.
 
-The suite is now **476 passed, 1 skipped** (206 new Phase G tests: 50 population
-screening + 39 evaluation matrix + 32 deployment + 32 documentation guards +
-53 pilot guards). Reports: `runs/phaseG_eval_matrix.json`,
-`runs/phaseG_deployment.json`, `runs/phaseG_pilot_status.json`.
+**Stage 2 status: partial.** A 24-item candidate set exists
+(`data/lexuq_target_candidates_v1.jsonl`, 12 L1 / 12 L7, 8 offences, every item
+`provenance.verified = false` and `PENDING_HUMAN_REVIEW`), with a per-item source
+record in `runs/phaseG_candidate_sources_v1.json`.
+
+The target-yield screen **has been run** on Qwen3 14B via LM Studio: 24 items ×
+10 samples, **3/24 majority-correct, rate 0.1250, 95% interval [0.0434, 0.3100]**,
+projection 172 items for 15 correct, $0.00. Those figures reproduce exactly under
+this repository's own `yield_report` and `items_needed` code. **The report file
+is not in this repository**, so the numbers are recorded as
+reported-and-corroborated, not as a verified artefact.
+
+The open question is per-slice: the report carries no per-slice breakdown, so the
+3 correct items cannot be attributed to L1 or L7. Since the frozen L7 arm has 0
+correct of 100 and G7's condition is per slice, a 172-item run may not change the
+verdict at all. **G7 remains `NOT_MET`** and human legal review is outstanding.
+Full report: [`PHASE-G-STAGE2.md`](PHASE-G-STAGE2.md).
+
+Authoring items cannot move G7 on its own — the gate is defined over *measured*
+correctness classes from a stored run, and a set of questions with no answers
+cannot enter that grid. Correctness is computed (`pipeline.py`, `majority_correct`),
+never authored, so the dataset deliberately carries no correctness labels.
+
+Building the population is Stage 2, and its first step is now enforced in code
+rather than left to prose. Stage 2 begins by authoring a candidate item set "in
+the Phase A schema with `verified: false` provenance"; `jurisuq/target/candidates.py`
+checks exactly that before `scripts/41` screens anything, and the screen's report
+records the candidate file's `data_sha256` so a yield cannot be quoted against a
+different item set. The contract also states in the artefact what it does *not*
+establish — legal correctness, answerability and every gate are outside it. No
+candidate item set exists yet and none was invented, so Stage 2 remains blocked
+on authoring input.
+
+The suite is now **555 passed, 8 skipped** (292 Phase G tests: 34 population
+screening + 23 yield screen + 52 candidate-set contract and dataset + 11
+screen-report provenance + 39 evaluation matrix + 32 deployment + 44
+documentation guards + 57 pilot guards). Seven of the skips are the screen-report
+checks, which activate when the report artefact is added; one is the pre-existing
+torch gate. Reports:
+`runs/phaseG_eval_matrix.json`, `runs/phaseG_deployment.json`,
+`runs/phaseG_pilot_status.json`.
 
 ## Documentation map
 
@@ -318,6 +355,9 @@ historical results record:
   AUROC interval, G5 status, and separate environment test records.
 - [Phase F follow-up](PHASE-F-FOLLOWUP.md) — the four post-merge experiments,
   corrected conformal provenance, and clustered uncertainty.
+- [Phase G Stage 2 report](PHASE-G-STAGE2.md) — the candidate item set, its
+  data card and source record, the review that was and was not performed, the
+  blocked screen, and why G7 is unchanged.
 - [Phase G guide](PHASE-G.md) — the corrected specification status and Gate G7,
   the §21.2 evaluation matrix with its undefined reason codes, the §21.3
   deployment measurements, the target-population readiness check, the
@@ -350,7 +390,8 @@ Phase G: stored runs -> population readiness audit; candidate-item yield screen
 
 Primary modules are in [`jurisuq/`](jurisuq/): core pipeline and metrics,
 `relations/` for Phase B, `context/` for Phase C, `warrant/` for Phase D,
-`uncertainty/` for Phase E, `calibration/` for Phase F, and `target/` and
+`uncertainty/` for Phase E, `calibration/` for Phase F, and `target/`
+(including the Stage 2 candidate contract in `target/candidates.py`) and
 `evaluation/` for Phase G.
 Scripts are numbered by phase: `00`–`06` (A), `10`–`13` (B), `20`–`22` (C),
 `23`–`27` (D/E), `29`–`31` (F, with follow-up experiments `32`–`34`) and `40`–`44` (G).

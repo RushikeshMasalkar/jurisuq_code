@@ -382,3 +382,104 @@ def test_the_runner_still_refuses_to_overwrite_a_run_directory():
     assert source.count("ensure_fresh_run_dir(") == 2, "both paid paths must use the guard"
     # and the runner never falls back to a different provider on failure
     assert "fallback" not in source.lower()
+
+
+# ----------------------------------------------------------------------
+# Stage 2, step 1: the candidate-set contract is documented, not implied
+# ----------------------------------------------------------------------
+def test_the_guide_documents_the_stage_2_candidate_contract():
+    text = GUIDE.read_text(encoding="utf-8")
+    assert "Stage 2, step 1" in text
+    assert "provenance.verified" in text
+    assert "data_sha256" in text
+
+
+def test_the_guide_does_not_claim_stage_2_ran():
+    """No candidate item set exists; the documents must not imply one was made."""
+    text = GUIDE.read_text(encoding="utf-8").lower()
+    for claim in ("stage 2 is complete", "stage 2 completed", "stage 2 has run",
+                  "candidate items were authored"):
+        assert claim not in text, f"PHASE-G.md claims {claim!r}"
+
+
+def test_the_documents_say_no_candidate_set_exists():
+    text = GUIDE.read_text(encoding="utf-8")
+    assert "does not exist" in text or "no candidate item set" in text.lower()
+
+
+def test_the_screen_cannot_bypass_the_candidate_contract():
+    """The check must run inside the screen, before any generator is built."""
+    source = (ROOT / "scripts" / "41_screen_target_yield.py").read_text(encoding="utf-8")
+    assert "validate_candidates(" in source
+    # validation of the whole set happens before the cap, and before generation
+    assert source.index("validate_candidates(") < source.index("make_generator(")
+
+
+def test_the_published_test_counts_match_the_files():
+    """The counts printed in the guide must be the counts the files collect.
+
+    This guard counts itself, so adding a documentation guard means updating
+    the published figures in `PHASE-G.md` in the same change. That is the
+    point: the guide's test record must not drift from the files.
+    """
+    import subprocess
+    import sys as _sys
+    expected = {
+        "test_target_population": 34, "test_target_screen": 23,
+        "test_target_candidates": 52,
+        "test_target_screen_report": 11, "test_eval_matrix": 39,
+        "test_deployment_metrics": 32, "test_phase_g_docs": 44,
+        "test_pilot_guard": 57,
+    }
+    text = GUIDE.read_text(encoding="utf-8")
+    total = sum(expected.values())
+    assert f"| Phase G tests now | {total}" in text
+    for name, count in expected.items():
+        proc = subprocess.run([_sys.executable, "-m", "pytest",
+                               str(ROOT / "tests" / f"{name}.py"), "-q",
+                               "--collect-only"],
+                              capture_output=True, text=True, cwd=str(ROOT))
+        assert f"{count} tests collected" in proc.stdout, \
+            f"{name}: guide says {count}; pytest collected " \
+            f"{proc.stdout.strip().splitlines()[-1] if proc.stdout else 'nothing'}"
+
+
+# ----------------------------------------------------------------------
+# Phase G Stage 2 report
+# ----------------------------------------------------------------------
+STAGE2 = ROOT / "PHASE-G-STAGE2.md"
+
+
+def test_the_stage_2_report_exists_and_is_linked():
+    assert STAGE2.is_file()
+    assert "PHASE-G-STAGE2.md" in README_TEXT()
+
+
+def README_TEXT():
+    return (ROOT / "README.md").read_text(encoding="utf-8")
+
+
+def test_the_stage_2_report_states_the_blocker_not_a_result():
+    text = STAGE2.read_text(encoding="utf-8").lower()
+    assert "blocked" in text
+    assert "connection refused" in text
+    assert "0 generations" in text or "no generation" in text
+
+
+def test_the_stage_2_report_does_not_claim_g7_moved():
+    text = STAGE2.read_text(encoding="utf-8").lower()
+    for claim in ("g7 pass", "g7 is met", "gate g7 passed", "g7 now passes"):
+        assert claim not in text, f"the report claims {claim!r}"
+    assert "not_met" in text
+
+
+def test_the_stage_2_report_says_the_mock_is_not_evidence():
+    text = STAGE2.read_text(encoding="utf-8").lower()
+    assert "must never be cited as a yield" in text
+    assert "meaningless" in text
+
+
+def test_the_stage_2_report_distinguishes_review_from_human_approval():
+    text = STAGE2.read_text(encoding="utf-8")
+    assert "not human legal approval" in text.lower()
+    assert "PENDING_HUMAN_REVIEW" in text
