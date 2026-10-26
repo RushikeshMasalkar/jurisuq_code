@@ -390,13 +390,35 @@ python -X utf8 scripts/41_screen_target_yield.py --data data/lexuq_target_candid
 
 # 6. inspect the committed reports without regenerating anything
 python -X utf8 -m pytest tests/test_target_screen_report.py -q
+
+# 7. the L7-only diagnostic (NOT yet run; see PHASE-G-L7-INVESTIGATION.md section 9).
+#    --slice narrows the run before the cap, so this screens 12 L7 items and never
+#    selects L1. --save-items writes the per-item evidence the aggregate omits.
+python -X utf8 scripts/41_screen_target_yield.py --data data/lexuq_target_candidates_v1.jsonl \
+    --slice L7 --out runs/phaseG_l7_diagnostic.json \
+    --save-items runs/phaseG_l7_diagnostic_items.jsonl --allow-generation \
+    --set n_samples=3
 ```
 
 Step 5 was already run and its artefacts are committed, so **no regeneration is
 needed** to reproduce this document's analysis. Re-running it would spend about
-2.6 hours of local compute.
+2.6 hours of local compute. **Step 7 has not been run** and needs approval first.
+
+`--slice SLICE` restricts a screen to one slice (`L1` or `L7`). It is validated
+against the slices present in the file, so a typo — or asking for `L1` in an
+L7-only file — fails immediately with the available slices named, before any
+generation. The report records `slice_filter` (`null` for a whole-set run), and
+`candidate_contract.slices` continues to describe the *file*, not the subset, so
+a partial run is never mistaken for a full one. Omitting `--slice` screens every
+slice exactly as before.
 
 ## 10. Limitations
+
+A `--slice` run covers one slice by construction. Its report is **not** a
+whole-set screen: `n_items` counts only the selected slice, `yield_by_slice` holds
+one bucket, and the exit code still reports whether any majority answer was
+correct for that slice alone. Do not compare a slice-filtered rate with the
+24-item aggregate rate as if they measured the same population.
 
 1. **The L7 zero is unexplained** (§6c) — the central limitation of this stage.
    Zero correct samples in 120 generations is a finding, not a diagnosis, and no

@@ -333,6 +333,17 @@ without one **G7 remains `NOT_MET`**. Human legal review is outstanding
 [`PHASE-G-STAGE2.md`](PHASE-G-STAGE2.md) and
 [`PHASE-G-L7-INVESTIGATION.md`](PHASE-G-L7-INVESTIGATION.md).
 
+The screen can now be aimed at one slice: `--slice L7` narrows the run to L7
+before the item cap (so `--slice L7 --items 12` is twelve L7 items, not six of
+each), refuses a slice the file does not contain, and leaving the flag out
+screens every slice exactly as before. The report records `slice_filter`, and
+`--save-items PATH` writes one JSONL record per item — the sampled text, the
+judge label and the reason — which is the evidence the aggregate report cannot
+carry. **The L7-only diagnostic that uses both flags has not been run**; it is
+specified, with its decision criteria fixed in advance, in
+[`PHASE-G-L7-INVESTIGATION.md`](PHASE-G-L7-INVESTIGATION.md) §9, and needs
+approval first.
+
 Authoring items cannot move G7 on its own — the gate is defined over *measured*
 correctness classes from a stored run, and a set of questions with no answers
 cannot enter that grid. Correctness is computed (`pipeline.py`, `majority_correct`),
@@ -348,9 +359,9 @@ establish — legal correctness, answerability and every gate are outside it. No
 candidate item set exists yet and none was invented, so Stage 2 remains blocked
 on authoring input.
 
-The suite is now **578 passed, 1 skipped** (308 Phase G tests: 34 population
-screening + 27 yield screen + 52 candidate-set contract and dataset + 18
-screen-report provenance + 39 evaluation matrix + 32 deployment + 49
+The suite is now **589 passed, 1 skipped** (319 Phase G tests: 34 population
+screening + 36 yield screen + 52 candidate-set contract and dataset + 18
+screen-report provenance + 39 evaluation matrix + 32 deployment + 51
 documentation guards + 57 pilot guards). With the screening artefacts committed,
 none of the screen-report checks skip any more; the single remaining skip is the
 pre-existing torch gate. Reports:
@@ -376,7 +387,11 @@ historical results record:
   corrected conformal provenance, and clustered uncertainty.
 - [Phase G Stage 2 report](PHASE-G-STAGE2.md) — the candidate item set, its
   data card and source record, the review that was and was not performed, the
-  blocked screen, and why G7 is unchanged.
+  three committed screening runs, and why G7 is unchanged.
+- [Phase G L7 investigation](PHASE-G-L7-INVESTIGATION.md) — why the L7 arm
+  yields nothing, the evidence that the generator asserts the repealed IPC
+  provision, the harness defect that hid it, the candidate provenance audit, and
+  the human review checklist.
 - [Phase G guide](PHASE-G.md) — the corrected specification status and Gate G7,
   the §21.2 evaluation matrix with its undefined reason codes, the §21.3
   deployment measurements, the target-population readiness check, the

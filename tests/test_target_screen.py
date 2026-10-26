@@ -310,3 +310,125 @@ def test_save_items_refuses_an_existing_file_without_force(tmp_path):
     assert proc.returncode != 0
     assert "exists" in (proc.stdout + proc.stderr)
     assert not out.exists(), "no report may be written when the run is refused"
+
+
+# ----------------------------------------------------------------------
+# --slice: the L7 diagnostic must target L7 and nothing else
+# ----------------------------------------------------------------------
+def test_select_slice_keeps_only_the_requested_slice():
+    """The whole point: an L7 diagnostic must not quietly include L1 items."""
+    items = ([_item(f"L7-{i}") for i in range(3)]
+             + [_item(f"L1-{i}", "L1") for i in range(2)])
+    chosen = screen._select_slice(items, "L7")
+    assert [i["item_id"] for i in chosen] == ["L7-0", "L7-1", "L7-2"]
+    assert all(i["slice"] == "L7" for i in chosen)
+
+
+def test_select_slice_is_a_no_op_when_not_asked_for():
+    """Default behaviour must be byte-for-byte what it was before the flag."""
+    items = [_item("L7-0"), _item("L1-0", "L1")]
+    assert screen._select_slice(items, None) == items
+
+
+def test_select_slice_accepts_any_case():
+    items = [_item("L7-0"), _item("L1-0", "L1")]
+    assert [i["item_id"] for i in screen._select_slice(items, " l7 ")] == ["L7-0"]
+
+
+def test_select_slice_refuses_a_slice_the_file_does_not_contain():
+    """A filter matching nothing would otherwise reach yield_report *after* the
+    generation had been paid for, and fail there with a bare ValueError."""
+    items = [_item("L7-0"), _item("L1-0", "L1")]
+    with pytest.raises(SystemExit) as excinfo:
+        screen._select_slice(items, "L9")
+    message = str(excinfo.value)
+    assert "L9" in message and "matches no items" in message
+    assert "L1" in message and "L7" in message      # says what *is* available
+
+
+def test_select_slice_refuses_a_present_slice_that_the_file_lacks():
+    """Asking for L1 in an L7-only file is a mistake worth reporting, not an
+    empty run."""
+    with pytest.raises(SystemExit) as excinfo:
+        screen._select_slice([_item("L7-0")], "L1")
+    assert "matches no items" in str(excinfo.value)
+
+
+# ---- end to end, against the committed candidate set ------------------
+def _candidate_ids(slice_name):
+    path = ROOT / "data" / "lexuq_target_candidates_v1.jsonl"
+    items = [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines()
+             if line.strip()]
+    return {i["item_id"] for i in items if i["slice"] == slice_name}
+
+
+def test_the_l7_diagnostic_selects_exactly_the_committed_l7_candidates(tmp_path):
+    """The diagnostic this flag exists for, run offline against the real dataset.
+
+    Every one of the twelve committed L7 candidates, and not one L1 item.
+    """
+    expected = _candidate_ids("L7")
+    assert len(expected) == 12
+    out = tmp_path / "screen.json"
+    items_out = tmp_path / "items.jsonl"
+    proc = _run(["--data", str(ROOT / "data" / "lexuq_target_candidates_v1.jsonl"),
+                 "--slice", "L7", "--out", str(out), "--save-items", str(items_out),
+                 "--set", "provider=mock", "--set", "n_samples=1"])
+    assert proc.returncode == 0, proc.stdout + proc.stderr
+
+    records = [json.loads(line) for line in
+               items_out.read_text(encoding="utf-8").splitlines() if line.strip()]
+    assert {r["item_id"] for r in records} == expected
+    assert all(r["slice"] == "L7" for r in records)
+    assert not any(r["slice"] == "L1" for r in records)
+
+    report = json.loads(out.read_text(encoding="utf-8"))
+    assert report["n_items"] == 12
+    assert report["slice_filter"] == "L7"
+    assert list(report["yield_by_slice"]) == ["L7"]
+    # the contract still describes the *file*, not the subset, so the report must
+    # say separately that only one slice was screened
+    assert report["candidate_contract"]["slices"] == {"L1": 12, "L7": 12}
+    # and the console warns that the run is partial
+    assert "does not cover" in proc.stdout
+
+
+def test_the_slice_cap_is_counted_within_the_slice(tmp_path):
+    """`--slice L7 --items 2` must give two L7 items, not one of each slice."""
+    data = _write(tmp_path, [_item(f"L7-{i}") for i in range(3)]
+                  + [_item(f"L1-{i}", "L1") for i in range(3)])
+    out = tmp_path / "screen.json"
+    items_out = tmp_path / "items.jsonl"
+    proc = _run(["--data", str(data), "--slice", "L7", "--items", "2",
+                 "--out", str(out), "--save-items", str(items_out),
+                 "--set", "provider=mock", "--set", "n_samples=1"])
+    assert proc.returncode == 0, proc.stdout + proc.stderr
+    records = [json.loads(line) for line in
+               items_out.read_text(encoding="utf-8").splitlines() if line.strip()]
+    assert len(records) == 2
+    assert {r["slice"] for r in records} == {"L7"}
+
+
+def test_without_the_flag_both_slices_are_still_screened(tmp_path):
+    """Regression: the default run is unchanged by this feature."""
+    data = _write(tmp_path, [_item(f"L7-{i}") for i in range(2)]
+                  + [_item(f"L1-{i}", "L1") for i in range(2)])
+    out = tmp_path / "screen.json"
+    proc = _run(["--data", str(data), "--out", str(out),
+                 "--set", "provider=mock", "--set", "n_samples=1"])
+    assert proc.returncode == 0, proc.stdout + proc.stderr
+    report = json.loads(out.read_text(encoding="utf-8"))
+    assert report["n_items"] == 4
+    assert report["slice_filter"] is None
+    assert set(report["yield_by_slice"]) == {"L1", "L7"}
+
+
+def test_an_unknown_slice_is_refused_before_generating(tmp_path):
+    data = _write(tmp_path, [_item()])
+    out = tmp_path / "screen.json"
+    proc = _run(["--data", str(data), "--slice", "L9", "--out", str(out),
+                 "--set", "provider=mock", "--set", "n_samples=1"])
+    assert proc.returncode != 0
+    assert "L9" in (proc.stdout + proc.stderr)
+    assert not out.exists(), "a refused filter must not produce a report"
+    assert "PHASE G SCREEN" not in proc.stdout, "the check must run before generation"

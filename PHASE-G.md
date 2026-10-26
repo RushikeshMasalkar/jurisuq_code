@@ -251,11 +251,11 @@ calls a model, and no frozen artefact is modified.
 | `jurisuq/target/population.py` | detector-state classification, `population_report` / `population_status` (the documented conditions, each carrying its source), `confound_report`, `yield_report`, `items_needed` |
 | `jurisuq/target/__init__.py` | package exports |
 | `scripts/40_audit_target_feasibility.py` | read-only audit of a stored run → `runs/phaseG_feasibility_audit.json` |
-| `scripts/41_screen_target_yield.py` | candidate-item yield screen; `mock` by default, real generation only with `--allow-generation`. Validates the item set against the Stage 2 contract before any generation and records the screened file's `data_sha256` |
+| `scripts/41_screen_target_yield.py` | candidate-item yield screen; `mock` by default, real generation only with `--allow-generation`. Validates the item set against the Stage 2 contract before any generation and records the screened file's `data_sha256`. `--slice SLICE` narrows the run to one slice before the item cap; `--save-items PATH` writes the per-item evidence the aggregate report cannot carry |
 | `jurisuq/target/candidates.py` | the Stage 2 candidate-set contract: Phase A schema fields, the two-slice rule, unique ids, and `provenance.verified` required to be exactly `False` with a non-empty `source`; returns a summary that records what it did and did not check |
 | `configs/phase_g_target.json` | audit inputs, screen parameters, planning assumptions, and the recorded forbidden operations |
 | `tests/test_target_population.py` | 34 tests: state classification, every readiness condition, the pooled trap, missing-value handling, confound diagnostic, yield estimation, planning projection |
-| `tests/test_target_screen.py` | 23 tests: item-schema validation, the provenance refusals, slice-stratified capping, the generation guard, end-to-end mock run, and the recorded `data_sha256` |
+| `tests/test_target_screen.py` | 36 tests: item-schema validation, the provenance refusals, slice-stratified capping, the `--slice` filter (all-and-only selection, invalid values, unchanged default), per-item evidence capture, the fail-fast overwrite guard, the generation guard, end-to-end mock run, and the recorded `data_sha256` |
 | `tests/test_target_candidates.py` | 52 tests: every required field, the slice rule, `gold.act`/`gold.provision`, unique ids, every provenance refusal (`verified: true`, a non-boolean flag, no flag, no source), a real Phase A record passing the schema, and a line-ending-agnostic content hash |
 | `jurisuq/evaluation/matrix.py` | the §21.2 grid: 9 methods × per-slice matrices, all ten metrics, per-slice judge coverage, reason-coded undefineds, confident-wrong, harm-weighted risk, `gate_g7`, and the no-pooling guard |
 | `jurisuq/evaluation/deployment.py` | §21.3 measurements: stage-1 latency, full-cascade median/p95, peak RSS, the measured-configuration record, and the §27.1 ladder check |
@@ -371,6 +371,9 @@ python -X utf8 scripts\40_audit_target_feasibility.py
 # the screen, offline plumbing check (no model is called)
 python -X utf8 scripts\41_screen_target_yield.py --data data\lexuq_slice.jsonl --items 6 --out runs\phaseG_screen_mock.json --set provider=mock --set n_samples=3
 
+# one slice only, offline (the shape of the L7 diagnostic; still no model)
+python -X utf8 scripts\41_screen_target_yield.py --data data\lexuq_target_candidates_v1.jsonl --slice L7 --out runs\phaseG_screen_mock_l7.json --save-items runs\phaseG_screen_mock_l7_items.jsonl --set provider=mock --set n_samples=3
+
 # the evaluation matrix (§21.2) and the G7 verdict, offline
 python -X utf8 scripts\42_build_eval_matrix.py
 
@@ -429,9 +432,10 @@ ERROR: this script calls a model when provider != 'mock'.
 | After the Qwen3 screen artefacts were committed (PR #7) | 562 passed, 1 skipped |
 | After the Stage 2 documentation synchronisation audit | 571 passed, 1 skipped |
 | After the L7 failure investigation (`PHASE-G-L7-INVESTIGATION.md`) | 578 passed, 1 skipped |
+| After adding `--slice` for the L7-only diagnostic | 589 passed, 1 skipped |
 | New tests | 206 (34 population + 16 screen + 39 matrix + 32 deployment + 32 doc guards + 53 pilot guards) |
 | New tests, Stage 2 contract | 44 (38 candidate contract + 6 screen) |
-| Phase G tests now | 308 (34 population + 27 screen + 52 candidates + 18 screen-report + 39 matrix + 32 deployment + 49 doc guards + 57 pilot guards) |
+| Phase G tests now | 319 (34 population + 36 screen + 52 candidates + 18 screen-report + 39 matrix + 32 deployment + 51 doc guards + 57 pilot guards) |
 | Skipped | `tests/test_relations.py:236` — `torch not installed`; pre-existing |
 | User's Windows environment | torch present, so the skip runs there (271 passed at baseline) |
 
