@@ -425,10 +425,10 @@ def test_the_published_test_counts_match_the_files():
     import subprocess
     import sys as _sys
     expected = {
-        "test_target_population": 34, "test_target_screen": 23,
+        "test_target_population": 34, "test_target_screen": 27,
         "test_target_candidates": 52,
         "test_target_screen_report": 18, "test_eval_matrix": 39,
-        "test_deployment_metrics": 32, "test_phase_g_docs": 46,
+        "test_deployment_metrics": 32, "test_phase_g_docs": 49,
         "test_pilot_guard": 57,
     }
     text = GUIDE.read_text(encoding="utf-8")
@@ -504,3 +504,44 @@ def test_the_stage_2_report_distinguishes_review_from_human_approval():
     text = STAGE2.read_text(encoding="utf-8")
     assert "not human legal approval" in text.lower()
     assert "PENDING_HUMAN_REVIEW" in text
+
+
+# ----------------------------------------------------------------------
+# the L7 investigation report
+# ----------------------------------------------------------------------
+def L7_INVESTIGATION_TEXT():
+    return (ROOT / "PHASE-G-L7-INVESTIGATION.md").read_text(encoding="utf-8")
+
+
+def test_the_l7_investigation_reports_no_generation_and_no_gate_change():
+    """The audit ran no model and moved no gate. Both must stay stated."""
+    text = L7_INVESTIGATION_TEXT().lower()
+    assert "generation performed here | **none**" in text
+    assert "g5 `not_evaluable`" in text and "g6 `not_met`" in text and "g7 `not_met`" in text
+    assert "phase g is not complete" in text
+
+
+def test_the_l7_investigation_keeps_legal_review_pending():
+    """The mechanism finding must never be presented as legal verification."""
+    text = L7_INVESTIGATION_TEXT()
+    lowered = text.lower()
+    assert "pending_human_review" in lowered
+    assert "human legal review is still outstanding" in lowered
+    assert "provenance.verified` remains `false" in lowered
+    # every L7 candidate must appear, so the checklist cannot silently shrink
+    items = [json.loads(line) for line in
+             (ROOT / "data" / "lexuq_target_candidates_v1.jsonl").read_text().splitlines()
+             if line.strip()]
+    l7 = [i["item_id"] for i in items if i["slice"] == "L7"]
+    assert len(l7) == 12
+    missing = [i for i in l7 if f"`{i}`" not in text]
+    assert not missing, f"checklist missing {missing}"
+
+
+def test_the_l7_investigation_does_not_overclaim_the_stage_2_mechanism():
+    """The mechanism is measured on a different item set. That caveat must survive."""
+    text = L7_INVESTIGATION_TEXT().lower()
+    assert "not directly established" in text or "not directly recorded" in text
+    assert "different item set" in text or "0 id overlap" in text
+    for overclaim in ("proves that the stage 2", "the stage 2 l7 zero is caused by"):
+        assert overclaim not in text, f"overclaims: {overclaim!r}"

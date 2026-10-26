@@ -2,7 +2,7 @@
   "phase": "G",
   "stage": 2,
   "generated_utc": "2026-10-25T11:47:05Z",
-  "headline": "Stage 2 screening is complete: all three Qwen3 14B artefacts are committed in this repository. The full run reports 3/24 majority-correct items (rate 0.1250, Wilson interval [0.0434, 0.3100]). The separate sliced run shows every correct item is L1 (3/12) and L7 produced 0 correct samples out of 120. These are automated screening results, not human legal verification. The L7 zero is unexplained and must be investigated before any larger run. G5, G6 and G7 are unchanged.",
+  "headline": "Stage 2 screening is complete: all three Qwen3 14B artefacts are committed in this repository. The full run reports 3/24 majority-correct items (rate 0.1250, Wilson interval [0.0434, 0.3100]). The separate sliced run shows every correct item is L1 (3/12) and L7 produced 0 correct samples out of 120. These are automated screening results, not human legal verification. The L7 zero is attributed to the generator asserting the repealed IPC provision (per-sample evidence in PHASE-G-L7-INVESTIGATION.md), not to item difficulty or a scoring artefact; human legal review of the gold labels remains outstanding. G5, G6 and G7 are unchanged.",
   "status": "SCREEN_COMPLETE_L7_OUTSTANDING",
   "completed": [
     "Stage 2 step 1: authored a 24-item candidate set in the Phase A schema with provenance.verified = false (data/lexuq_target_candidates_v1.jsonl)",
@@ -51,11 +51,11 @@
       "provenance_verified": false
     },
     "l7_investigation": {
-      "status": "OUTSTANDING",
+      "status": "MECHANISM_ESTABLISHED_HUMAN_REVIEW_OUTSTANDING",
       "question": "why did the L7 arm produce no correct answer at all?",
-      "not_established": "item difficulty, a wrong gold label, model failure to apply the transition, or the model taking the designed IPC trap",
-      "blocked_by": "neither committed report retains per-item records, so the failure mode cannot be classified without a small diagnostic run that writes them",
-      "remains_pending": "human legal review of the L7 gold labels"
+      "answered_by": "PHASE-G-L7-INVESTIGATION.md; mechanism detail in the top-level l7_investigation record",
+      "established": "on L7 items of this design the generator asserts the repealed IPC provision (qwen3-14b: 33 of 36 L7 samples stale_law, 0 gold); it is not a scoring artefact",
+      "still_open": "a direct per-item measurement on these twelve candidates (the harness now supports it via --save-items), and human legal review of the gold labels"
     }
   },
   "gates_unchanged": {
@@ -264,6 +264,60 @@
     "must_not_be_pooled_with": [
       "runs/phaseG_screen_qwen3_14b_full.json",
       "runs/phaseG_screen_qwen3_14b_sliced.json"
+    ]
+  },
+  "l7_investigation": {
+    "status": "MECHANISM_ESTABLISHED_FOR_THE_SLICE_DESIGN_NOT_FOR_THESE_ITEMS",
+    "report": "PHASE-G-L7-INVESTIGATION.md",
+    "question": "why did the L7 arm produce no correct answer at all?",
+    "mechanism_established": {
+      "finding": "on L7 items of this design the generator asserts the repealed IPC provision",
+      "evidence": "runs/pilot-qwen3-14b-pilot/pilot_items.jsonl - qwen3-14b, 12 L7 items x 3 samples, documented in PHASE-A.md",
+      "l7_samples": 36,
+      "stale_law_samples": 33,
+      "wrong_section_samples": 3,
+      "gold_labelled_samples": 0,
+      "mean_repealed_code_share": 0.917,
+      "corroboration": "the frozen primary run labels 832 of 1000 L7 samples stale_law and 0 as correct (PHASE-G.md)"
+    },
+    "not_scoring_artefact": {
+      "why": "the same run scored 32 of 240 correct samples on L1 with the same generator, judge and item schema, so no slice-agnostic defect explains a 3/12 versus 0/12 split",
+      "judge_probe": "ProvisionJudge accepts 'Section 103(1) of the BNS', 'Section 103 of the BNS' and a gold-with-superseded-note answer for an L7 gold of BNS 103(1); it labels 'Section 302 IPC' stale_law",
+      "covered_by": "tests/test_judge.py:66-78"
+    },
+    "not_directly_established": "the pilot uses data/lexuq_slice.jsonl (0 item-id overlap with the candidate set), and the screen reports kept no per-item records, so the mechanism is corroborated across a different item set rather than measured on these twelve items",
+    "harness_defects_fixed": [
+      {
+        "defect": "the screen discarded the per-item diagnostics build_record already computes (sample_texts, sample_verdict_labels, sample_verdict_reasons, asserted_keys, repealed_code_share), which is the sole reason the zero was unattributable",
+        "fix": "scripts/41_screen_target_yield.py --save-items PATH writes one jsonl record per item, same schema as the frozen items.jsonl",
+        "regression_test": "tests/test_target_screen.py::test_save_items_writes_the_per_item_evidence"
+      },
+      {
+        "defect": "the overwrite guard on the output report ran after all generation, so an accidental re-run spent the full compute budget before refusing",
+        "fix": "both output paths are resolved and checked before sampling",
+        "regression_test": "tests/test_target_screen.py::test_the_screen_refuses_an_existing_output_before_generating"
+      }
+    ],
+    "provenance_audit": {
+      "sources_registry": "runs/phaseG_candidate_sources_v1.json",
+      "all_items_unverified": true,
+      "retrieval_caveat": "BPRD_COMPARISON could not be opened (HTTP 500) and EGAZETTE_BNS, UPPOLICE_COMPARATIVE and MHA_REFERENCE_2023 were search excerpts only; NCRB_BNS_2023 was read as full text for Chapters I-V",
+      "weakest_pairs": [
+        "cheating (BNS 318(4) <- IPC 420): the UP Police excerpt showed only 318(1)-(3)",
+        "cruelty_by_husband (BNS 85 <- IPC 498A): the correspondence table was read only to Chapter V"
+      ]
+    },
+    "pair_id_observation": "the 24 candidates carry 24 distinct pair_id values and no fact pattern is shared across slices, so unlike the frozen slice there is no cross-slice sibling key; the screen groups by slice, so no result is affected, but paired analysis on this set must not assume matching",
+    "next_step": "run the L7-only diagnostic in PHASE-G-L7-INVESTIGATION.md section 9 (12 items x 3 samples, ~11-27 min, $0, --save-items) with its interpretation criteria fixed in advance",
+    "remains_pending": "human legal review of the L7 gold labels - per-item checklist in PHASE-G-L7-INVESTIGATION.md section 10"
+  },
+  "documentation": {
+    "stage2_report": "PHASE-G-STAGE2.md",
+    "l7_investigation": "PHASE-G-L7-INVESTIGATION.md",
+    "screening_reports": [
+      "runs/phaseG_screen_qwen3_14b_full.json",
+      "runs/phaseG_screen_qwen3_14b_sliced.json",
+      "runs/phaseG_screen_qwen3_14b_smoke.json"
     ]
   }
 }

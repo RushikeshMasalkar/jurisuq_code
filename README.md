@@ -315,16 +315,23 @@ twice: they agree on 3/24 majority and differ on correct samples (34 vs 32).
 Neither supersedes the other and their sample counts must not be pooled.
 
 The sliced run answers the question the full run could not: **every correct item
-is L1, and L7 produced no correct sample at all in 120 generations.** That is a
-finding requiring investigation, not a diagnosis — the reports retain no per-item
-records, so it cannot yet be attributed to item difficulty, a wrong gold label, or
-the model taking the designed IPC trap.
+is L1, and L7 produced no correct sample at all in 120 generations.** The cause
+has since been investigated in
+[`PHASE-G-L7-INVESTIGATION.md`](PHASE-G-L7-INVESTIGATION.md): on L7 items of this
+design the model writes the **repealed IPC provision** — the committed
+`qwen3-14b` frozen-slice pilot labels 33 of 36 L7 samples `stale_law` and none
+correct — and the judge is not the cause, since the same run scored 32/240 correct
+samples on L1 with the same parser. That is corroboration from a different item
+set, not a direct measurement of these twelve items: the screen harness discarded
+its per-item records, which is now fixed (`--save-items`). Gold labels remain
+unverified pending human legal review.
 
 Because the aggregate rate that produces the 172-item projection is carried
 entirely by L1, a larger run cannot be expected to create an L7 correct class, and
 without one **G7 remains `NOT_MET`**. Human legal review is outstanding
-(`provenance.verified = false` throughout). Full report:
-[`PHASE-G-STAGE2.md`](PHASE-G-STAGE2.md).
+(`provenance.verified = false` throughout). Full reports:
+[`PHASE-G-STAGE2.md`](PHASE-G-STAGE2.md) and
+[`PHASE-G-L7-INVESTIGATION.md`](PHASE-G-L7-INVESTIGATION.md).
 
 Authoring items cannot move G7 on its own — the gate is defined over *measured*
 correctness classes from a stored run, and a set of questions with no answers
@@ -341,9 +348,9 @@ establish — legal correctness, answerability and every gate are outside it. No
 candidate item set exists yet and none was invented, so Stage 2 remains blocked
 on authoring input.
 
-The suite is now **571 passed, 1 skipped** (301 Phase G tests: 34 population
-screening + 23 yield screen + 52 candidate-set contract and dataset + 18
-screen-report provenance + 39 evaluation matrix + 32 deployment + 46
+The suite is now **578 passed, 1 skipped** (308 Phase G tests: 34 population
+screening + 27 yield screen + 52 candidate-set contract and dataset + 18
+screen-report provenance + 39 evaluation matrix + 32 deployment + 49
 documentation guards + 57 pilot guards). With the screening artefacts committed,
 none of the screen-report checks skip any more; the single remaining skip is the
 pre-existing torch gate. Reports:
