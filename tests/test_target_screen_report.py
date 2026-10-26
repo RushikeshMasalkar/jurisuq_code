@@ -72,7 +72,11 @@ def test_the_status_record_still_denies_legal_verification():
     status = _status()
     text = json.dumps(status).lower()
     assert "not human legal verification" in text or "not human legal" in text
-    assert status["not_completed"]["l7_investigation"]["status"] == "OUTSTANDING"
+    # The L7 investigation has since been carried out, so the record must no longer
+    # say the mechanism is unknown -- but it must still say human review is open.
+    l7 = status["not_completed"]["l7_investigation"]
+    assert l7["status"] != "OUTSTANDING"
+    assert "human" in json.dumps(l7).lower() and "review" in json.dumps(l7).lower()
     assert status["gates_unchanged"] == {"G5": "NOT_EVALUABLE", "G6": "NOT_MET", "G7": "NOT_MET"}
 
 

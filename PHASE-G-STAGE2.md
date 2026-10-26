@@ -242,11 +242,15 @@ items (10,684.6 s), identical in configuration but emitting `yield_by_slice`.
 and no correct sample at all** across 120 generations. The 3 correct items are
 entirely L1.
 
-**Not established:** why. Zero-yield on L7 is a finding that requires
-investigation, not a diagnosis. A zero at both the majority *and* the sample level
-is at least consistent with the model consistently selecting the repealed IPC
-provision — which is exactly the trap L7 is built around — but this repository
-holds no per-item records in either report, so that remains a hypothesis.
+**Not established by this report:** why. Both zeros are findings, not diagnoses,
+and neither report keeps per-item records. The cause was investigated separately
+in **[`PHASE-G-L7-INVESTIGATION.md`](PHASE-G-L7-INVESTIGATION.md)**, which finds
+that the same model (`qwen3-14b`) asserts the repealed IPC provision in **33 of 36
+L7 samples (91.7%)** in the committed frozen-slice pilot, and never once names the
+BNS gold. That establishes the mechanism for L7 items of this design; it is
+corroboration from a different item set, not a direct measurement of these twelve
+items, because this harness discarded the evidence (§4 of that document, now
+fixed).
 
 **The full and sliced runs disagree slightly and must be kept apart:** 34 vs 32
 correct samples. Both report 3/24 majority. They are independent draws from the
@@ -336,6 +340,11 @@ They verify that it is a
 real (non-mock) run over the dataset in this repository, with self-consistent
 arithmetic and a projection matching this repository's planning code.
 
+The screen harness itself is covered by `tests/test_target_screen.py`, including
+two regression tests added by the L7 investigation: that `--save-items` writes the
+per-sample diagnostics the aggregate report cannot carry, and that an existing
+output is refused **before** generation rather than after it.
+
 Dataset-level tests live in `tests/test_target_candidates.py` and cover: the file
 exists and parses; 24 items; 12/12 slice balance; 24 distinct questions and ids;
 `provenance.verified is False` on every item; every item cites a source and a
@@ -410,23 +419,36 @@ needed** to reproduce this document's analysis. Re-running it would spend about
 7. **Punishment text is deliberately thin.** Graduated terms for BNS 105 and 305
    are described, not restated, to avoid asserting figures not checked here.
 
-## 11. Next action
+## 11. The L7 investigation, and the next action
 
-**Investigate the L7 zero before authorising any further generation.**
+The investigation asked for here has been carried out and is reported in full in
+**[`PHASE-G-L7-INVESTIGATION.md`](PHASE-G-L7-INVESTIGATION.md)**. In short:
 
-1. **Find out what the model actually answers on L7.** Neither committed report
-   retains per-item records, so this needs a small diagnostic run that writes
-   them — roughly 12 L7 items × a few samples, minutes rather than hours.
-   Classify each failure as: the repealed IPC trap provision, an unrelated
-   provision, or no usable answer. (The 0/120 sample result is consistent with the
-   trap being taken, but that is a hypothesis, not an established explanation.)
-2. **Check the L7 gold labels** against the cited sources, by hand. If a gold
-   label is wrong, the model may be right and the item wrong, which would change
-   the interpretation entirely. This is human legal review and it is outstanding.
-3. **Only then** decide whether a larger run is justified. The 172-item projection
-   comes from an aggregate rate that L7 contributes nothing to, so it does not
-   describe the population Stage 2 needs.
+- **Mechanism.** On L7 items of this design the generator writes the **repealed
+  IPC provision**. The committed `qwen3-14b` frozen-slice pilot records 33/36
+  L7 samples as `stale_law` and **0** as correct, with 91.7% mean
+  `repealed_code_share`; the frozen primary run shows the same at 832/1000.
+- **Not a scoring artefact.** The judge accepts correct L7 answers in every form
+  tested, tolerates a missing subsection in gold, and the same run scored 32/240
+  correct samples on L1 with the same parser — so no slice-agnostic defect can
+  produce the 3/12 versus 0/12 split.
+- **Two harness defects, fixed.** The screen discarded the per-item diagnostics it
+  had already computed (the sole reason the zero was unattributable), and checked
+  for an existing output only after the full generation. Both now have regression
+  tests.
+- **Provenance audited.** All twelve L7 items trace to official government sources
+  with URLs, but four of the eight section pairs lean partly on a BPRD PDF that
+  could not be opened here (search excerpts only), and two pairs —
+  `cheating` and `cruelty_by_husband` — are the weakest. Gold labels remain
+  unverified: **human legal review is outstanding**, with a per-item checklist in
+  §10 of the investigation document.
 
-Stage 2 remains **partial**: item authoring, contract validation, screening and
-the affordability decision are done; the L7 investigation, human legal review and
+**Next action: run the L7-only diagnostic specified in §9 of that document** — 12
+items × 3 samples, ~11–27 minutes on a local endpoint at $0, writing per-item
+records — with its interpretation criteria fixed in advance. A larger run is still
+**not** justified: the 172-item projection comes from an aggregate rate that L7
+contributes nothing to.
+
+Stage 2 remains **partial**: item authoring, contract validation, screening, the
+affordability decision and the L7 investigation are done; human legal review and
 any G7 re-evaluation are not.

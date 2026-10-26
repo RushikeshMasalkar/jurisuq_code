@@ -231,6 +231,16 @@ Two conclusions follow, and they are deliberately separated:
 Either way, a two-class target population cannot be assembled from the frozen
 artefacts. It needs new items and new generation, which is the checkpoint below.
 
+**Follow-up (Stage 2).** When the Stage 2 candidate screen reproduced the same zero
+on a new 12-item L7 set (0/12 majority, 0/120 samples), the question above was
+reopened for that item set and is reported in
+[`PHASE-G-L7-INVESTIGATION.md`](PHASE-G-L7-INVESTIGATION.md). It reaches the same
+conclusion with per-sample evidence from a committed `qwen3-14b` pilot — 33 of 36
+L7 samples labelled `stale_law`, none correct — and records that the screening
+harness, unlike the Phase A pipeline, had been discarding the per-item diagnostics
+that make this analysis possible. Gold labels remain unverified pending human legal
+review.
+
 ## What is implemented
 
 Everything below is offline, deterministic and tested. Nothing in this phase
@@ -418,9 +428,10 @@ ERROR: this script calls a model when provider != 'mock'.
 | After the Stage 2 candidate dataset and its report guards | 550 passed, 1 skipped |
 | After the Qwen3 screen artefacts were committed (PR #7) | 562 passed, 1 skipped |
 | After the Stage 2 documentation synchronisation audit | 571 passed, 1 skipped |
+| After the L7 failure investigation (`PHASE-G-L7-INVESTIGATION.md`) | 578 passed, 1 skipped |
 | New tests | 206 (34 population + 16 screen + 39 matrix + 32 deployment + 32 doc guards + 53 pilot guards) |
 | New tests, Stage 2 contract | 44 (38 candidate contract + 6 screen) |
-| Phase G tests now | 301 (34 population + 23 screen + 52 candidates + 18 screen-report + 39 matrix + 32 deployment + 46 doc guards + 57 pilot guards) |
+| Phase G tests now | 308 (34 population + 27 screen + 52 candidates + 18 screen-report + 39 matrix + 32 deployment + 49 doc guards + 57 pilot guards) |
 | Skipped | `tests/test_relations.py:236` — `torch not installed`; pre-existing |
 | User's Windows environment | torch present, so the skip runs there (271 passed at baseline) |
 

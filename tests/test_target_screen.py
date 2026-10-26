@@ -233,3 +233,80 @@ def test_the_screen_reports_yield_per_slice(tmp_path):
             + by_slice["L7"]["overall"]["items"]) == report["yield"]["overall"]["items"]
     # and it is printed, so a reader of the console sees it
     assert "L7" in proc.stdout
+
+
+# ----------------------------------------------------------------------
+# per-item evidence: a zero yield must be diagnosable after the fact
+# ----------------------------------------------------------------------
+def test_save_items_writes_the_per_item_evidence(tmp_path):
+    """The aggregate report cannot say *why* an item scored zero.
+
+    `build_record` already computes the sampled texts, the judge label and the
+    reason for every sample; before this option existed the screen discarded all
+    of it, which is why the Stage 2 L7 zero could not be attributed. The records
+    written here are the same shape as the frozen runs' `items.jsonl`.
+    """
+    data = _write(tmp_path, [_item(f"L7-{i}") for i in range(2)]
+                  + [_item(f"L1-{i}", "L1") for i in range(2)])
+    out = tmp_path / "screen.json"
+    items_out = tmp_path / "items.jsonl"
+    proc = _run(["--data", str(data), "--out", str(out), "--save-items", str(items_out),
+                 "--set", "provider=mock", "--set", "n_samples=3"])
+    assert proc.returncode == 0, proc.stdout + proc.stderr
+    assert items_out.exists()
+
+    records = [json.loads(line) for line in items_out.read_text(encoding="utf-8").splitlines()]
+    assert len(records) == 4
+    for record in records:
+        # the fields that make a failure attributable rather than mysterious
+        assert record["sample_texts"] and len(record["sample_texts"]) == 3
+        assert len(record["sample_verdict_labels"]) == 3
+        assert len(record["sample_verdict_reasons"]) == 3
+        assert "repealed_code_share" in record
+        assert "asserted_keys" in record
+        assert record["slice"] in {"L1", "L7"}
+
+    # the report points at the evidence, and the item count reconciles
+    report = json.loads(out.read_text(encoding="utf-8"))
+    assert report["items_path"].endswith("items.jsonl")
+    assert len(records) == report["n_items"]
+
+
+def test_no_items_file_is_written_unless_asked(tmp_path):
+    """Opt-in: the default report keeps its schema and writes one file."""
+    data = _write(tmp_path, [_item()])
+    out = tmp_path / "screen.json"
+    proc = _run(["--data", str(data), "--out", str(out),
+                 "--set", "provider=mock", "--set", "n_samples=2"])
+    assert proc.returncode == 0, proc.stdout + proc.stderr
+    assert json.loads(out.read_text(encoding="utf-8"))["items_path"] is None
+    assert not (tmp_path / "items.jsonl").exists()
+
+
+def test_the_screen_refuses_an_existing_output_before_generating(tmp_path):
+    """The overwrite guard must fire before sampling, not after.
+
+    Checking at the end meant an accidental re-run spent the whole generation
+    budget to discover it could not write. The run header is printed only once
+    generation is about to start, so its absence proves the guard ran first.
+    """
+    data = _write(tmp_path, [_item()])
+    out = tmp_path / "screen.json"
+    out.write_text("{}", encoding="utf-8")
+    proc = _run(["--data", str(data), "--out", str(out),
+                 "--set", "provider=mock", "--set", "n_samples=2"])
+    assert proc.returncode != 0
+    assert "exists" in (proc.stdout + proc.stderr)
+    assert "PHASE G SCREEN" not in proc.stdout, "the guard must run before generation"
+
+
+def test_save_items_refuses_an_existing_file_without_force(tmp_path):
+    data = _write(tmp_path, [_item()])
+    out = tmp_path / "screen.json"
+    items_out = tmp_path / "items.jsonl"
+    items_out.write_text("", encoding="utf-8")
+    proc = _run(["--data", str(data), "--out", str(out), "--save-items", str(items_out),
+                 "--set", "provider=mock", "--set", "n_samples=2"])
+    assert proc.returncode != 0
+    assert "exists" in (proc.stdout + proc.stderr)
+    assert not out.exists(), "no report may be written when the run is refused"

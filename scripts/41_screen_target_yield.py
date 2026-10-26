@@ -64,6 +64,10 @@ def main() -> int:
     ap.add_argument("--allow-generation", action="store_true",
                     help="required when the provider is not 'mock'")
     ap.add_argument("--force", action="store_true")
+    ap.add_argument("--save-items", default=None, metavar="PATH",
+                    help="also write one jsonl record per item, carrying the sampled "
+                         "texts and the judge label/reason for each. The aggregate report "
+                         "cannot say *why* an item scored zero; these records can")
     args = ap.parse_args()
 
     cfg_g = json.loads(Path(args.config_g).read_text(encoding="utf-8"))
@@ -82,6 +86,17 @@ def main() -> int:
             "ERROR: this script calls a model when provider != 'mock'.\n"
             f"       provider is {cfg.provider!r}. Re-run with --allow-generation once "
             "the cost is approved, or use --set provider=mock for a plumbing check.")
+
+    # Resolve the outputs and refuse an existing file *before* sampling anything.
+    # Checking at the end (where this used to live) meant an accidental re-run
+    # spent the whole generation budget -- hours on the laptop -- to discover it
+    # could not write. The timestamp is the run start, for the same reason.
+    out = _resolve_out(args.out, ROOT / "runs" /
+                       f"phaseG_screen_{cfg.provider}_{time.strftime('%Y%m%dT%H%M%SZ', time.gmtime())}.json")
+    items_out = _resolve_out(args.save_items, None)
+    for path in (out, items_out):
+        if path is not None and path.exists() and not args.force:
+            raise SystemExit(f"ERROR: {path} exists (pass --force)")
 
     items = load_candidates(data_path)
     # `load_candidates` already validated this set. Re-running the pure check is
@@ -164,15 +179,16 @@ def main() -> int:
         "verdict_note": ("This is a yield estimate, not a gate. A zero rate means no "
                          "two-class population can be built from this item set with this "
                          "generator; it does not license changing any Phase E/F constant."),
+        # where the per-item evidence lives, when it was asked for. A reader who
+        # queries a zero yield needs this to tell a model error from a judge error.
+        "items_path": _relative(items_out) if items_out else None,
         "generated_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
     }
-    out = Path(args.out) if args.out else (
-        ROOT / "runs" / f"phaseG_screen_{cfg.provider}_{time.strftime('%Y%m%dT%H%M%SZ', time.gmtime())}.json")
-    if not out.is_absolute():
-        out = ROOT / out
-    if out.exists() and not args.force:
-        raise SystemExit(f"ERROR: {out} exists (pass --force)")
     write_json(out, payload)
+    if items_out is not None:
+        items_out.parent.mkdir(parents=True, exist_ok=True)
+        items_out.write_text("".join(json.dumps(record, sort_keys=True) + "\n"
+                                     for record in records), encoding="utf-8")
 
     overall = report["overall"]
     print("-" * 78)
@@ -204,6 +220,8 @@ def main() -> int:
               f"{overall_slice['majority_correct']:8d} "
               f"{overall_slice['majority_rate']:7.3f}")
     print(f"  report written: {out}")
+    if items_out is not None:
+        print(f"  per-item records written: {items_out}")
     return 0 if overall["majority_correct"] > 0 else 1
 
 
@@ -221,6 +239,14 @@ def _limit(items: list[dict], count: int) -> list[dict]:
     for slice_name in sorted(per_slice):
         chosen.extend(per_slice[slice_name][:quota])
     return chosen[:count]
+
+
+def _resolve_out(value: str | None, default: Path | None) -> Path | None:
+    """Absolute output path, or None when the caller did not ask for that file."""
+    if value is None:
+        return default
+    path = Path(value)
+    return path if path.is_absolute() else ROOT / path
 
 
 def _relative(path: Path) -> str:
