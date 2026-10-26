@@ -319,18 +319,21 @@ generations**, with the new diagnostics on.
 ```powershell
 python scripts/41_screen_target_yield.py `
     --data data/lexuq_target_candidates_v1.jsonl `
-    --items 12 `
+    --slice L7 `
     --out runs/phaseG_l7_diagnostic.json `
     --save-items runs/phaseG_l7_diagnostic_items.jsonl `
     --provider openai --allow-generation `
     --set n_samples=3
 ```
 
-**Caveat on `--items 12`:** the existing `_limit` stratifies across slices, so a
-cap of 12 would take 6 per slice, not 12 L7 items. Either add a slice filter
-(small, but not implemented here because no run is authorised yet) or select the
-twelve L7 items into a temporary jsonl first. **This is a real limitation of the
-current CLI and must be fixed before the run.**
+**`--slice L7` was added for this run.** Without it, `_limit` stratified any cap
+across both slices — `--items 12` produced 6 L1 + 6 L7 — so the earlier draft of
+this command would have screened the wrong thing. The filter is applied after
+contract validation and before the cap, so the cap now counts within L7. Omitting
+`--slice` reproduces the previous behaviour exactly (all 24 items).
+
+**This command has not been run.** It needs approval first, and it spends real
+generation time on a local endpoint.
 
 **Prerequisites.** A running OpenAI-compatible endpoint serving `qwen3-14b` with
 reasoning off; `--allow-generation`; no paid API (the endpoint is local, so cost

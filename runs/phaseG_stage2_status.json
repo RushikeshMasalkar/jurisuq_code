@@ -308,8 +308,14 @@
       ]
     },
     "pair_id_observation": "the 24 candidates carry 24 distinct pair_id values and no fact pattern is shared across slices, so unlike the frozen slice there is no cross-slice sibling key; the screen groups by slice, so no result is affected, but paired analysis on this set must not assume matching",
-    "next_step": "run the L7-only diagnostic in PHASE-G-L7-INVESTIGATION.md section 9 (12 items x 3 samples, ~11-27 min, $0, --save-items) with its interpretation criteria fixed in advance",
-    "remains_pending": "human legal review of the L7 gold labels - per-item checklist in PHASE-G-L7-INVESTIGATION.md section 10"
+    "next_step": "run the L7-only diagnostic in PHASE-G-L7-INVESTIGATION.md section 9: 12 items x 3 samples, ~11-27 min, $0, --slice L7 --save-items, with its interpretation criteria fixed in advance. The CLI now supports --slice (applied before the item cap) and --save-items; the run itself is NOT yet authorised and has not been executed",
+    "remains_pending": "human legal review of the L7 gold labels - per-item checklist in PHASE-G-L7-INVESTIGATION.md section 10",
+    "cli_readiness": {
+      "slice_filter": "scripts/41_screen_target_yield.py --slice L7 - validated against the slices present in the file; omitting it screens every slice as before",
+      "per_item_evidence": "scripts/41_screen_target_yield.py --save-items PATH",
+      "tests": "tests/test_target_screen.py",
+      "generation_run": false
+    }
   },
   "documentation": {
     "stage2_report": "PHASE-G-STAGE2.md",

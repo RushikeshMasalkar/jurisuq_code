@@ -425,10 +425,10 @@ def test_the_published_test_counts_match_the_files():
     import subprocess
     import sys as _sys
     expected = {
-        "test_target_population": 34, "test_target_screen": 27,
+        "test_target_population": 34, "test_target_screen": 36,
         "test_target_candidates": 52,
         "test_target_screen_report": 18, "test_eval_matrix": 39,
-        "test_deployment_metrics": 32, "test_phase_g_docs": 49,
+        "test_deployment_metrics": 32, "test_phase_g_docs": 51,
         "test_pilot_guard": 57,
     }
     text = GUIDE.read_text(encoding="utf-8")
@@ -545,3 +545,23 @@ def test_the_l7_investigation_does_not_overclaim_the_stage_2_mechanism():
     assert "different item set" in text or "0 id overlap" in text
     for overclaim in ("proves that the stage 2", "the stage 2 l7 zero is caused by"):
         assert overclaim not in text, f"overclaims: {overclaim!r}"
+
+
+def test_the_slice_filter_is_documented_where_a_reader_will_look():
+    """The CLI gained --slice for the L7 diagnostic. Every guide that tells a
+    reader how to run the screen has to mention it, or the instructions go stale."""
+    for name in ("README.md", "PHASE-G.md", "PHASE-G-STAGE2.md"):
+        text = (ROOT / name).read_text(encoding="utf-8")
+        assert "--slice" in text, f"{name} does not mention --slice"
+
+
+def test_the_l7_diagnostic_command_is_slice_filtered_and_not_run():
+    """The L7 command must target L7 through the flag, must capture per-item
+    evidence, and must never be described as having been executed."""
+    text = L7_INVESTIGATION_TEXT()
+    section = text.split("## 9.")[1].split("## 10.")[0]
+    assert "--slice L7" in section
+    assert "--save-items" in section
+    # the obsolete caveat said the CLI could not do this; it must not come back
+    assert "must be fixed before the run" not in section
+    assert "has not been run" in section

@@ -59,7 +59,14 @@ def main() -> int:
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter))
     ap.add_argument("--config-g", default=str(ROOT / "configs" / "phase_g_target.json"))
     ap.add_argument("--data", default=None, help="candidate item jsonl")
-    ap.add_argument("--items", type=int, default=None, help="cap the number of items")
+    ap.add_argument("--slice", dest="slice_name", default=None, metavar="SLICE",
+                    help="screen only the items in this slice (e.g. L7). The value is "
+                         "validated against the slices actually present in the file, so a "
+                         "typo cannot silently screen nothing. Without this flag every "
+                         "slice is screened, as before")
+    ap.add_argument("--items", type=int, default=None,
+                    help="cap the number of items, applied after --slice so the cap is "
+                         "counted within the selected slice")
     ap.add_argument("--out", default=None)
     ap.add_argument("--allow-generation", action="store_true",
                     help="required when the provider is not 'mock'")
@@ -104,6 +111,11 @@ def main() -> int:
     # item cannot be hidden by capping, and the summary describes the whole set.
     contract = _candidates.validate_candidates(items)
     data_sha256 = content_sha256(data_path)
+    # Narrow to one slice *after* the whole set has been validated, so the contract
+    # summary keeps describing the file rather than the subset, and *before* the
+    # cap, so `--slice L7 --items 12` counts twelve L7 items instead of letting
+    # `_limit` stratify a cap across both slices.
+    items = _select_slice(items, args.slice_name)
     items = _limit(items, args.items if args.items is not None
                    else int(screen_cfg.get("items", len(items))))
 
@@ -118,6 +130,9 @@ def main() -> int:
     print(f"generator : {gen.name}")
     print(f"judge     : {judge.method}")
     print(f"items     : {len(items)} ({dict(Counter(i['slice'] for i in items))})")
+    if _normalise_slice(args.slice_name) is not None:
+        print(f"slice     : {_normalise_slice(args.slice_name)} only -- this run does "
+              f"not cover the other slice")
     print(f"samples   : {cfg.n_samples} per item   temperature: {cfg.temperature}")
     if cfg.provider == "mock":
         print("NOTE: the mock generator's numbers are a plumbing check only and must "
@@ -169,6 +184,11 @@ def main() -> int:
         "data_sha256": data_sha256,
         "candidate_contract": contract,
         "n_items": len(items),
+        # Which slice this run covered, or None for the whole set. Kept beside
+        # n_items because candidate_contract describes the *file*, not the subset:
+        # without this a 12-item L7-only run and a 24-item run both look like a
+        # report over the same population.
+        "slice_filter": _normalise_slice(args.slice_name),
         "n_samples_per_item": cfg.n_samples,
         "elapsed_seconds": round(elapsed, 1),
         "seconds_per_item": round(elapsed / len(items), 2) if items else None,
@@ -223,6 +243,35 @@ def main() -> int:
     if items_out is not None:
         print(f"  per-item records written: {items_out}")
     return 0 if overall["majority_correct"] > 0 else 1
+
+
+def _normalise_slice(slice_name: str | None) -> str | None:
+    """The canonical slice name, or None when no filter was requested.
+
+    One place decides this, so the filter and the report cannot disagree about
+    which slice a run covered.
+    """
+    if slice_name is None:
+        return None
+    return slice_name.strip().upper()
+
+
+def _select_slice(items: list[dict], slice_name: str | None) -> list[dict]:
+    """Restrict the item set to one slice, or return it untouched.
+
+    Validated against the slices actually present rather than against a hard-coded
+    list: asking for L1 in an L7-only file is a mistake worth reporting, and a
+    filter that matched nothing would otherwise reach `yield_report`, which raises
+    on an empty record list -- after the generation had already been paid for.
+    """
+    wanted = _normalise_slice(slice_name)
+    if wanted is None:
+        return items
+    present = sorted({item["slice"] for item in items})
+    if wanted not in present:
+        raise SystemExit(f"ERROR: --slice {slice_name!r} matches no items; "
+                         f"this file contains {present}")
+    return [item for item in items if item["slice"] == wanted]
 
 
 def _limit(items: list[dict], count: int) -> list[dict]:
