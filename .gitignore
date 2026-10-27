@@ -7,3 +7,7 @@ __pycache__/
 # the trained checkpoint (model.pt is ~440 MB; model.json/tokenizer files are
 # copies of the public encoder) — keep it on disk, keep it out of git
 models/
+
+# the offline demonstration writes scratch outputs here; regenerate with
+#   python -X utf8 scripts/47_demo.py
+runs/demo/
