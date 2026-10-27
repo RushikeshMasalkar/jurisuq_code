@@ -7,6 +7,16 @@ answering.
 > not provide legal advice. Its benchmark is scoped and partly synthetic, and
 > Phase C legal verification is incomplete.
 
+**Where to start.** [`PROFESSOR-SUMMARY.md`](PROFESSOR-SUMMARY.md) for the
+question and the evidence, [`STATUS.md`](STATUS.md) for what is finished,
+blocked and why, [`DEMO.md`](DEMO.md) to run everything offline in one command,
+and [`ROADMAP.md`](ROADMAP.md) for the order of the remaining work.
+
+```bash
+python -X utf8 -m pytest -q        # the suite
+python -X utf8 scripts/47_demo.py  # offline end-to-end demonstration (no model)
+```
+
 ## Purpose and scope
 
 JURIS-UQ studies whether agreement among an LLM's sampled answers can hide a
@@ -374,6 +384,21 @@ pre-existing torch gate. Reports:
 
 ## Documentation map
 
+Project-level documents, read first:
+
+- [`PROFESSOR-SUMMARY.md`](PROFESSOR-SUMMARY.md) — the research question,
+  architecture, the evidence that exists, what is provisional, and the next
+  experiment, in one page.
+- [`STATUS.md`](STATUS.md) — the authoritative per-phase status: implemented
+  components and paths, tests actually run, artefacts and hashes, remaining
+  implementation and experimental work, human dependencies, the status label for
+  each phase, and the exact action that resolves each blocker.
+- [`ROADMAP.md`](ROADMAP.md) — the dependency order for the remaining work, with
+  the blocked milestones and their unblock conditions.
+- [`DEMO.md`](DEMO.md) — quick start for Windows PowerShell and POSIX, the
+  one-command offline demonstration, expected outputs, and the difference between
+  a mock, a fixture and a real run.
+
 Canonical phase guides, each containing implementation details and the complete
 historical results record:
 
@@ -476,6 +501,26 @@ Run from the repository root:
 python -m pytest -q
 python scripts/00_env_check.py --skip-endpoint
 ```
+
+**Current suite (2026-10-27, Python 3.11.2, CPU-only sandbox): `649 passed, 1
+skipped` in about 9 s.** The one skip is the optional `torch`/`transformers`
+path, which needs the Phase A optional requirements; it is a genuine dependency
+skip, not a weakened test. Re-run the command for the count on your machine.
+
+The per-block counts quoted further up this file (160, 216, 270, 589 …) are
+**historical records** of the suite at the time each block was merged. They are
+not claims about the present suite; only the line above is.
+
+Offline end-to-end demonstration of the implementation (no model, no network):
+
+```bash
+python scripts/47_demo.py
+```
+
+It verifies the frozen-input hashes, re-runs the target-population audit, the
+§21.2 matrix, the §21.3 deployment summary and a mock plumbing screen into
+`runs/demo/`, and prints the gate verdicts exactly as stored. See
+[`DEMO.md`](DEMO.md).
 
 Focused deterministic checks:
 
