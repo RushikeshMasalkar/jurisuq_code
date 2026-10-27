@@ -14,9 +14,14 @@ Generation is opt-in. The default provider is ``mock`` so the harness can be
 exercised end to end with no model; a real backend requires ``--allow-generation``
 because it spends compute on the operator's machine.
 
+The model must be given explicitly as ``--set model=...``: the default comes
+from ``configs/phase_a.json``, which ships a placeholder string, and the
+generator would then name itself after that placeholder. There is no
+``--provider`` flag; the provider is read from the same config file.
+
     python scripts/41_screen_target_yield.py                       # mock, no model
     python scripts/41_screen_target_yield.py --data data/lexuq_target_candidates_v1.jsonl \
-        --provider openai --allow-generation                       # ~20 min, laptop
+        --set model=qwen3-14b --allow-generation                   # ~20 min, laptop
 """
 from __future__ import annotations
 

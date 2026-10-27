@@ -339,10 +339,14 @@ each), refuses a slice the file does not contain, and leaving the flag out
 screens every slice exactly as before. The report records `slice_filter`, and
 `--save-items PATH` writes one JSONL record per item — the sampled text, the
 judge label and the reason — which is the evidence the aggregate report cannot
-carry. **The L7-only diagnostic that uses both flags has not been run**; it is
-specified, with its decision criteria fixed in advance, in
-[`PHASE-G-L7-INVESTIGATION.md`](PHASE-G-L7-INVESTIGATION.md) §9, and needs
-approval first.
+carry. **The L7-only diagnostic that uses both flags has been run** (2026-10-27,
+qwen3-14b): 12 items × 3 samples, **0/12 majority correct, 0/36 correct samples**,
+Wilson 95% interval [0.0, 0.2425], with all twelve items `stale_law` and every
+sample asserting a repealed code. An earlier attempt was labelled with a
+placeholder model id and is **not** attributable to Qwen3-14B; the two are kept
+apart in [`PHASE-G-L7-INVESTIGATION.md`](PHASE-G-L7-INVESTIGATION.md) §3.4. Gold
+labels remain unverified, and the comparison that would follow review has not
+been run.
 
 Authoring items cannot move G7 on its own — the gate is defined over *measured*
 correctness classes from a stored run, and a set of questions with no answers
