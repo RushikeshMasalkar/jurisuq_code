@@ -169,205 +169,268 @@ jurisdiction, typed relations between asserted provisions) can separate
 
 ## 3. Architecture
 
-The diagram below describes the **intended complete system**, end to end, at the
-level of the components the phase documents define. It is annotated with what
-exists today. Status labels follow `STATUS.md`: `IMPLEMENTED` means the code is
-wired into the pipeline and tested; `PARTIAL` means the component exists but its
-contract is not fully discharged; `PLANNED` means designed but not built;
-`BLOCKED` means built-in-principle work that cannot proceed without data, a
-model endpoint, or a human decision.
+The system is a pipeline with one deliberate asymmetry: **everything up to the
+risk score is label-free**, and correctness labels enter at exactly two places —
+fitting the calibration maps (step 8) and measuring held-out metrics (step 9).
+That is what keeps the query path honest, and it is why the two diagrams below
+are worth reading together.
 
-### 3.1 End-to-end system
+§3.1 shows the ten stages of the intended system end to end, annotated with what
+exists today. §3.2 shows the label boundary that the step 8–9 arrows depend on.
+§3.3 traces one real item through all ten stages using values from the stored run
+of record.
+
+### 3.1 End-to-end flow
 
 ```mermaid
 flowchart TB
-  subgraph A["A · Inputs and legal context"]
-    Q["Legal question and case facts<br/>matched L1 / L7 pairs · DATA"]
-    ASOF["As-of date and jurisdiction<br/>DATA"]
-    SLICE["Frozen slice<br/>200 items · 100 L1 + 100 L7 · DATA"]
-    STAT["Statute store<br/>48 rows · 24 IPC + 24 BNS · validity windows"]
-    XWALK["IPC-BNS crosswalk and link table<br/>20 rows · verified false"]
-    CAND["Target candidate sets<br/>v1 screened · v2 authored · PARTIAL"]
+  subgraph S1["1 · Legal QA inputs"]
+    Q1["Legal question and case facts<br/>L7 asks the law in force now · L1 asks the law before 1 July 2024"]
+    Q2["As-of date and jurisdiction<br/>per item: it is what the temporal check reads"]
   end
 
-  subgraph B["B · Dataset and legal knowledge preparation"]
-    VALID["Dataset validation and integrity<br/>recorded digests · schema · seed · IMPLEMENTED"]
-    NORM["Provision normalisation<br/>IPC 302 to ipc:302 · IMPLEMENTED"]
-    LOOK["Statute lookup and in-force status<br/>IMPLEMENTED"]
-    TEMP["Temporal applicability<br/>as-of date against validity window · IMPLEMENTED"]
-    JUR["Jurisdiction fit<br/>IMPLEMENTED"]
-    AUDIT["Population audit and yield screen<br/>IMPLEMENTED"]
+  subgraph S2["2 · Dataset and statute preparation (offline, once per version)"]
+    P3["Slice assembly<br/>200 items · 100 matched pairs · seed 20261005"]
+    P1["Statute store<br/>48 rows · 24 IPC + 24 BNS · in-force windows"]
+    P2["IPC to BNS crosswalk<br/>20 rows · verified = false"]
+    P4["Target candidate sets<br/>v1 screened · v2 authored, unscreened"]
   end
 
-  subgraph C["C · Inference and repeated sampling"]
-    PROV["Provider interface<br/>OpenAI-compatible + mock · IMPLEMENTED"]
-    ENDP["Local endpoint<br/>LM Studio :1234 · llama-server :8080<br/>availability external to repo"]
-    SAMP["Repeated sampling<br/>M = 10 · T = 1.0 · p2-structured prompt<br/>model, seed and config recorded"]
-    RUN["Immutable run directory<br/>items.jsonl · meta.json · tree hash"]
+  subgraph S3["3 · Model generates multiple answers"]
+    G1["Provider interface<br/>OpenAI-compatible or mock"]
+    ENDP["Local endpoint<br/>LM Studio 1234 · llama-server 8080"]
+    G2["M samples per item<br/>M = 10 · T = 1.0 · p2-structured prompt"]
+    G3["Immutable run directory<br/>items.jsonl · meta.json · source tree hash"]
   end
 
-  subgraph D["D · Legal-aware representation and common-mode analysis"]
-    CLUST["Clustering<br/>exact key · NLI · typed relations"]
-    AGG["Agreement statistics<br/>A · cluster entropy · contradiction mass K"]
-    WARRANT["Warrant tuple<br/>W = A x T x J x (1 - K) · CM = A - W<br/>IMPLEMENTED"]
-    FLAGS["Detector flags<br/>stale · unresolvable · foreign · contradictory"]
+  subgraph S4["4 · Provision extraction and normalisation"]
+    X1["Asserted provision extracted<br/>anything unresolvable stays None"]
+    X2["Normalised to one comparable key<br/>section 378 IPC and IPC 378 both become IPC 378"]
   end
 
-  subgraph E["E · Uncertainty quantification"]
-    FEAT["Feature extraction<br/>label-free · explicit fallback when evidence missing"]
-    EST["Monotone risk score<br/>logistic · sample-only fallback"]
-    CAL["Per-stratum calibration maps<br/>isotonic or Platt · grouped cross-validation"]
-    CONF["Split-conformal threshold<br/>finite-sample coverage guarantee"]
-    POL["Decision policy<br/>harm-weighted loss comparison"]
+  subgraph S5["5 · Typed relations and temporal validity"]
+    R1["Clustering<br/>exact key · NLI · typed legal relations"]
+    R2["Statute lookup at the item as-of date<br/>in force · repealed · successor"]
+    R3["Four separate factors<br/>A agreement · T temporal · J jurisdiction · K contradiction"]
   end
 
-  subgraph F["F · Decision boundary"]
-    DEC["Answer · verify · abstain<br/>plus the reason for the decision"]
-    OUT["Provision answer with uncertainty explanation<br/>research output · not legal advice"]
+  subgraph S6["6 · Common-mode legal error analysis"]
+    C1["Warranted agreement<br/>W = A x T x J x (1 - K) and CM = A - W"]
+    C2["Detector flags<br/>stale · unresolvable · foreign · contradictory"]
   end
 
-  subgraph G["G · Evaluation and scientific validation"]
-    SPLIT["Pair-grouped partitions<br/>156 development / 44 evaluation"]
-    BASE["Baselines<br/>exact agreement · semantic entropy · SelfCheck · provision entropy"]
-    MATRIX["Section 21.2 evaluation matrix<br/>AUROC · AUPRC · AURC · ACE · selective risk"]
-    DEPLOY["Section 21.3 deployment measurements<br/>stage-1 latency measured · cascade PLANNED"]
-    GATES["Gates G1 to G7<br/>validation boundary · not a module"]
-    PILOT["Approval-gated pilot harness<br/>BLOCKED · ON_HOLD"]
+  subgraph S7["7 · Uncertainty estimation"]
+    U1["Label-free features<br/>u_prov · u_text · u_warrant · u_cm · u_contra"]
+    U2["Monotone risk score, larger means more uncertain<br/>sample-only fallback when legal evidence is missing"]
   end
 
-  subgraph H["H · Outputs and research artefacts"]
-    ART["Per-item and aggregate reports<br/>machine-readable run artefacts"]
-    MAN["Integrity hashes and manifests<br/>source tree hash · dataset digests"]
-    GVER["Recorded gate verdicts<br/>with evidence pointers"]
+  subgraph S8["8 · Calibration and decision policy"]
+    K1["p_reliable per stratum<br/>isotonic or Platt · grouped cross-validation"]
+    K2["Split-conformal threshold<br/>coverage target 0.80"]
+    K3["Decision<br/>answer · verify · abstain, with the reason"]
   end
 
-  POP["Two-class target population<br/>PLANNED"]
-  XBENCH["External benchmark transfer<br/>PLANNED · dataset and licensing"]
-  LAPTOP["Laptop latency and peak memory<br/>BLOCKED · needs a target-machine run"]
-  L7CAL["L7 calibration stratum<br/>BLOCKED · needs both correctness classes"]
+  subgraph S9["9 · Held-out evaluation and metrics"]
+    E1["Section 21.2 matrix, nine methods per slice<br/>AUROC · AUPRC · AURC · ACE · selective risk"]
+    E2["Section 21.3 deployment<br/>stage-1 latency measured, cascade not instrumented"]
+  end
 
-  SLICE --> VALID --> NORM
-  STAT --> LOOK --> TEMP --> JUR
-  XWALK --> TEMP
-  CAND --> AUDIT
-  Q --> SAMP
-  ASOF --> SAMP
-  SLICE --> SAMP
-  PROV -->|HTTP /v1| ENDP
-  PROV --> SAMP
-  SAMP --> RUN
-  NORM --> CLUST
-  RUN --> CLUST
-  CLUST --> AGG --> WARRANT
-  TEMP --> WARRANT
-  JUR --> WARRANT
-  WARRANT --> FLAGS
-  WARRANT --> FEAT
-  FLAGS --> FEAT
-  RUN --> FEAT
-  FEAT --> EST --> CAL
-  CAL --> CONF
-  CAL --> POL
-  CONF --> POL
-  POL --> DEC --> OUT
-  RUN --> MATRIX
-  SPLIT --> MATRIX
-  BASE --> MATRIX
-  MATRIX --> GATES
-  CAL --> GATES
-  POL --> GATES
-  GATES --> GVER
-  AUDIT --> PILOT
-  CAND --> PILOT
-  GATES -->|G7 met| PILOT
-  PILOT -.->|new frozen data| POP
-  POP -.-> MATRIX
-  LAPTOP -.-> DEPLOY
-  DEPLOY --> GATES
-  XBENCH -.-> MATRIX
-  L7CAL -.-> CAL
-  RUN --> ART
-  RUN --> MAN
-  GVER --> ART
+  subgraph S10["10 · Research gates and reproducible artefacts"]
+    A1["Gates G1 to G7 and the pilot<br/>verdicts read from stored runs, never upgraded"]
+    A2["Artefacts and integrity<br/>reports · manifests · digests · offline check"]
+  end
+
+  subgraph D["Data that enters only at step 8 and step 9"]
+    D3["Correctness labels<br/>computed by the judge, never authored"]
+    D1["Development partition<br/>156 items · 36 correct"]
+    D2["Evaluation partition<br/>44 items · 7 correct"]
+  end
+
+  subgraph O["Decision boundary"]
+    O1["Provision candidate with its uncertainty and reason<br/>research output, not legal advice"]
+  end
+
+  POP["Two-class target population"]
+  XB["External benchmark transfer"]
+  PILOT["Pilot harness, approval gated"]
+  LAP["Laptop cascade latency and peak memory"]
+
+  Q1 -->|"question"| G2
+  Q2 -->|"as-of date"| R2
+  P3 -->|"items"| G2
+  G1 --> G2 -->|"10 samples per item"| G3
+  ENDP -.->|"served model"| G1
+  G3 -->|"sampled answers"| X1 --> X2
+  X2 -->|"provision keys"| R1
+  P1 --> R2
+  P2 -->|"successor and contradiction links"| R2
+  R1 -->|"clusters"| R3
+  R2 -->|"validity at the as-of date"| R3
+  X2 -->|"provision distribution"| U1
+  R3 -->|"A, T, J, K"| C1
+  C1 -->|"W and CM"| C2
+  C1 -->|"W, CM"| U1
+  C2 -->|"flags"| U1
+  U1 -->|"features"| U2
+  D3 --> D1
+  D3 --> D2
+  D1 -->|"fits the maps"| K1
+  U2 -->|"raw score"| K1
+  K1 -->|"p_reliable"| K2 --> K3 --> O1
+  U2 -->|"uncalibrated arm"| E1
+  K1 -->|"calibrated arm"| E1
+  D2 -->|"held-out items and labels"| E1
+  G3 -->|"stored timings"| E2
+  E1 -->|"metrics"| A1
+  E2 -->|"measurements"| A1
+  A1 -->|"verdicts"| A2
+  P4 -.->|"needs screening"| POP
+  POP -.->|"would make L7 evaluable"| E1
+  POP -.->|"would give L7 a calibrated stratum"| K1
+  XB -.->|"planned transfer arm"| E1
+  LAP -.->|"blocked: needs a laptop run"| E2
+  PILOT -.->|"blocked: no zero-cost provider"| A1
 
   classDef data fill:#eef2f7,stroke:#3b5b7a,stroke-width:1px,color:#12263a
   classDef impl fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px,color:#10321a
   classDef partial fill:#fff8e1,stroke:#a06b00,stroke-width:2px,color:#3a2a00
-  classDef planned fill:#f4f4f4,stroke:#666666,stroke-width:1px,stroke-dasharray:5 5,color:#222222
+  classDef planned fill:#f5f5f5,stroke:#666666,stroke-width:1px,stroke-dasharray:5 5,color:#222222
   classDef blocked fill:#fdecea,stroke:#b3261e,stroke-width:1px,stroke-dasharray:4 3,color:#3a0d0a
 
-  class Q,ASOF,SLICE,STAT,XWALK data
-  class VALID,NORM,LOOK,TEMP,JUR,AUDIT,PROV,SAMP,RUN,CLUST,AGG,WARRANT,FLAGS,FEAT,EST,CAL,CONF,POL,DEC,OUT,SPLIT,BASE,MATRIX,ART,MAN,GVER impl
-  class CAND,DEPLOY partial
-  class POP,XBENCH planned
-  class PILOT,LAPTOP,L7CAL,ENDP blocked
+  class Q1,Q2,P1,P2,P3,D1,D2,D3 data
+  class G1,G2,G3,X1,X2,R1,R2,R3,C1,C2,U1,U2,K1,K2,K3,E1,A1,A2,O1 impl
+  class P4,E2 partial
+  class POP,XB planned
+  class ENDP,PILOT,LAP blocked
 ```
 
-**Legend.**
+**Legend.** Status labels are the ones `STATUS.md` defines; the border and the
+fill carry the same information as the `class` list, so the diagram survives a
+colour-blind reader and a monochrome print.
 
-| Border | Fill | Meaning |
+| Border and fill | Class | Meaning |
 |---|---|---|
-| Solid, thick, green | green | `IMPLEMENTED` — code exists, is wired in, and is covered by tests |
-| Solid, thick, amber | amber | `PARTIAL` — implemented, but a declared part of the contract is missing |
-| Dashed | grey | `PLANNED` — designed in the phase documents, not built |
-| Dashed | red | `BLOCKED` — cannot proceed without data, an endpoint or a human decision |
+| solid, thick, green | `impl` | `IMPLEMENTED` — code exists, is wired into this flow, and is covered by tests |
+| solid, thick, amber | `partial` | `PARTIAL` — implemented, but a declared part is missing (`E2`: stage-1 latency measured, cascade latency and peak memory `not_instrumented`; `P4`: candidate sets exist, none has yet produced a two-class population) |
+| dashed, grey | `planned` | `PLANNED` — designed in the phase documents, not built |
+| dashed, red | `blocked` | `BLOCKED` — cannot proceed without data, an endpoint, or a human decision |
+| solid, thin, blue | `data` | frozen input or stored artefact, not code |
 
-`PARTIAL`: `DEPLOY` (stage-1 latency measured, cascade latency and peak memory
-`not_instrumented`) and `CAND` (candidates exist and one set is screened, but no
-set has produced a two-class population). `BLOCKED`: `ENDP` (code implemented,
-reachability depends on the machine), `PILOT` (no zero-cost provider), `LAPTOP`
-(target-machine run), `L7CAL` (needs both correctness classes).
+How to read the arrows: solid arrows carry data forward through the pipeline;
+dashed arrows are dependencies that are **not** satisfied today. Five of them —
+`POP → E1`, `POP → K1`, `XB → E1`, `LAP → E2`, `PILOT → A1` — are the entire set
+of remaining scientific work: a target population with two correctness classes
+(`POP`), a second model for transfer (`XB`), a laptop run (`LAP`), and a funded
+provider (`PILOT`). None is drawn as if it were already feeding the pipeline.
+The sixth, `P4 → POP`, is the step that has to happen first. The seventh,
+`ENDP → G1`, is different in kind: it marks that a local model endpoint must be
+running for step 3, not that a piece of work is missing.
 
-### 3.2 Separation of fitting, calibration and evaluation
+### 3.2 Where labels enter: fitting, calibration, evaluation
 
-The protocol requires that no method be scored on data it was fitted on, so the
-partitions are part of the architecture, not an implementation detail.
+Steps 8 and 9 are the only places `majority_correct` is read. Everything that
+scores a live question runs on a whitelist that excludes it.
 
 ```mermaid
-flowchart TB
+flowchart LR
+  D3["Correctness labels<br/>computed by the judge"]
   DEV["Development partition<br/>156 items · 36 correct · 120 incorrect"]
-  EVALP["Evaluation partition<br/>44 items · 7 correct · 37 incorrect"]
-  FIT["Fit Phase E legal-aware head<br/>the only place correctness labels are read"]
-  CALMAP["Fit calibration maps<br/>isotonic or Platt · grouped cross-validation"]
-  CONFORMAL["Fit conformal threshold"]
-  LABELFREE["Apply score and policy<br/>label-blind query path"]
-  METRICS["Held-out metrics<br/>AUROC · ACE · selective risk · coverage"]
-  GATES["Gate G5 / G6 verdict"]
-  L7["L7 stratum<br/>0 correct of 100 items · single class"]
+  EVA["Evaluation partition<br/>44 items · 7 correct · 37 incorrect"]
+  FIT["Fit the legal-aware head<br/>only place labels are read"]
+  CMAP["Fit calibration maps<br/>grouped cross-validation"]
+  CTHR["Fit the conformal threshold"]
+  QUERY["Score a question<br/>label-blind whitelist path"]
+  HELD["Held-out metrics<br/>every method out of sample"]
+  GATE["Gate verdict G5 / G6 / G7"]
+  L7["L7 stratum in the stored run<br/>0 correct of 100 items"]
 
-  DEV --> FIT --> CALMAP --> CONFORMAL
-  FIT --> LABELFREE
-  CALMAP --> LABELFREE
-  CONFORMAL --> LABELFREE
-  EVALP --> METRICS
-  LABELFREE --> METRICS --> GATES
-  L7 -->|no ranking defined| GATES
+  D3 --> DEV
+  D3 --> EVA
+  DEV --> FIT --> CMAP --> CTHR
+  FIT --> QUERY
+  CMAP --> QUERY
+  CTHR --> QUERY
+  QUERY --> HELD
+  EVA --> HELD --> GATE
+  L7 -.->|"single class: no ranking defined"| GATE
 
-  classDef data fill:#eef2f7,stroke:#3b5b7a,stroke-width:1px,color:#12263a
   classDef impl fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px,color:#10321a
+  classDef data fill:#eef2f7,stroke:#3b5b7a,stroke-width:1px,color:#12263a
   classDef blocked fill:#fdecea,stroke:#b3261e,stroke-width:1px,stroke-dasharray:4 3,color:#3a0d0a
-  class DEV,EVALP data
-  class FIT,CALMAP,CONFORMAL,LABELFREE,METRICS,GATES impl
+  class DEV,EVA,D3 data
+  class FIT,CMAP,CTHR,QUERY,HELD,GATE impl
   class L7 blocked
 ```
 
-The query path is label-blind by construction: `scripts/30_apply_policy.py` reads
-a whitelist of stored fields and never reads `majority_correct`,
-`sample_correct`, `gold` or `trap`, and a test parses that script statically to
-enforce it.
+The split is the Phase E pair-grouped SHA-256 holdout, so items from the same
+matched pair never straddle it. `scripts/30_apply_policy.py` is the query path and
+reads only the score, the Phase D flags, the slice and the topic — a test parses
+that script statically to prove it never touches the four label fields. When a
+stratum has no fitted map, `p_reliable` is `null` and the policy takes its
+documented undefined-reliability action; it is never imputed as a probability.
 
-### 3.3 Layer responsibilities
+### 3.3 Worked example: one question through all ten stages
 
-| Layer | Responsibility | Modules | Status |
-|---|---|---|---|
-| A | Legal context and frozen inputs | `data/` | `IMPLEMENTED` |
-| B | Normalisation, statute lookup, temporal and jurisdictional checks, candidate auditing | `jurisuq/normalize.py`, `jurisuq/context/`, `jurisuq/target/` | `IMPLEMENTED`, `TESTED` |
-| C | Provider abstraction, repeated sampling, run materialisation | `jurisuq/generators.py`, `jurisuq/pipeline.py`, `jurisuq/config.py` | `IMPLEMENTED`, mocked in tests |
-| D | Clustering, agreement statistics, warrant tuple, detector flags | `jurisuq/cluster.py`, `jurisuq/relations/`, `jurisuq/warrant/` | `IMPLEMENTED`, `TESTED` |
-| E | Feature extraction, risk score, calibration, conformal, policy | `jurisuq/uncertainty/`, `jurisuq/calibration/` | `IMPLEMENTED`, `TESTED` |
-| F | Decision and explanation | `jurisuq/calibration/policy.py` | `IMPLEMENTED`, `TESTED` |
-| G | Evaluation matrix, deployment measurement, gates, pilot harness | `jurisuq/evaluation/`, `jurisuq/pilot.py` | `IMPLEMENTED`, `TESTED`; pilot `BLOCKED` |
-| H | Artefacts, hashes, verdicts | `runs/`, `reports/` | `IMPLEMENTED` |
+Item `L7-theft-096` from the frozen slice — *"The matter is before a magistrate
+for committal. Under the law in force in India today (after 1 July 2024), which
+section applies…"* — gold `BNS 303(2)`, trap `IPC 379`. Every value below is
+read from the stored run of record (`…+ctx-r2+typed+warrant` for stages 5–6,
+`…+uq-exact` for stage 7, `…+cal-r2` for stage 8); none is illustrative.
+
+| Stage | What happens | This item |
+|---|---|---|
+| 1 · Inputs | question, facts, as-of date, jurisdiction | as-of `2024-07-01`, jurisdiction India; gold `BNS 303(2)` is held out of the model's view |
+| 2 · Preparation | statute rows and crosswalk are looked up | `IPC 379` in force 1862-01-01 → 2024-07-01, successor `BNS 303(2)`; crosswalk row `successor_of` with `verified: false` |
+| 3 · Generation | 10 samples through the local endpoint | `qwen2.5-7b-instruct`, T = 1.0, 48.2 s for this item |
+| 4 · Extraction | asserted provision is parsed and keyed | 8 samples assert **IPC 378**, 2 assert **IPC 384**; 0 unresolvable. The model reaches for the repealed *definition* section, not the repealed punishment section — which is why correctness is judged at provision level |
+| 5 · Relations and temporal | cluster the samples, then look the modal key up at the as-of date | modal `IPC 378`, share `A = 0.8`; repealed on 2024-07-01 so `T = 0.0`; `J = 1.0`; `K = 0.0` |
+| 6 · Common-mode | compose the factors, raise flags | `W = 0.8 × 0.0 × 1.0 × 1.0 = 0.0`, `CM = 0.8 − 0.0 = 0.8`; flag `stale_provision`; judge verdict `stale_law`, majority incorrect |
+| 7 · Uncertainty | label-free features into the monotone score | `u_prov 0.217 · u_text 1.0 · u_warrant 1.0 · u_cm 0.8 · u_contra 0.0` → score **0.8428**, uncalibrated risk, `legal_aware` mode |
+| 8 · Calibration and policy | look up a calibrated reliability, then decide | L7 has no fitted map → `p_reliable = null` (not 0); trigger `undefined_reliability`; harm class `custodial` (w = 5.0), thresholds `p_answer 0.97`, `p_verify 0.93` → action **verify**, with the reason attached |
+| 9 · Evaluation | the item sits in the evaluation partition | scored out of sample against eight other methods; on the L7 arm 0 of 22 items are correct, so AUROC there is reported as `single_correctness_class`, not as a number |
+| 10 · Gates and artefacts | the record and the verdict are stored | item record and digests live in the run directory; the gate table cites `runs/phaseG_eval_matrix.json`; `scripts/47_offline_check.py` re-verifies the digests |
+
+Two things this example is meant to make concrete. First, `CM = 0.8` with
+`A = 0.8` says the samples agreed on a provision that was not law at the asked
+date — the failure mode the project exists to catch. Second, the decision at
+stage 8 is `verify` **because the stratum is not calibrated**, not because a
+probability was computed and found low; that distinction is the difference
+between an honest abstention and a fabricated confidence.
+
+### 3.4 What exists today, by stage
+
+| Stage | Software | Evidence or limit |
+|---|---|---|
+| 1–2 inputs and preparation | `IMPLEMENTED`, `TESTED` | slice and statute table hash-pinned; crosswalk `verified: false` |
+| 3 generation | `IMPLEMENTED`, `TESTED` | frozen run of record; endpoint reachability is external to the repository |
+| 4 extraction | `IMPLEMENTED`, `TESTED` | unresolvable assertions are `None`, never coerced |
+| 5 relations and temporal | `IMPLEMENTED`, `TESTED` | `relations_v2` macro-F1 0.9942 on its test split |
+| 6 common-mode | `IMPLEMENTED`, `TESTED` | G4 PASS: AUROC 0.9412, CI [0.8529, 1.0000]; 13 of 200 records have an unresolved factor |
+| 7 uncertainty | `IMPLEMENTED`, `TESTED` | G5 `NOT_EVALUABLE`: the L7 arm is single-class and `T` has no within-slice variance |
+| 8 calibration and policy | `IMPLEMENTED`, `TESTED` | G6 `NOT_MET`: ACE 0.2797 vs 0.05; selective risk 0.5455 vs 0.4545 |
+| 9 evaluation and metrics | `IMPLEMENTED`, `TESTED`; `PARTIAL` for §21.3 | G7 `NOT_MET`; cascade latency and peak memory `not_instrumented` |
+| 10 gates and artefacts | `IMPLEMENTED`, `TESTED` | verdicts read from stored runs; offline check re-verifies digests |
+| two-class target population | `PLANNED` | the v1/v2 candidate sets exist; neither has produced a two-class population |
+| external benchmark transfer | `PLANNED` | deferred pending dataset and licensing review |
+| pilot, laptop run | `BLOCKED` | no confirmed zero-cost provider; no target-machine measurement |
+
+Implementation status is not scientific status: all ten stages are
+`IMPLEMENTED` and `TESTED` (stage 9 only partially, for the §21.3 measurements),
+and yet only G1 and G4 pass. §5 and §6 keep those two columns apart.
+
+### 3.5 Modules behind each stage
+
+| Stage | Modules | Entry point |
+|---|---|---|
+| 2 preparation | `jurisuq/context/`, `jurisuq/facts.py`, `jurisuq/target/candidates.py` | `scripts/01`, `20`, `45`, `46` |
+| 3 generation | `jurisuq/generators.py`, `jurisuq/config.py`, `jurisuq/pipeline.py` | `scripts/00`, `02`, `05` |
+| 4 extraction | `jurisuq/normalize.py`, `jurisuq/judge.py`, `jurisuq/cluster.py` | `scripts/03` |
+| 5 relations and temporal | `jurisuq/relations/`, `jurisuq/context/statute.py` | `scripts/10`–`13`, `21`, `23` |
+| 6 common-mode | `jurisuq/warrant/detector.py` | `scripts/23`, `24` |
+| 7 uncertainty | `jurisuq/uncertainty/` | `scripts/25`, `26` |
+| 8 calibration and policy | `jurisuq/calibration/` | `scripts/29`, `30`, `31` |
+| 9 evaluation | `jurisuq/evaluation/` | `scripts/42`, `43` |
+| 10 gates and artefacts | `jurisuq/pilot.py` | `scripts/44`, `47` |
 
 ---
 
