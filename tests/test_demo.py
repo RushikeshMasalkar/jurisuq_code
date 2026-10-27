@@ -166,3 +166,20 @@ def test_the_captured_sample_output_exists_and_is_labelled():
     assert "by construction" in head, "the mock accuracy must be labelled"
     assert "G7: NOT_MET" in text
     assert "RESULT: ok" in text
+
+
+# ----------------------------------------------------------------------
+# the demo must be repeatable into the same directory
+# ----------------------------------------------------------------------
+def test_the_demo_can_be_re_run_into_the_same_directory(tmp_path):
+    """A demonstration is run more than once. The second run must not fail
+    because it finds its own previous output."""
+    out = tmp_path / "repeat"
+    for attempt in (1, 2):
+        proc = subprocess.run(
+            [sys.executable, "-X", "utf8", str(SCRIPT), "--out-dir", str(out), "--quiet"],
+            cwd=ROOT, capture_output=True, text=True)
+        assert proc.returncode == 0, f"attempt {attempt} failed: {proc.stdout}{proc.stderr}"
+    summary = json.loads((out / "demo_summary.json").read_text(encoding="utf-8"))
+    assert summary["step_failures"] == []
+    assert (out / "demo_screen_mock.json").is_file()
