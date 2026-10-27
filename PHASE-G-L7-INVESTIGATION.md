@@ -485,6 +485,13 @@ for the reviewer, and its §7 lists four recommended corrections, including one
 section-level error (`wrongful_restraint-c003` reads as confinement under BNS 127,
 not restraint under 126).
 
+Those four corrections were **decided and applied to a new file**, not to this
+dataset: `data/lexuq_target_candidates_v2.jsonl`, described in
+[`reports/phaseG_l7_label_review_v2_changes.md`](reports/phaseG_l7_label_review_v2_changes.md).
+v1 — the file every result in this document was measured on — is unchanged. v2
+has not been screened, and its revisions are AI-assisted and operator-decided,
+not human legal approval.
+
 Reviewer instructions: for each item, open the source in §6.1, read the facts, and
 answer the five decisions. Record the source actually opened. Start with `cheating`,
 `cruelty_by_husband` and `criminal_breach_of_trust` (§6.2). When every item is

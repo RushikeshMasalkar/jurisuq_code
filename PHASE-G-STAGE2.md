@@ -57,6 +57,22 @@ Built deterministically by `scripts/45_build_target_candidates.py`, which holds
 the item table and the citations in one file so the dataset and its provenance
 record cannot drift apart. No network, no model.
 
+**A second version exists and has never been screened.**
+`data/lexuq_target_candidates_v2.jsonl` (sha256
+`44e7b5a2f3f968a7523b071a972ef522894f7ad0453e7390dff728b020878e8c`) revises
+**four L7 items** — the agent tier for criminal breach of trust, the knowledge
+limb for culpable homicide, and the restraint/confinement distinction in both
+wrongful-restraint items. It is built by
+`scripts/46_revise_target_candidates_v2.py` from v1, so that v1 stays frozen:
+the three committed screen reports record v1's hash as `data_sha256`, and editing
+v1 in place would detach them from the dataset they were taken over. The other
+twenty rows are byte-identical, every `item_id` is unchanged, all four revisions
+are recorded with their legal source and reasoning in
+[`reports/phaseG_l7_label_review_v2_changes.md`](reports/phaseG_l7_label_review_v2_changes.md)
+and `runs/phaseG_l7_candidate_revisions_v1.json`. `configs/phase_g_target.json`
+still points at **v1**, and every item in both versions still carries
+`provenance.verified = false`. **v2 carries no measurement of any kind.**
+
 ### Data card
 
 | Field | Value |

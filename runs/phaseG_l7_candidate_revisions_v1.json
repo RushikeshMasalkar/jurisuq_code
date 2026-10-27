@@ -1,0 +1,153 @@
+{
+  "phase": "G",
+  "artifact": "candidate set v1 -> v2 revisions",
+  "revision_date": "2026-10-27",
+  "basis": "ai_assisted_source_comparison; operator-decided on 2026-10-27 from reports/phaseG_l7_label_review_v1.md; NOT human legal verification",
+  "review_detail": "reports/phaseG_l7_label_review_v2_changes.md",
+  "datasets": {
+    "v1": {
+      "path": "data/lexuq_target_candidates_v1.jsonl",
+      "sha256": "f49f4d91946387eb0534718945092cc2f840bd9f2aee053ed9ac13c3f296d341",
+      "n_items": 24,
+      "screened": true,
+      "referenced_by": [
+        "runs/phaseG_screen_qwen3_14b_full.json",
+        "runs/phaseG_screen_qwen3_14b_sliced.json",
+        "runs/phaseG_screen_qwen3_14b_smoke.json"
+      ],
+      "status": "FROZEN as screened; never edited in place",
+      "provenance_verified": false
+    },
+    "v2": {
+      "path": "data/lexuq_target_candidates_v2.jsonl",
+      "sha256": "44e7b5a2f3f968a7523b071a972ef522894f7ad0453e7390dff728b020878e8c",
+      "n_items": 24,
+      "screened": false,
+      "status": "AUTHORED, NOT SCREENED",
+      "provenance_verified": false
+    }
+  },
+  "invariants": {
+    "v1_bytes_unchanged": true,
+    "rows_byte_identical_to_v1": 20,
+    "rows_revised": 4,
+    "L1_items_revised": 0,
+    "item_ids_unchanged": true,
+    "pair_ids_unchanged": true,
+    "slices_unchanged": {
+      "L1": 12,
+      "L7": 12
+    },
+    "provenance_verified_after_revision": false,
+    "review_status_after_revision": "PENDING_HUMAN_REVIEW",
+    "builder": "scripts/46_revise_target_candidates_v2.py",
+    "builder_is_deterministic": true
+  },
+  "revisions": [
+    {
+      "item_id": "L7-culpable_homicide-c003",
+      "pair_id": "culpable_homicide-c003",
+      "before": {
+        "question": "Under the law in force in India today (after 1 July 2024), which section applies to this situation, and what is the punishment prescribed? A pushed B during a quarrel, not intending death or injury likely to cause it; B fell, struck his head and died.",
+        "gold_provision": "105",
+        "punishment": "see BNS 105(1)-(2); the graduated terms are cited, not reproduced"
+      },
+      "after": {
+        "question": "Under the law in force in India today (after 1 July 2024), which section applies to this situation, and what is the punishment prescribed? A pushed B during a quarrel, not intending death or injury likely to cause it, but knowing that the push was likely to make B fall and strike his head on the stone floor; B fell, struck his head and died.",
+        "gold_provision": "105(2)",
+        "punishment": "up to ten years and fine (the knowledge limb of BNS 105)"
+      },
+      "reason": "v1 negated intention but said nothing about knowledge, which is the element separating culpable homicide punished under BNS 105(2) (knowledge that the act is likely to cause death, up to ten years and fine) from causing death by negligence under BNS 106(1). With knowledge stated, 105(2) follows and 106(1) is no longer available; the item tests the repealed-code phenomenon instead of an ambiguity.",
+      "sources": [
+        "https://devgan.in/bns/section/105/",
+        "https://devgan.in/bns/section/106/"
+      ],
+      "decided_by": "operator decision, 2026-10-27, on the AI-assisted review in reports/phaseG_l7_label_review_v1.md",
+      "legal_basis": "BNS 105(2) <- IPC 304 knowledge limb"
+    },
+    {
+      "item_id": "L7-criminal_breach_of_trust-c003",
+      "pair_id": "criminal_breach_of_trust-c003",
+      "before": {
+        "gold_provision": "316(2)",
+        "trap_provision": "406",
+        "punishment": "up to five years, or fine, or both (raised from three years under IPC 406)"
+      },
+      "after": {
+        "gold_provision": "316(5)",
+        "trap_provision": "409",
+        "punishment": "imprisonment for life, or up to ten years, and fine"
+      },
+      "reason": "The facts state that A was 'B's agent for collecting rent' and used the rent himself. BNS 316 punishes criminal breach of trust in tiers by capacity: 316(2) is the general tier reproducing IPC 406, while 316(5) reproduces IPC 409 for a public servant or a person entrusted in the way of his business as a banker, merchant, factor, broker, attorney or agent, and carries imprisonment for life or up to ten years and fine. An agent is named in 316(5), so the v1 gold (316(2)) and the v1 trap (IPC 406) both understate the tier and mis-identify the repealed counterpart.",
+      "sources": [
+        "https://devgan.in/bns/section/316/",
+        "https://lawrato.com/bharatiya-nyaya-sanhita/bns-section-316"
+      ],
+      "decided_by": "operator decision, 2026-10-27, on the AI-assisted review in reports/phaseG_l7_label_review_v1.md",
+      "legal_basis": "BNS 316(5) <- IPC 409 (agent tier)"
+    },
+    {
+      "item_id": "L7-wrongful_restraint-c001",
+      "pair_id": "wrongful_restraint-c001",
+      "before": {
+        "question": "The question arises during a bail hearing. A junior lawyer needs the exact provision today (after 1 July 2024). Which act and which section apply? A blocked B's only exit from a room, preventing B from leaving, without B's consent."
+      },
+      "after": {
+        "question": "Under the law in force in India today (after 1 July 2024), which section applies to this situation, and what is the punishment prescribed? A stood in the road in front of B's car and refused to move, so that B could not drive on, without B's consent."
+      },
+      "reason": "v1 had A block the only exit of the room B was in. That restrains B so as to prevent proceeding beyond the circumscribing limits of the room, which is wrongful confinement under BNS 127, not restraint under BNS 126. The facts are re-authored as a plain obstruction so that the item tests 126(2) as intended; the gold is unchanged.",
+      "sources": [
+        "https://devgan.in/bns/section/126/",
+        "https://devgan.in/bns/section/127/"
+      ],
+      "decided_by": "operator decision, 2026-10-27, on the AI-assisted review in reports/phaseG_l7_label_review_v1.md",
+      "legal_basis": "BNS 126(2) <- IPC 341 (restraint), facts re-authored"
+    },
+    {
+      "item_id": "L7-wrongful_restraint-c003",
+      "pair_id": "wrongful_restraint-c003",
+      "before": {
+        "gold_provision": "126(2)",
+        "trap_provision": "341",
+        "punishment": "up to one month, or fine up to five thousand rupees, or both",
+        "distractor_provision": "127",
+        "distractor": {
+          "act": "BNS",
+          "provision": "127",
+          "label": "wrongful confinement"
+        }
+      },
+      "after": {
+        "gold_provision": "127(2)",
+        "trap_provision": "342",
+        "punishment": "up to one year, or fine up to five thousand rupees, or both",
+        "distractor_provision": "126(2)",
+        "distractor": {
+          "act": "BNS",
+          "provision": "126(2)",
+          "label": "wrongful restraint"
+        }
+      },
+      "reason": "A locks the gate of B's compound from outside so that B cannot leave. B is restrained so as to prevent proceeding beyond the circumscribing limits of the compound; Illustration 1 to BNS 127 is the lock-in case. The gold therefore moves to 127(2), its repealed counterpart moves to IPC 342 (the confinement punishment, not the restraint punishment in IPC 341), and the distractor moves to 126(2), which is now the plausible wrong answer.",
+      "sources": [
+        "https://devgan.in/bns/section/127/",
+        "https://devgan.in/bns/section/126/"
+      ],
+      "decided_by": "operator decision, 2026-10-27, on the AI-assisted review in reports/phaseG_l7_label_review_v1.md",
+      "legal_basis": "BNS 127(2) <- IPC 342 (confinement)"
+    }
+  ],
+  "not_done": [
+    "no screen has been run against v2; it carries no measured yield",
+    "configs/phase_g_target.json still points at v1; repointing it is a separate decision",
+    "no human legal review of v1 or v2 gold labels",
+    "no gate, threshold or frozen artefact was touched"
+  ],
+  "gates_unchanged": {
+    "G5": "NOT_EVALUABLE",
+    "G6": "NOT_MET",
+    "G7": "NOT_MET"
+  },
+  "pilot_unchanged": "ON_HOLD",
+  "next_action": "human legal review of the four revised labels and the eight confirmed ones; only then decide whether to screen v2 and whether to repoint configs/phase_g_target.json"
+}
