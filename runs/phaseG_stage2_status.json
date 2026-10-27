@@ -2,6 +2,8 @@
   "phase": "G",
   "stage": 2,
   "generated_utc": "2026-10-25T11:47:05Z",
+  "amended_utc": "2026-10-27",
+  "amendment": "records the operator-reported L7 diagnostic and the AI-assisted label review; the Stage 2 screen figures above are untouched, generated_utc is left as the original record time, and no gate, threshold or frozen artefact changed",
   "headline": "Stage 2 screening is complete: all three Qwen3 14B artefacts are committed in this repository. The full run reports 3/24 majority-correct items (rate 0.1250, Wilson interval [0.0434, 0.3100]). The separate sliced run shows every correct item is L1 (3/12) and L7 produced 0 correct samples out of 120. These are automated screening results, not human legal verification. The L7 zero is attributed to the generator asserting the repealed IPC provision (per-sample evidence in PHASE-G-L7-INVESTIGATION.md), not to item difficulty or a scoring artefact; human legal review of the gold labels remains outstanding. G5, G6 and G7 are unchanged.",
   "status": "SCREEN_COMPLETE_L7_OUTSTANDING",
   "completed": [
@@ -55,7 +57,8 @@
       "question": "why did the L7 arm produce no correct answer at all?",
       "answered_by": "PHASE-G-L7-INVESTIGATION.md; mechanism detail in the top-level l7_investigation record",
       "established": "on L7 items of this design the generator asserts the repealed IPC provision (qwen3-14b: 33 of 36 L7 samples stale_law, 0 gold); it is not a scoring artefact",
-      "still_open": "a direct per-item measurement on these twelve candidates (the harness now supports it via --save-items), and human legal review of the gold labels"
+      "still_open": "human legal review of the twelve L7 gold labels (an AI-assisted review is complete and leaves four corrections for decision); the diagnostic artefacts are not committed here; the cross-model comparison remains unauthorised",
+      "label_review": "reports/phaseG_l7_label_review_v1.md (AI-assisted, not human legal verification)"
     }
   },
   "gates_unchanged": {
@@ -308,13 +311,64 @@
       ]
     },
     "pair_id_observation": "the 24 candidates carry 24 distinct pair_id values and no fact pattern is shared across slices, so unlike the frozen slice there is no cross-slice sibling key; the screen groups by slice, so no result is affected, but paired analysis on this set must not assume matching",
-    "next_step": "run the L7-only diagnostic in PHASE-G-L7-INVESTIGATION.md section 9: 12 items x 3 samples, ~11-27 min, $0, --slice L7 --save-items, with its interpretation criteria fixed in advance. The CLI now supports --slice (applied before the item cap) and --save-items; the run itself is NOT yet authorised and has not been executed",
-    "remains_pending": "human legal review of the L7 gold labels - per-item checklist in PHASE-G-L7-INVESTIGATION.md section 10",
+    "next_step": "human legal review of the twelve L7 gold labels, using section 10 of PHASE-G-L7-INVESTIGATION.md together with the AI-assisted review in reports/phaseG_l7_label_review_v1.md, which leaves four corrections for decision; the L7-only diagnostic was reported run by the operator on 2026-10-27 but its artefacts are not in this repository, so its figures stay operator-reported here; the cross-model comparison is not authorised until the labels are reviewed",
+    "remains_pending": "human legal review of the L7 gold labels - per-item checklist in PHASE-G-L7-INVESTIGATION.md section 10; plus commit of the diagnostic artefacts",
     "cli_readiness": {
       "slice_filter": "scripts/41_screen_target_yield.py --slice L7 - validated against the slices present in the file; omitting it screens every slice as before",
       "per_item_evidence": "scripts/41_screen_target_yield.py --save-items PATH",
       "tests": "tests/test_target_screen.py",
-      "generation_run": false
+      "generation_run": false,
+      "generation_run_note": "stays false: no generation run of this CLI is recorded in this repository. The 2026-10-27 diagnostic is operator-reported only - see l7_investigation.diagnostic_run"
+    },
+    "diagnostic_run": {
+      "reported": true,
+      "reported_date": "2026-10-27",
+      "reported_by": "operator (principal investigator), on a local OpenAI-compatible endpoint",
+      "artifacts_in_repository": false,
+      "artifacts_expected": [
+        "runs/phaseG_l7_qwen3_14b_diagnostic.json",
+        "runs/phaseG_l7_qwen3_14b_diagnostic_items.jsonl"
+      ],
+      "verification_status": "OPERATOR_REPORTED_NOT_ARTIFACT_VERIFIED",
+      "reported_figures": {
+        "generator": "openai-compat:qwen3-14b",
+        "items": 12,
+        "samples_per_item": 3,
+        "majority_correct": 0,
+        "majority_rate": 0.0,
+        "correct_samples": 0,
+        "samples": 36,
+        "wilson_interval": {
+          "lo": 0.0,
+          "hi": 0.242494,
+          "confidence": 0.95
+        },
+        "repealed_code_share_all_items": 1.0
+      },
+      "note": "reported figures only. Nothing in this repository holds the run, so they are not artefact-verified here; they must not be pooled with the Stage 2 screens or the pilot, and an earlier run labelled with a placeholder model id is not attributable to any model."
+    },
+    "label_review": {
+      "status": "AI_ASSISTED_COMPLETE_HUMAN_OUTSTANDING",
+      "is_human_legal_review": false,
+      "report": "reports/phaseG_l7_label_review_v1.md",
+      "record": "runs/phaseG_l7_label_review_v1.json",
+      "scope": "the 12 L7 items; the 12 L1 items were not reviewed",
+      "outcome": {
+        "confirmed": 8,
+        "ambiguous": 3,
+        "unsupported": 1,
+        "unresolved": 0,
+        "gold_labels_changed": 0
+      },
+      "corrections_pending_human_decision": [
+        "L7-criminal_breach_of_trust-c003",
+        "L7-culpable_homicide-c003",
+        "L7-wrongful_restraint-c001",
+        "L7-wrongful_restraint-c003"
+      ],
+      "effect_on_recorded_result": "none: all 36 recorded samples asserted repealed IPC sections and none named any BNS provision, so no gold revision can change 0/12 majority or 0/36 samples",
+      "provenance_verified": false,
+      "must_not_be_read_as": "human legal verification, an approval of any gold label, or a gate movement"
     }
   },
   "documentation": {
@@ -324,6 +378,7 @@
       "runs/phaseG_screen_qwen3_14b_full.json",
       "runs/phaseG_screen_qwen3_14b_sliced.json",
       "runs/phaseG_screen_qwen3_14b_smoke.json"
-    ]
+    ],
+    "label_review": "reports/phaseG_l7_label_review_v1.md"
   }
 }

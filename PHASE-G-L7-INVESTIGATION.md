@@ -476,6 +476,15 @@ generation buys L1 items only (§6d of `PHASE-G-STAGE2.md`).
 **Not started. No item has been reviewed by a qualified person.** Automated checks
 in this repository cannot substitute for it, and nothing below is legal advice.
 
+**An AI-assisted source comparison now exists:**
+[`reports/phaseG_l7_label_review_v1.md`](reports/phaseG_l7_label_review_v1.md)
+(record: `runs/phaseG_l7_label_review_v1.json`). It is **not** the review this
+section asks for and it changes no label and no provenance field. Its findings —
+8 of the 12 labels confirmed, 3 ambiguous, 1 unsupported — are a starting point
+for the reviewer, and its §7 lists four recommended corrections, including one
+section-level error (`wrongful_restraint-c003` reads as confinement under BNS 127,
+not restraint under 126).
+
 Reviewer instructions: for each item, open the source in §6.1, read the facts, and
 answer the five decisions. Record the source actually opened. Start with `cheating`,
 `cruelty_by_husband` and `criminal_breach_of_trust` (§6.2). When every item is

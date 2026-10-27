@@ -485,6 +485,11 @@ is worth running only after the labels survive review. A larger run is still
 **not** justified: the 172-item projection comes from an aggregate rate that L7
 contributes nothing to.
 
+An **AI-assisted source comparison** of those twelve labels is recorded in
+[`reports/phaseG_l7_label_review_v1.md`](reports/phaseG_l7_label_review_v1.md):
+8 confirmed, 3 ambiguous, 1 unsupported, no label changed. It narrows the human
+review to four decisions but does not replace it.
+
 Stage 2 remains **partial**: item authoring, contract validation, screening, the
 affordability decision and the L7 investigation are done; human legal review and
 any G7 re-evaluation are not.
