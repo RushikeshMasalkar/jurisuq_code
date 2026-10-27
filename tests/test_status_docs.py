@@ -1,4 +1,4 @@
-"""Guards for the project-level documents: STATUS, ROADMAP, DEMO, PROFESSOR-SUMMARY.
+"""Guards for the project-level documents: STATUS and ROADMAP.
 
 These documents are what a reader trusts first, so the failure mode worth
 testing is drift: a hash, a count, a gate verdict or a file path that no longer
@@ -18,11 +18,9 @@ ROOT = Path(__file__).resolve().parents[1]
 
 STATUS = ROOT / "STATUS.md"
 ROADMAP = ROOT / "ROADMAP.md"
-DEMO = ROOT / "DEMO.md"
-SUMMARY = ROOT / "PROFESSOR-SUMMARY.md"
 README = ROOT / "README.md"
 
-DOCS = (STATUS, ROADMAP, DEMO, SUMMARY)
+DOCS = (STATUS, ROADMAP)
 
 
 def _text(path: Path) -> str:
@@ -51,7 +49,7 @@ def test_each_project_document_exists_and_is_not_a_stub(path):
 
 
 def test_status_is_the_authoritative_document_and_the_others_point_at_it():
-    for doc in (ROADMAP, DEMO, SUMMARY):
+    for doc in (ROADMAP,):
         assert "STATUS.md" in _text(doc), f"{doc.name} must link to STATUS.md"
 
 
@@ -147,7 +145,7 @@ def test_the_documents_never_claim_human_legal_verification():
 
 
 def test_the_documents_keep_the_l7_result_scoped_to_one_model():
-    text = _text(SUMMARY)
+    text = _text(STATUS)
     assert "not a cross-model comparison" in text.lower()
 
 
@@ -170,8 +168,8 @@ ALLOW_MISSING = {
     "runs/phaseG_l7_qwen3_14b_diagnostic_items.jsonl",
     "runs/phaseG_l7_rehearsal.json",
     "runs/phaseG_l7_rehearsal_items.jsonl",
-    # produced by scripts/47_demo.py, not committed
-    "runs/demo/demo_summary.json",
+    # produced by scripts/47_offline_check.py, not committed
+    "runs/offline_check/offline_check_summary.json",
 }
 
 
@@ -200,22 +198,3 @@ def test_every_referenced_script_and_artifact_exists():
             if not (ROOT / rel).exists():
                 missing.append(f"{doc.name} -> {rel}")
     assert not missing, f"documents reference files that do not exist: {missing}"
-
-
-# ----------------------------------------------------------------------
-# the demo document describes the demo that exists
-# ----------------------------------------------------------------------
-def test_the_demo_guide_runs_the_real_demo_script():
-    text = _text(DEMO)
-    assert "scripts/47_demo.py" in text
-    assert (ROOT / "scripts" / "47_demo.py").is_file()
-    assert "runs/demo" in text
-    for command in ("python -X utf8 -m pytest -q", "scripts/00_env_check.py"):
-        assert command in text
-
-
-def test_the_demo_guide_marks_the_mock_and_the_missing_artifacts():
-    text = _text(DEMO).lower()
-    assert "mock provider" in text
-    assert "by construction" in text
-    assert "operator-reported" in text

@@ -35,7 +35,7 @@ prerequisites.**
 | M3 | L7 investigation: why the L7 arm yields nothing | M2 | **done** (document); diagnostic **operator-reported** |
 | M4 | AI-assisted label review of the 12 L7 golds | M3 | **done** — 8 confirmed / 3 ambiguous / 1 unsupported, no label changed |
 | M5 | v2 candidate set with the four decided corrections | M4 | **done** — authored, never screened |
-| M6 | Demonstration surface: one-command offline demo, status doc, quick start, professor summary | M1–M5 | **done in this change** |
+| M6 | Maintenance surface: authoritative status doc, dependency roadmap, one-command offline integrity check | M1–M5 | **done** |
 | M7 | Screen `v2` (12 L7 items × 3 samples, ≈11–27 min, $0) | a local endpoint + the operator's go-ahead | **ready, unrun** |
 | M8 | Cross-model comparison (`PHASE-G-L7-INVESTIGATION.md` §9) | human legal review of the labels | **BLOCKED** by protocol |
 | M9 | L7 calibration extension | a stored L7 run with both correctness classes | **BLOCKED** (needs M7 + a two-class outcome) |
@@ -46,7 +46,7 @@ prerequisites.**
 
 | Task | Needs a model? | Needs a human? | Cost |
 |---|---|---|---|
-| Run the suite, the demo, `--check` on the v2 builder | no | no | seconds |
+| Run the suite, the offline check, `--check` on the v2 builder | no | no | seconds |
 | Commit the diagnostic artefacts so the 0/12 / 0/36 figures become recomputable | no | no | — |
 | Reconcile the statute table's `verified` flag with its actual semantics | no | yes (to approve the wording) | an hour of review |
 | Screen `v2` on the local endpoint | **yes** | no (operator's call) | 11–27 min, $0 |
@@ -67,10 +67,11 @@ prerequisites.**
 ## 5. Definition of done for the software
 
 1. `python -X utf8 -m pytest -q` green, with the skip explained.
-2. `python -X utf8 scripts/47_demo.py` exits 0, writes `runs/demo/demo_summary.json`,
-   and modifies nothing under `runs/` or `data/`.
+2. `python -X utf8 scripts/47_offline_check.py` exits 0, writes
+   `runs/offline_check/offline_check_summary.json`, and modifies nothing under
+   `runs/` or `data/`.
 3. `python -X utf8 scripts/46_revise_target_candidates_v2.py --check` reports that
    the committed v2 matches its builder.
 4. `STATUS.md` agrees with the artefacts (checked by `tests/test_status_docs.py`).
-5. The quick start in [`DEMO.md`](DEMO.md) works from a clean checkout with the
-   documented dependencies only.
+5. The setup instructions in [`README.md`](README.md) work from a clean checkout
+   with the documented dependencies only.
