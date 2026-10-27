@@ -1,0 +1,428 @@
+{
+  "phase": "G",
+  "artifact": "AI-assisted review of the twelve L7 candidate gold labels",
+  "artifact_path": "reports/phaseG_l7_label_review_v1.md",
+  "review_date": "2026-10-27",
+  "reviewer": {
+    "type": "ai_assisted_source_comparison",
+    "is_human_legal_review": false,
+    "is_qualified_legal_opinion": false,
+    "note": "An automated agent compared the stored gold provisions against reproductions of the enacted BNS text and the commencement notification. It is not a lawyer, and this record must never be cited as independent human verification."
+  },
+  "dataset": {
+    "path": "data/lexuq_target_candidates_v1.jsonl",
+    "sha256": "f49f4d91946387eb0534718945092cc2f840bd9f2aee053ed9ac13c3f296d341",
+    "sha256_recomputed_by_this_review": "f49f4d91946387eb0534718945092cc2f840bd9f2aee053ed9ac13c3f296d341",
+    "slice": "L7",
+    "n_items_in_slice": 12,
+    "dataset_modified_by_this_review": false,
+    "provenance_verified_after_review": false
+  },
+  "method": {
+    "inputs": [
+      "stored question text",
+      "gold_act and gold_provision",
+      "recorded punishment",
+      "designed trap and distractor",
+      "provenance mapping notes"
+    ],
+    "comparison_target": "Bharatiya Nyaya Sanhita, 2023 (Act 45 of 2023), enacted numbering",
+    "prohibited_actions_observed": [
+      "no dataset edit",
+      "no gold relabelling",
+      "no generation",
+      "no model call",
+      "no gate or threshold change",
+      "no provenance.verified change"
+    ]
+  },
+  "commencement": {
+    "notification": "S.O. 850(E)",
+    "dated": "2024-02-23",
+    "in_force": "2024-07-01",
+    "exception": "sub-section (2) of section 106",
+    "sources": [
+      "https://www.mha.gov.in/sites/default/files/BhartiyaNyayaSanhita_24022024.pdf",
+      "https://www.indiacode.nic.in/indiacode/bitstream/123456789/20062/1/a202345.pdf"
+    ],
+    "access_note": "the MHA gazette PDF was read as a search-index excerpt, not opened; the India Code PDF could not be fetched from the reviewing environment"
+  },
+  "summary": {
+    "n_items_reviewed": 12,
+    "confirmed": 8,
+    "ambiguous": 3,
+    "unsupported": 1,
+    "unresolved": 0,
+    "section_level_errors": 1,
+    "subsection_level_errors": 3,
+    "gold_labels_changed": 0,
+    "confirmed_items": [
+      "L7-cheating-c001",
+      "L7-criminal_breach_of_trust-c001",
+      "L7-cruelty_by_husband-c001",
+      "L7-murder-c001",
+      "L7-theft-c001",
+      "L7-theft-c003",
+      "L7-theft_in_dwelling-c001",
+      "L7-theft_in_dwelling-c003"
+    ],
+    "ambiguous_items": [
+      "L7-criminal_breach_of_trust-c003",
+      "L7-culpable_homicide-c003",
+      "L7-wrongful_restraint-c001"
+    ],
+    "unsupported_items": [
+      "L7-wrongful_restraint-c003"
+    ]
+  },
+  "items": [
+    {
+      "item_id": "L7-cheating-c001",
+      "facts": "A induced B to pay for a non-existent plot of land by showing B a forged title deed.",
+      "gold_act": "BNS",
+      "gold_provision": "318(4)",
+      "designed_trap_ipc": "420",
+      "status": "CONFIRMED",
+      "confidence": "high",
+      "bns_provisions_cited": [
+        "318(1)",
+        "318(4)"
+      ],
+      "reasoning": "318(1) defines cheating (deception inducing delivery of property); 318(4) punishes cheating that thereby dishonestly induces the person deceived to deliver property, up to 7 years and fine, matching the recorded punishment. Forgery under BNS 336/340 is also made out but 318(4) governs the induced payment.",
+      "recommended_action": "none",
+      "sources": [
+        "https://devgan.in/bns/section/318/"
+      ]
+    },
+    {
+      "item_id": "L7-criminal_breach_of_trust-c001",
+      "facts": "A, entrusted with B's jewellery for safekeeping, sold it and kept the money.",
+      "gold_act": "BNS",
+      "gold_provision": "316(2)",
+      "designed_trap_ipc": "406",
+      "status": "CONFIRMED",
+      "confidence": "high",
+      "bns_provisions_cited": [
+        "316(1)",
+        "316(2)"
+      ],
+      "reasoning": "Entrustment plus dishonest conversion is criminal breach of trust under 316(1); no aggravated capacity is pleaded, so the general tier 316(2) applies: up to 5 years, or fine, or both (raised from 3 years under IPC 406).",
+      "recommended_action": "none",
+      "sources": [
+        "https://devgan.in/bns/section/316/",
+        "https://lawrato.com/bharatiya-nyaya-sanhita/bns-section-316"
+      ]
+    },
+    {
+      "item_id": "L7-criminal_breach_of_trust-c003",
+      "facts": "A, B's agent for collecting rent, received the rent and dishonestly used it for himself.",
+      "gold_act": "BNS",
+      "gold_provision": "316(2)",
+      "designed_trap_ipc": "406",
+      "status": "AMBIGUOUS_LIKELY_WRONG",
+      "confidence": "medium-high",
+      "bns_provisions_cited": [
+        "316(1)",
+        "316(2)",
+        "316(5)"
+      ],
+      "reasoning": "The facts name an agent. BNS 316(5) punishes CBT by a person entrusted in the way of his business as a banker, merchant, factor, broker, attorney or agent with imprisonment for life or up to 10 years and fine, reproducing IPC 409. The correct IPC analogue of these facts is therefore 409, not the item's designed trap 406, and the recorded punishment (up to 5 years) understates the tier. Whether rent collection is 'in the way of his business' is a question of fact for a human reviewer.",
+      "recommended_action": "gold 316(5), trap IPC 409, punishment 'life, or up to 10 years, and fine'; OR re-author the facts as a non-capacity entrustment and keep 316(2)",
+      "sources": [
+        "https://devgan.in/bns/section/316/",
+        "https://lawrato.com/bharatiya-nyaya-sanhita/bns-section-316"
+      ]
+    },
+    {
+      "item_id": "L7-cruelty_by_husband-c001",
+      "facts": "B was subjected to sustained harassment for dowry by her husband and his family.",
+      "gold_act": "BNS",
+      "gold_provision": "85",
+      "designed_trap_ipc": "498A",
+      "status": "CONFIRMED",
+      "confidence": "high",
+      "bns_provisions_cited": [
+        "85",
+        "86"
+      ],
+      "reasoning": "BNS 85 punishes a husband or the relative of the husband who subjects a woman to cruelty: up to 3 years and fine. The definition of 'cruelty', which covers dowry harassment, is supplied by BNS 86 and should be cited in any gold rationale. No death is alleged, so the dowry-death provisions (BNS 80) are not attracted, correctly reflected in the item's distractor.",
+      "recommended_action": "none (cite 86 in the rationale)",
+      "sources": [
+        "https://devgan.in/bns/section/85/"
+      ]
+    },
+    {
+      "item_id": "L7-culpable_homicide-c003",
+      "facts": "A pushed B during a quarrel, not intending death or injury likely to cause it; B fell, struck his head and died.",
+      "gold_act": "BNS",
+      "gold_provision": "105",
+      "designed_trap_ipc": "304",
+      "status": "AMBIGUOUS",
+      "confidence": "medium",
+      "bns_provisions_cited": [
+        "100",
+        "105(1)",
+        "105(2)",
+        "106(1)"
+      ],
+      "reasoning": "The facts expressly negate intention but are silent on knowledge. On the knowledge limb the act is culpable homicide under BNS 100 punished by 105(2) (up to 10 years and fine). If knowledge is absent as well, the offence is causing death by negligence under BNS 106(1), not culpable homicide at all. The item as drafted does not compel either reading; the diagnostic's answer of IPC 304A is the 106(1) analogue and is not obviously wrong on the face of these facts.",
+      "recommended_action": "gold 105(2) and add a knowledge cue to the facts; otherwise accept 106(1) as equally correct",
+      "sources": [
+        "https://devgan.in/bns/section/105/"
+      ]
+    },
+    {
+      "item_id": "L7-murder-c001",
+      "facts": "A, intending to kill B, stabbed B in the chest; B died of the injury.",
+      "gold_act": "BNS",
+      "gold_provision": "103(1)",
+      "designed_trap_ipc": "302",
+      "status": "CONFIRMED",
+      "confidence": "high",
+      "bns_provisions_cited": [
+        "101",
+        "103(1)"
+      ],
+      "reasoning": "BNS 101 defines murder; 103(1) punishes murder with death or imprisonment for life and fine. The facts establish intention to cause death, so murder is made out and 103(1) is the punishment provision. Numbering is the enacted numbering (the Bill numbered these 99/101).",
+      "recommended_action": "none",
+      "sources": [
+        "https://devgan.in/bns/section/103/"
+      ]
+    },
+    {
+      "item_id": "L7-theft-c001",
+      "facts": "A took B's scooter from a public stand without B's consent and kept it.",
+      "gold_act": "BNS",
+      "gold_provision": "303(2)",
+      "designed_trap_ipc": "379",
+      "status": "CONFIRMED",
+      "confidence": "high",
+      "bns_provisions_cited": [
+        "303(1)",
+        "303(2)"
+      ],
+      "reasoning": "303(1) defines theft; 303(2) punishes it with up to 3 years, or fine, or both, with the repeat-conviction tier and the sub-Rs 5,000 community-service proviso. Residual, low risk: 305(b) covers theft 'of any means of transport used for the transport of goods or passengers', which is aimed at transport in service rather than a privately parked scooter.",
+      "recommended_action": "none",
+      "sources": [
+        "https://devgan.in/bns/section/303/"
+      ]
+    },
+    {
+      "item_id": "L7-theft-c003",
+      "facts": "A picked B's pocket in a market and took B's wallet without B noticing.",
+      "gold_act": "BNS",
+      "gold_provision": "303(2)",
+      "designed_trap_ipc": "379",
+      "status": "CONFIRMED",
+      "confidence": "high",
+      "bns_provisions_cited": [
+        "303(1)",
+        "303(2)"
+      ],
+      "reasoning": "Theft under 303(1), punished by 303(2). The Explanation to 303(2) expressly includes pick pocketing among the forms it addresses, so the item is squarely on the section.",
+      "recommended_action": "none",
+      "sources": [
+        "https://devgan.in/bns/section/303/"
+      ]
+    },
+    {
+      "item_id": "L7-theft_in_dwelling-c001",
+      "facts": "A entered B's locked house at night and took B's television.",
+      "gold_act": "BNS",
+      "gold_provision": "305",
+      "designed_trap_ipc": "380",
+      "status": "CONFIRMED",
+      "confidence": "high",
+      "bns_provisions_cited": [
+        "305(a)"
+      ],
+      "reasoning": "305(a) covers theft in any building used as a human dwelling: up to 7 years and fine. House-trespass provisions may also be attracted by the entry, but the theft provision is 305. Documentation nit: the dataset's mapping note calls the clauses 'sub-sections (b)-(e)'; they are clauses of an undivided section.",
+      "recommended_action": "none",
+      "sources": [
+        "https://devgan.in/bns/section/305/",
+        "https://lawx.in/acts/section/99/845/7429",
+        "https://bprd.nic.in/uploads/pdf/202402021153004864390OFFENCESAGAINSTPROPERTY.pdf"
+      ]
+    },
+    {
+      "item_id": "L7-theft_in_dwelling-c003",
+      "facts": "A broke into B's flat while B was away and removed cash and a laptop.",
+      "gold_act": "BNS",
+      "gold_provision": "305",
+      "designed_trap_ipc": "380",
+      "status": "CONFIRMED",
+      "confidence": "high",
+      "bns_provisions_cited": [
+        "305(a)"
+      ],
+      "reasoning": "Same limb as the previous item: theft in a building used as a human dwelling, 305(a).",
+      "recommended_action": "none",
+      "sources": [
+        "https://devgan.in/bns/section/305/",
+        "https://lawx.in/acts/section/99/845/7429",
+        "https://bprd.nic.in/uploads/pdf/202402021153004864390OFFENCESAGAINSTPROPERTY.pdf"
+      ]
+    },
+    {
+      "item_id": "L7-wrongful_restraint-c001",
+      "facts": "A blocked B's only exit from a room, preventing B from leaving, without B's consent.",
+      "gold_act": "BNS",
+      "gold_provision": "126(2)",
+      "designed_trap_ipc": "341",
+      "status": "AMBIGUOUS",
+      "confidence": "medium",
+      "bns_provisions_cited": [
+        "126(1)",
+        "126(2)",
+        "127(1)",
+        "127(2)"
+      ],
+      "reasoning": "126(1) restrains by voluntarily obstructing a person from proceeding in a direction in which they have a right to proceed. 127(1) confines by restraining a person in such a manner as to prevent proceeding beyond certain circumscribing limits; Illustration 1 to 127 is 'locks Z in'. A person inside a room whose only exit is blocked cannot proceed beyond the room, which reads as confinement. The punishments differ materially: 126(2) one month or fine up to Rs 5,000; 127(2) up to one year or fine up to Rs 5,000.",
+      "recommended_action": "re-author the facts to plain obstruction (e.g. blocking B's car on a road) and keep 126(2); or accept 127(2) as correct",
+      "sources": [
+        "https://devgan.in/bns/section/126/",
+        "https://devgan.in/bns/section/127/"
+      ]
+    },
+    {
+      "item_id": "L7-wrongful_restraint-c003",
+      "facts": "A locked the gate of B's compound from outside so that B could not leave.",
+      "gold_act": "BNS",
+      "gold_provision": "126(2)",
+      "designed_trap_ipc": "341",
+      "status": "UNSUPPORTED",
+      "confidence": "medium-high",
+      "bns_provisions_cited": [
+        "126(1)",
+        "127(1)",
+        "127(2)"
+      ],
+      "reasoning": "This is the illustration fact pattern for wrongful confinement under BNS 127, not restraint under 126: B is restrained so as to be prevented from proceeding beyond the circumscribing limits of the compound. The item's own distractor (BNS 127, wrongful confinement) is arguably the correct answer, and the gold as recorded appears wrong at section level, not merely at subsection level.",
+      "recommended_action": "change gold to 127(2) with punishment 'up to 1 year, or fine up to Rs 5,000, or both'",
+      "sources": [
+        "https://devgan.in/bns/section/127/",
+        "https://devgan.in/bns/section/126/"
+      ]
+    }
+  ],
+  "systemic_findings": [
+    {
+      "id": "cbt_subsection_collapse",
+      "topic": "criminal_breach_of_trust",
+      "affected_items": [
+        "L7-criminal_breach_of_trust-c001",
+        "L7-criminal_breach_of_trust-c003"
+      ],
+      "finding": "The dataset models BNS 316 as a single punishment tier {316(2) <- IPC 406}. BNS 316 has five sub-sections reproducing IPC 405-409, including 316(5) <- IPC 409 for a public servant, banker, merchant, factor, broker, attorney or agent (life or up to 10 years and fine).",
+      "impact": "latent for -c001 (plain entrustment), active for -c003 (facts name an agent): wrong tier and wrong IPC trap",
+      "likely_origin": "assumption in scripts/45_build_target_candidates.py about BNS 316's structure, not a single-row typo"
+    },
+    {
+      "id": "wrongful_restraint_offence_mismatch",
+      "topic": "wrongful_restraint",
+      "affected_items": [
+        "L7-wrongful_restraint-c001",
+        "L7-wrongful_restraint-c003"
+      ],
+      "finding": "Both item fact patterns describe enclosure, which is wrongful confinement under BNS 127, while both golds are wrongful restraint under BNS 126(2).",
+      "impact": "one section-level error (-c003) and one substantive ambiguity (-c001); punishments differ (1 month vs 1 year)",
+      "likely_origin": "fact patterns authored from the restraint definition without testing them against BNS 127's illustrations"
+    },
+    {
+      "id": "silent_on_knowledge",
+      "topic": "culpable_homicide",
+      "affected_items": [
+        "L7-culpable_homicide-c003"
+      ],
+      "finding": "The fact pattern negates intention but says nothing about knowledge, which is the element that separates BNS 105(2) from BNS 106(1).",
+      "impact": "the item tests ambiguity rather than the repealed-code phenomenon it is meant to test",
+      "likely_origin": "fact pattern authored to avoid intention without stating knowledge either way"
+    }
+  ],
+  "recommended_corrections": [
+    {
+      "item_id": "L7-criminal_breach_of_trust-c003",
+      "current": {
+        "gold_provision": "316(2)",
+        "trap_provision": "406"
+      },
+      "recommended": {
+        "gold_provision": "316(5)",
+        "trap_provision": "409",
+        "punishment": "life, or up to 10 years, and fine"
+      },
+      "alternative": "re-author the facts as a non-capacity entrustment and keep 316(2)",
+      "requires_human_approval": true
+    },
+    {
+      "item_id": "L7-culpable_homicide-c003",
+      "current": {
+        "gold_provision": "105"
+      },
+      "recommended": {
+        "gold_provision": "105(2)",
+        "fact_pattern_change": "add a knowledge cue"
+      },
+      "requires_human_approval": true
+    },
+    {
+      "item_id": "L7-wrongful_restraint-c001",
+      "current": {
+        "gold_provision": "126(2)"
+      },
+      "recommended": {
+        "gold_provision": "126(2)",
+        "fact_pattern_change": "re-author to plain obstruction"
+      },
+      "requires_human_approval": true
+    },
+    {
+      "item_id": "L7-wrongful_restraint-c003",
+      "current": {
+        "gold_provision": "126(2)"
+      },
+      "recommended": {
+        "gold_provision": "127(2)",
+        "punishment": "up to 1 year, or fine up to Rs 5,000, or both"
+      },
+      "requires_human_approval": true
+    }
+  ],
+  "correction_mechanism": {
+    "must_not": "in-place edit of data/lexuq_target_candidates_v1.jsonl, which would change its sha256 and invalidate data_sha256 in the committed screen reports",
+    "recommended": "a new versioned dataset (v2) with the screens re-pointed"
+  },
+  "effect_on_the_l7_measurement": {
+    "changes_recorded_result": false,
+    "reason": "all 36 recorded samples asserted repealed IPC sections and none named any BNS provision, so no gold revision can convert a recorded answer into a correct one",
+    "result_stands": {
+      "majority_correct": "0/12",
+      "samples_correct": "0/36"
+    },
+    "risk_carried_forward": "under the current labels a future generator answering BNS 106(1) or BNS 127(2) would be scored incorrect; the cross-model comparison in PHASE-G-L7-INVESTIGATION.md section 9 should not be run against these labels as they stand"
+  },
+  "gates_and_state": {
+    "G5": "NOT_EVALUABLE",
+    "G6": "NOT_MET",
+    "G7": "NOT_MET",
+    "pilot": "ON_HOLD",
+    "gates_changed": false,
+    "thresholds_changed": false,
+    "human_legal_review": "OUTSTANDING",
+    "dataset_review_status": "PENDING_HUMAN_REVIEW"
+  },
+  "unresolved": [],
+  "source_access_limits": [
+    "the India Code bare-act PDF could not be fetched from the reviewing environment",
+    "the MHA gazette PDF was read as a search-index excerpt, not opened directly",
+    "section texts therefore rest on reproductions that agree across independent sites",
+    "no human lawyer participated",
+    "only the 12 L7 items were reviewed; the 12 L1 items were not"
+  ],
+  "human_review_questions": [
+    "For L7-criminal_breach_of_trust-c003: was A acting 'in the way of his business as an agent', so that BNS 316(5) and IPC 409 apply?",
+    "For L7-culpable_homicide-c003: do the facts establish knowledge that the push was likely to cause death, or only negligence?",
+    "For L7-wrongful_restraint-c001: is a person inside a room whose only exit is blocked 'restrained' (BNS 126) or 'confined' (BNS 127)?",
+    "For L7-wrongful_restraint-c003: does locking a compound gate from outside fall under BNS 127 rather than 126?"
+  ]
+}

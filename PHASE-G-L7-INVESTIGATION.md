@@ -1,14 +1,15 @@
 # Phase G — the L7 zero: what the evidence does and does not establish
 
-**Status: investigation complete; the mechanism is established by corroborating
-committed evidence, and is *not* directly recorded for the Stage 2 screen run.
-Human legal review is still outstanding. No gate moves.**
+**Status: investigation complete. The mechanism was established from corroborating
+committed evidence; it has since been *directly measured* on the twelve candidate
+items (§3.4). Human legal review is still outstanding. No gate moves.**
 
 This document answers one question: why did the Phase G Stage 2 screen produce
 zero correct L7 answers (0/120 samples, 0/12 majority)? It is an audit of
-committed artefacts plus deterministic probes of the judge. **No new generation
-was run for it** — where a claim needs a model run, that run is specified in §9
-and left unexecuted.
+committed artefacts plus deterministic probes of the judge. **This audit ran no
+model.** The diagnostic runs recorded in §3.4 were performed separately by the
+operator on a local endpoint; §9 specifies the comparison that has *not* been
+run.
 
 | | |
 |---|---|
@@ -16,6 +17,7 @@ and left unexecuted.
 | Dataset | `data/lexuq_target_candidates_v1.jsonl`, sha256 `f49f4d91…d341` |
 | Reports audited | the full, sliced and smoke Stage 2 screens; the frozen Phase A records; the committed qwen3-14b pilot |
 | Generation performed here | **none** |
+| Diagnostic runs in §3.4 | **two**, made by the operator on a local endpoint, not by this audit; Run B is timestamped `2026-10-27T11:35:24Z`, Run A's date is not recorded here |
 | Gate effect | **none** — G5 `NOT_EVALUABLE`, G6 `NOT_MET`, G7 `NOT_MET` |
 
 ---
@@ -47,6 +49,8 @@ Committed artefacts only, plus code and deterministic probes:
 | `runs/pilot-qwen3-14b-pilot/pilot_items.jsonl` | **per-sample** qwen3-14b records, 24 items × 3 samples |
 | `runs/phaseA-laptop-v2-rejudged+ctx-r2/items.jsonl` | frozen Phase A per-sample records (200 items) |
 | `runs/phaseG_candidate_sources_v1.json` | the provenance registry for the candidate set |
+| `runs/phaseG_l7_qwen3_14b_diagnostic.json` and `…_items.jsonl` | the corrected diagnostic on the twelve candidate items (§3.4); not committed here at the time of writing |
+| a superseded diagnostic whose model id was a placeholder | preserved as history, not attributable to any model (§3.4) |
 | `jurisuq/judge.py`, `jurisuq/normalize.py`, `jurisuq/pipeline.py` | the correctness decision path |
 | `scripts/41_screen_target_yield.py` | the screen harness |
 | `tests/test_judge.py` | the judge's existing behavioural tests |
@@ -106,12 +110,118 @@ produce almost exclusively the **repealed IPC provision**, and neither ever
 produces the BNS gold. For qwen3-14b this is recorded per sample across 36
 answers; for qwen2.5-7b across 1,000.
 
-**Not directly established.** That the *Stage 2 candidate* L7 zero has this same
-cause. The pilot used a different item set (`data/lexuq_slice.jsonl`: 0 id overlap
-with the candidate set) and the Stage 2 reports kept no per-item records. The
-inference is therefore *strong corroboration across a different item set*, not a
-direct measurement of these 12 items — see §4 for why no direct measurement
-exists, and §9 for the cheapest way to obtain one.
+**Not directly established *by this pilot*.** That the *Stage 2 candidate* L7 zero
+had this same cause: the pilot used a different item set (`data/lexuq_slice.jsonl`,
+0 id overlap with the candidate set), and at the time the Stage 2 reports kept no
+per-item records (§4). The pilot alone was therefore strong corroboration across a
+different item set, not a measurement of these 12 items. **§3.4 now supplies that
+measurement**, and the two should be read together: §3.3 shows the pattern is not
+an artefact of one item set; §3.4 records what these twelve items actually
+produced.
+
+### 3.4 The direct measurement on the twelve candidate items
+
+Two runs were made on the twelve candidates, 3 samples each. **They are not the
+same experiment and must never be pooled or averaged.**
+
+| | Run A — superseded | Run B — corrected |
+|---|---|---|
+| `generator` recorded in the report | `openai-compat:REPLACE_WITH_YOUR_MODEL_ID` | `openai-compat:qwen3-14b` |
+| Model actually under test | **unknown** — not attributable to Qwen3-14B | qwen3-14b |
+| Items × samples | 12 × 3 = 36 | 12 × 3 = 36 |
+| Elapsed | ≈895.5 s (operator-reported) | not transcribed here |
+| Majority correct | not transcribed here | **0/12** |
+| Correct samples | not transcribed here | **0/36** |
+| Wilson 95% CI (majority) | — | [0.000000, 0.242494] |
+| Projection | — | `reachable: false` |
+
+**Why Run A is superseded — and preserved.** `scripts/41` takes its model from
+`--set model=`, which defaults to `configs/phase_a.json`; that file carries the
+literal string `REPLACE_WITH_YOUR_MODEL_ID`, and the OpenAI-compatible generator
+names itself `openai-compat:{model}` (`jurisuq/config.py:10`,
+`jurisuq/generators.py:196`). Nothing in the harness refuses such a value, so an
+un-overridden run silently labels itself with the placeholder. Run A is kept as
+the record of a mis-specified model id. **It is not evidence about Qwen3-14B and
+its numbers must not be cited as if it were.**
+
+**Run B — command as run** (Windows, from the repository root):
+
+```powershell
+python scripts\41_screen_target_yield.py `
+    --data data\lexuq_target_candidates_v1.jsonl `
+    --slice L7 `
+    --out runs\phaseG_l7_qwen3_14b_diagnostic.json `
+    --save-items runs\phaseG_l7_qwen3_14b_diagnostic_items.jsonl `
+    --allow-generation `
+    --set model=qwen3-14b --set n_samples=3
+```
+
+`--provider` is **not** a flag of this script; the provider comes from
+`configs/phase_a.json` (`"provider": "openai"`). Earlier drafts of §9 showed
+`--provider openai` and would have failed at argument parsing.
+
+**Verified against the run files** by the operator on 2026-10-27:
+
+| Field | Value |
+|---|---|
+| `generator` | `openai-compat:qwen3-14b` |
+| `data_sha256` | `f49f4d91946387eb0534718945092cc2f840bd9f2aee053ed9ac13c3f296d341` — matches the committed dataset |
+| `n_items` / `n_samples_per_item` | 12 / 3 |
+| `yield.overall` | 0/12 majority correct; 0/36 samples correct |
+| `yield.overall.majority_interval` | Wilson, `[0.0, 0.242494]`, 95% |
+| `projection.reachable` | `false` — "a zero observed rate cannot be projected" |
+| `generated_utc` | `2026-10-27T11:35:24Z` |
+| judge / temperature | **not recorded in the report**; `configs/phase_a.json` reads `provision` and `1.0` |
+
+**Item-level results.** Twelve records, three samples each. `majority_verdict` is
+`stale_law` for all twelve and `repealed_code_share` is exactly 1.0 for all
+twelve, so every one of the 36 samples asserted a code repealed on 1 July 2024.
+
+| Item | Gold | Majority verdict | Provision counts (per sample) | Repealed share |
+|---|---|---|---|---:|
+| `L7-cheating-c001` | `BNS 318(4)` | `stale_law` | IPC 420 ×3 | 1.0 |
+| `L7-criminal_breach_of_trust-c001` | `BNS 316(2)` | `stale_law` | IPC 201 ×1; IPC 406 ×2 | 1.0 |
+| `L7-criminal_breach_of_trust-c003` | `BNS 316(2)` | `stale_law` | IPC 406 ×3 | 1.0 |
+| `L7-cruelty_by_husband-c001` | `BNS 85` | `stale_law` | IPC 304B ×2; IPC 498A ×1 | 1.0 |
+| `L7-culpable_homicide-c003` | `BNS 105` | `stale_law` | IPC 304A ×3 | 1.0 |
+| `L7-murder-c001` | `BNS 103(1)` | `stale_law` | IPC 300 ×3 | 1.0 |
+| `L7-theft-c001` | `BNS 303(2)` | `stale_law` | IPC 379 ×3 | 1.0 |
+| `L7-theft-c003` | `BNS 303(2)` | `stale_law` | IPC 379 ×3 | 1.0 |
+| `L7-theft_in_dwelling-c001` | `BNS 305` | `stale_law` | IPC 395 ×3 | 1.0 |
+| `L7-theft_in_dwelling-c003` | `BNS 305` | `stale_law` | IPC 395 ×1; IPC 397 ×2 | 1.0 |
+| `L7-wrongful_restraint-c001` | `BNS 126(2)` | `stale_law` | IPC 376 ×1; IPC 376A ×1; IPC 377 ×1 | 1.0 |
+| `L7-wrongful_restraint-c003` | `BNS 126(2)` | `stale_law` | IPC 377 ×1; IPC 379 ×2 | 1.0 |
+
+**Three things this table shows that the aggregate does not.**
+
+1. **Label unanimity is not provision unanimity.** `majority_verdict` is a judge
+   label taken from the modal cluster's first member; `prov_counts` is a per-sample
+   tally of `provision_key`. **5** of the twelve items split across two or three
+   different IPC sections while all carrying `stale_law`.
+2. **The attractor is "a repealed code", not "the matched repealed twin".**
+   Measured against each item's designed `trap`: **4** items take the trap on all
+   three samples, **2** take it on some, and **6 never take it at all**:
+   `L7-culpable_homicide-c003`, `L7-murder-c001`, `L7-theft_in_dwelling-c001`, `L7-theft_in_dwelling-c003`, `L7-wrongful_restraint-c001`, `L7-wrongful_restraint-c003`. The murder item answers `IPC 300` (the
+   *definition* of murder, not the punishment in `IPC 302`); the culpable-homicide
+   item answers `IPC 304A` (negligence); the theft-in-dwelling items answer dacoity
+   sections `IPC 395`/`397`; the wrongful-restraint items answer sexual-offence
+   sections `IPC 376`/`376A`/`377`.
+3. **The gold provision is never reached.** Not one of the 36 samples names a BNS
+   section, consistent with §3.1 and with the frozen runs.
+
+**What §3.4 establishes.** On these twelve items, under this configuration, the
+generator produced no correct majority answer and no correct sample in 36
+generations, and every sample asserted a repealed criminal code.
+
+**What it does not establish.** Independent correctness of any gold label
+(`provenance.verified` remains `false`); that L7 is unanswerable in general
+(n = 12, one model, one prompt, one temperature, CI upper bound 0.2425); that
+another model would behave the same; or any change to a Phase G gate.
+
+**Provenance of this table.** The twelve rows are the operator's transcription of
+`runs/phaseG_l7_qwen3_14b_diagnostic_items.jsonl`, verified against that file
+locally; this audit did not hold the file in its own environment. Counts are per
+sample, not per item. Regenerate rather than retype — see §11.
 
 ## 4. Finding 2 — the zero was unattributable because the harness discards the evidence (confirmed)
 
@@ -288,7 +398,7 @@ dataset composition is out of scope for this task.
 | Bare provision numbers without a cue are not detected | **Established** | deterministic probes (§5.3) |
 | qwen3-14b asserts the repealed IPC on L7 items | **Established** (frozen-slice pilot, per sample) | `pilot_items.jsonl`: 33/36 |
 | qwen2.5-7b does the same at scale | **Established** (frozen slice) | `PHASE-G.md` table: 832/1000 |
-| **The Stage 2 candidates' L7 zero has that same cause** | **Strongly corroborated, not directly recorded** | §3.3, §4 |
+| **The Stage 2 candidates' L7 zero has that same cause** | **Directly measured on the twelve items: 0/36 correct, 12/12 `stale_law`, repealed share 1.0** | Run B items JSONL, §3.4 |
 | The 12 gold labels are legally correct | **Unverified — needs a human** | §6.3 |
 | Any gate should move | **No** | §12 |
 
@@ -308,57 +418,79 @@ result.
    are resolved and existence-checked *before* any sampling, so a mis-specified
    run refuses in seconds instead of after the full generation budget.
 
-## 9. The next experiment — specified, not run
+## 9. The comparison experiment — specified, not run
 
-**Purpose.** Obtain per-sample labels for the twelve *candidate* L7 items, to
-convert §3.3's corroboration into a direct measurement of these items.
+The L7 diagnostic itself is done (§3.4). What is **not** done is the step that
+would let the result say something about the *project's thesis* rather than about
+one endpoint, and that step is not a larger screening run.
 
-**Smallest useful run.** Re-screen **L7 only**: 12 items × 3 samples = **36
-generations**, with the new diagnostics on.
+**Order matters.** First the gold labels must survive independent review (§10):
+if a gold is wrong, the model may be right and the item wrong, and that inverts
+the interpretation of every row in §3.4. Only then is a comparison worth its
+compute.
+
+**The comparison.** Re-screen the same twelve L7 items with **one** alternative
+generator, or one prompt variant, holding everything else fixed — same dataset,
+same slice, same judge, same `n_samples`, so the only difference is the variable
+under test:
 
 ```powershell
-python scripts/41_screen_target_yield.py `
-    --data data/lexuq_target_candidates_v1.jsonl `
+python scripts\41_screen_target_yield.py `
+    --data data\lexuq_target_candidates_v1.jsonl `
     --slice L7 `
-    --out runs/phaseG_l7_diagnostic.json `
-    --save-items runs/phaseG_l7_diagnostic_items.jsonl `
-    --provider openai --allow-generation `
-    --set n_samples=3
+    --out runs\phaseG_l7_compare_<model-id>.json `
+    --save-items runs\phaseG_l7_compare_<model-id>_items.jsonl `
+    --allow-generation `
+    --set model=<model-id> --set n_samples=3
 ```
 
-**`--slice L7` was added for this run.** Without it, `_limit` stratified any cap
-across both slices — `--items 12` produced 6 L1 + 6 L7 — so the earlier draft of
-this command would have screened the wrong thing. The filter is applied after
-contract validation and before the cap, so the cap now counts within L7. Omitting
-`--slice` reproduces the previous behaviour exactly (all 24 items).
+Replace `<model-id>` with the exact id reported by the endpoint's `/v1/models`.
+**Do not leave `--set model=` off**: the default is the placeholder discussed in
+§3.4, and an un-overridden run is not attributable to any model.
 
-**This command has not been run.** It needs approval first, and it spends real
-generation time on a local endpoint.
+**This comparison has not been run.** It needs approval first, and it must not
+be run until §10 has an outcome.
 
-**Prerequisites.** A running OpenAI-compatible endpoint serving `qwen3-14b` with
-reasoning off; `--allow-generation`; no paid API (the endpoint is local, so cost
-is $0 — the three committed screen runs cost $0.00).
+**Prerequisites.** A running OpenAI-compatible endpoint serving the comparison
+model with reasoning off; `provider` comes from `configs/phase_a.json` ("openai"),
+so only the model id is overridden; `--allow-generation`; no paid API — the local
+endpoint cost $0.00 for all runs recorded here.
 
-**Expected cost.** The sliced screen took 10,684.6 s for 240 generations
-(44.5 s/sample); the pilot took 1,373 s for 72 (19.1 s/sample). So **≈ 11–27
-minutes** for 36 generations.
+**Expected cost.** The three committed Stage 2 screens ran at 44.5 s/sample; the
+pilot at 19.1 s/sample. A 36-generation comparison is therefore ≈ 11–27 minutes.
 
 **Decision criteria, fixed in advance:**
 
-| If the labels show | Interpretation | Next action |
+| If the comparison shows | Interpretation | Next action |
 |---|---|---|
-| `stale_law` ≥ 80% | Generator knowledge limit confirmed on these items too | Record as a finding; the target population needs a different generator or prompt, **not** more items — a larger run cannot fix it |
-| `unresolved` / `no_provision_named` dominant | Output format or parser problem | Investigate prompt/answer format and `find_mentions` (§5.3) before any further screening |
-| any `gold` labels appear | The earlier zero was sampling noise or item-specific | Re-screen with more samples before concluding anything |
+| repealed codes on ≥ 80% of samples again | the attractor is not specific to this model or prompt | record as a cross-model finding; a third model adds little — move to gold review outcomes |
+| a materially different label mix | the pattern is configuration-specific | identify which variable moved (model vs prompt) before any further run |
+| any BNS gold provision appears | these items are reachable in principle | re-screen with more samples before concluding anything |
 
-**What would not be justified:** a large run. G7 needs both classes on L7; if the
-generator will not produce the BNS provision, more generation buys L1 items only
-(§6d of `PHASE-G-STAGE2.md`).
+**What would still not be justified:** a large L7 run. G7 needs both correctness
+classes on L7; if the generator will not produce the BNS provision, more
+generation buys L1 items only (§6d of `PHASE-G-STAGE2.md`).
 
 ## 10. Human legal review — PENDING
 
 **Not started. No item has been reviewed by a qualified person.** Automated checks
 in this repository cannot substitute for it, and nothing below is legal advice.
+
+**An AI-assisted source comparison now exists:**
+[`reports/phaseG_l7_label_review_v1.md`](reports/phaseG_l7_label_review_v1.md)
+(record: `runs/phaseG_l7_label_review_v1.json`). It is **not** the review this
+section asks for and it changes no label and no provenance field. Its findings —
+8 of the 12 labels confirmed, 3 ambiguous, 1 unsupported — are a starting point
+for the reviewer, and its §7 lists four recommended corrections, including one
+section-level error (`wrongful_restraint-c003` reads as confinement under BNS 127,
+not restraint under 126).
+
+Those four corrections were **decided and applied to a new file**, not to this
+dataset: `data/lexuq_target_candidates_v2.jsonl`, described in
+[`reports/phaseG_l7_label_review_v2_changes.md`](reports/phaseG_l7_label_review_v2_changes.md).
+v1 — the file every result in this document was measured on — is unchanged. v2
+has not been screened, and its revisions are AI-assisted and operator-decided,
+not human legal approval.
 
 Reviewer instructions: for each item, open the source in §6.1, read the facts, and
 answer the five decisions. Record the source actually opened. Start with `cheating`,
@@ -586,6 +718,13 @@ approved, and update `review.status` per item — do not flip the field for the 
 
 ## 11. Reproducing the checks in this document
 
+**Regenerating §3.4's item table from the run** (read-only; requires the two
+diagnostic files, which are not committed here):
+
+```powershell
+python -c "import json,collections; r=[json.loads(l) for l in open(r'runs\phaseG_l7_qwen3_14b_diagnostic_items.jsonl',encoding='utf-8')]; [print(x['item_id'], x['majority_verdict'], x.get('prov_counts'), x.get('repealed_code_share')) for x in sorted(r,key=lambda y:y['item_id'])]; print('majority', sum(x['majority_correct'] for x in r),'/',len(r)); print('samples', sum(sum(x['sample_correct']) for x in r),'/',sum(len(x['sample_correct']) for x in r)); print(collections.Counter(l for x in r for l in x['sample_verdict_labels']))"
+```
+
 Deterministic, offline, no model required:
 
 ```powershell
@@ -618,11 +757,18 @@ python -c "import json; from jurisuq.judge import ProvisionJudge; i=[json.loads(
 
 ## 13. Limitations of this investigation
 
-1. The Stage 2 L7 mechanism is inferred from a *different item set*. §9 exists to
-   close that gap.
+1. The Stage 2 L7 mechanism in §3.3 is inferred from a *different item set*;
+   §3.4 closed that gap for these twelve items, and nothing here measures other
+   item sets or other models.
 2. The pilot's per-sample evidence is for 3 samples per item, not 10.
 3. No external legal verification was performed here, and none is implied.
 4. The three Stage 2 reports cannot be re-derived per item; that evidence is gone
    by construction (§4).
 5. The fact patterns are not shared across slices (§6.4), so part of the L1/L7
    difference may be item difficulty rather than the era flip.
+6. §3.4's item table is the operator's transcription of the run's JSONL; this
+   audit did not hold that file in its own environment.
+7. The diagnostic report does not record the judge, temperature or base URL, so
+   those rest on `configs/phase_a.json` rather than on the artefact itself.
+8. §3.4 is one model, one prompt template, one temperature and twelve items. Its
+   Wilson upper bound of 0.2425 is the precision available at this sample size.

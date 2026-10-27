@@ -57,6 +57,22 @@ Built deterministically by `scripts/45_build_target_candidates.py`, which holds
 the item table and the citations in one file so the dataset and its provenance
 record cannot drift apart. No network, no model.
 
+**A second version exists and has never been screened.**
+`data/lexuq_target_candidates_v2.jsonl` (sha256
+`44e7b5a2f3f968a7523b071a972ef522894f7ad0453e7390dff728b020878e8c`) revises
+**four L7 items** — the agent tier for criminal breach of trust, the knowledge
+limb for culpable homicide, and the restraint/confinement distinction in both
+wrongful-restraint items. It is built by
+`scripts/46_revise_target_candidates_v2.py` from v1, so that v1 stays frozen:
+the three committed screen reports record v1's hash as `data_sha256`, and editing
+v1 in place would detach them from the dataset they were taken over. The other
+twenty rows are byte-identical, every `item_id` is unchanged, all four revisions
+are recorded with their legal source and reasoning in
+[`reports/phaseG_l7_label_review_v2_changes.md`](reports/phaseG_l7_label_review_v2_changes.md)
+and `runs/phaseG_l7_candidate_revisions_v1.json`. `configs/phase_g_target.json`
+still points at **v1**, and every item in both versions still carries
+`provenance.verified = false`. **v2 carries no measurement of any kind.**
+
 ### Data card
 
 | Field | Value |
@@ -391,18 +407,27 @@ python -X utf8 scripts/41_screen_target_yield.py --data data/lexuq_target_candid
 # 6. inspect the committed reports without regenerating anything
 python -X utf8 -m pytest tests/test_target_screen_report.py -q
 
-# 7. the L7-only diagnostic (NOT yet run; see PHASE-G-L7-INVESTIGATION.md section 9).
-#    --slice narrows the run before the cap, so this screens 12 L7 items and never
-#    selects L1. --save-items writes the per-item evidence the aggregate omits.
+# 7. the L7-only diagnostic -- RUN on 2026-10-27; results in PHASE-G-L7-INVESTIGATION.md
+#    section 3.4. --slice narrows the run before the cap, so it screens 12 L7 items
+#    and never selects L1. --save-items writes the per-item evidence the aggregate
+#    omits. --set model= is mandatory: without it the run is labelled with the
+#    placeholder in configs/phase_a.json and is not attributable to any model.
 python -X utf8 scripts/41_screen_target_yield.py --data data/lexuq_target_candidates_v1.jsonl \
-    --slice L7 --out runs/phaseG_l7_diagnostic.json \
-    --save-items runs/phaseG_l7_diagnostic_items.jsonl --allow-generation \
-    --set n_samples=3
+    --slice L7 --out runs/phaseG_l7_qwen3_14b_diagnostic.json \
+    --save-items runs/phaseG_l7_qwen3_14b_diagnostic_items.jsonl --allow-generation \
+    --set model=qwen3-14b --set n_samples=3
 ```
 
 Step 5 was already run and its artefacts are committed, so **no regeneration is
 needed** to reproduce this document's analysis. Re-running it would spend about
-2.6 hours of local compute. **Step 7 has not been run** and needs approval first.
+2.6 hours of local compute.
+
+Step 7 **was run** on 2026-10-27 against qwen3-14b: 12 L7 items × 3 samples, 0/12
+majority correct, 0/36 correct samples, Wilson 95% interval [0.0, 0.2425], every
+sample asserting a repealed code. An earlier attempt used a placeholder model id
+and is **not** attributable to Qwen3-14B; the two runs are kept separate in
+`PHASE-G-L7-INVESTIGATION.md` section 3.4. The comparison experiment that would
+follow gold review has **not** been run.
 
 `--slice SLICE` restricts a screen to one slice (`L1` or `L7`). It is validated
 against the slices present in the file, so a typo — or asking for `L1` in an
@@ -465,11 +490,21 @@ The investigation asked for here has been carried out and is reported in full in
   unverified: **human legal review is outstanding**, with a per-item checklist in
   §10 of the investigation document.
 
-**Next action: run the L7-only diagnostic specified in §9 of that document** — 12
-items × 3 samples, ~11–27 minutes on a local endpoint at $0, writing per-item
-records — with its interpretation criteria fixed in advance. A larger run is still
+**Next action: independent review of the twelve L7 gold labels**, using the
+checklist in section 10 of that document. The diagnostic itself has been run
+(section 3.4 there): on these twelve items, under this configuration, the
+generator produced 0 correct majority answers and 0 correct samples in 36
+generations, and every sample asserted a repealed code. That is a measurement on
+twelve items with one model — not a statement that L7 is unanswerable in general —
+and it does not verify any gold label. A cross-model comparison (section 9 there)
+is worth running only after the labels survive review. A larger run is still
 **not** justified: the 172-item projection comes from an aggregate rate that L7
 contributes nothing to.
+
+An **AI-assisted source comparison** of those twelve labels is recorded in
+[`reports/phaseG_l7_label_review_v1.md`](reports/phaseG_l7_label_review_v1.md):
+8 confirmed, 3 ambiguous, 1 unsupported, no label changed. It narrows the human
+review to four decisions but does not replace it.
 
 Stage 2 remains **partial**: item authoring, contract validation, screening, the
 affordability decision and the L7 investigation are done; human legal review and
