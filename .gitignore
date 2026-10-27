@@ -8,6 +8,6 @@ __pycache__/
 # copies of the public encoder) — keep it on disk, keep it out of git
 models/
 
-# the offline demonstration writes scratch outputs here; regenerate with
-#   python -X utf8 scripts/47_demo.py
-runs/demo/
+# the offline integrity check writes scratch outputs here; regenerate with
+#   python -X utf8 scripts/47_offline_check.py
+runs/offline_check/

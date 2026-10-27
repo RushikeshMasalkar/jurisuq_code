@@ -7,14 +7,13 @@ answering.
 > not provide legal advice. Its benchmark is scoped and partly synthetic, and
 > Phase C legal verification is incomplete.
 
-**Where to start.** [`PROFESSOR-SUMMARY.md`](PROFESSOR-SUMMARY.md) for the
-question and the evidence, [`STATUS.md`](STATUS.md) for what is finished,
-blocked and why, [`DEMO.md`](DEMO.md) to run everything offline in one command,
-and [`ROADMAP.md`](ROADMAP.md) for the order of the remaining work.
+**Where to start.** [`STATUS.md`](STATUS.md) is the authoritative record of what
+is implemented, what is tested, what is blocked and why; [`ROADMAP.md`](ROADMAP.md)
+holds the dependency order of the remaining work.
 
 ```bash
-python -X utf8 -m pytest -q        # the suite
-python -X utf8 scripts/47_demo.py  # offline end-to-end demonstration (no model)
+python -X utf8 -m pytest -q                       # the suite
+python -X utf8 scripts/47_offline_check.py        # offline integrity + integration check
 ```
 
 ## Purpose and scope
@@ -386,18 +385,12 @@ pre-existing torch gate. Reports:
 
 Project-level documents, read first:
 
-- [`PROFESSOR-SUMMARY.md`](PROFESSOR-SUMMARY.md) — the research question,
-  architecture, the evidence that exists, what is provisional, and the next
-  experiment, in one page.
 - [`STATUS.md`](STATUS.md) — the authoritative per-phase status: implemented
   components and paths, tests actually run, artefacts and hashes, remaining
   implementation and experimental work, human dependencies, the status label for
   each phase, and the exact action that resolves each blocker.
 - [`ROADMAP.md`](ROADMAP.md) — the dependency order for the remaining work, with
   the blocked milestones and their unblock conditions.
-- [`DEMO.md`](DEMO.md) — quick start for Windows PowerShell and POSIX, the
-  one-command offline demonstration, expected outputs, and the difference between
-  a mock, a fixture and a real run.
 
 Canonical phase guides, each containing implementation details and the complete
 historical results record:
@@ -502,8 +495,8 @@ python -m pytest -q
 python scripts/00_env_check.py --skip-endpoint
 ```
 
-**Current suite (2026-10-27, Python 3.11.2, CPU-only sandbox): `650 passed, 1
-skipped` in about 9 s.** The one skip is the optional `torch`/`transformers`
+**Current suite (2026-10-27, Python 3.11.2, CPU-only sandbox): `645 passed, 1
+skipped` in about 11 s.** The one skip is the optional `torch`/`transformers`
 path, which needs the Phase A optional requirements; it is a genuine dependency
 skip, not a weakened test. Re-run the command for the count on your machine.
 
@@ -511,16 +504,21 @@ The per-block counts quoted further up this file (160, 216, 270, 589 …) are
 **historical records** of the suite at the time each block was merged. They are
 not claims about the present suite; only the line above is.
 
-Offline end-to-end demonstration of the implementation (no model, no network):
+Offline integrity and integration check (no model, no network, no API key):
 
 ```bash
-python scripts/47_demo.py
+python scripts/47_offline_check.py
 ```
 
-It verifies the frozen-input hashes, re-runs the target-population audit, the
-§21.2 matrix, the §21.3 deployment summary and a mock plumbing screen into
-`runs/demo/`, and prints the gate verdicts exactly as stored. See
-[`DEMO.md`](DEMO.md).
+It verifies the recorded SHA-256 digests of the frozen inputs, re-runs the
+target-population audit, the §21.2 evaluation matrix, the §21.3 deployment
+summary, the §21.3-only mock smoke of the screen harness, and the v2 builder
+reproducibility check, writing everything under `runs/offline_check/` and
+printing the gate verdicts exactly as stored. Exit codes: `0` all good, `2`
+a frozen input no longer matches its digest, `1` a stage failed. It is the
+regression check for the stored evidence, not an experiment: the mock stage
+exercises the harness wiring and its 100 % accuracy is an artefact of the mock
+echoing the gold.
 
 Focused deterministic checks:
 

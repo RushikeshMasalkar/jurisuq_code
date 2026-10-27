@@ -10,8 +10,8 @@ artefacts under `runs/` win, and this file is the thing to fix.
 |---|---|
 | Status date | 2026-10-27 |
 | Branch of record | `main` |
-| Full suite, actually run on 2026-10-27 | `python -X utf8 -m pytest -q` → **650 passed, 1 skipped** in about 9 s (651 collected; the skip is the optional torch/transformers path) |
-| Offline demonstration | `python -X utf8 scripts/47_demo.py` — no model, no network |
+| Full suite, actually run on 2026-10-27 | `python -X utf8 -m pytest -q` → **645 passed, 1 skipped** in about 11 s (646 collected; the skip is the optional torch/transformers path) |
+| Offline integrity check | `python -X utf8 scripts/47_offline_check.py` — no model, no network |
 | Gate summary | G1 PASS · G2 NOT YET · G3 NOT MET · G4 PASS · G5 NOT_EVALUABLE · G6 NOT_MET · G7 NOT_MET · pilot ON_HOLD |
 
 **Two things this project is not.** It is not a legal service and gives no legal
@@ -209,7 +209,7 @@ unit tests pass.
 | calibration | maps, splits, policy, conformal | `jurisuq/calibration/*` | `TESTED` |
 | evaluation | §21.2 matrix, §21.3 deployment | `jurisuq/evaluation/*` | `TESTED` |
 | target population | contract, screen, yield, revisions | `jurisuq/target/*`, `scripts/40`–`46` | `TESTED` |
-| **demonstration** | **one-command offline demo** | **`scripts/47_demo.py`**, `tests/test_demo.py` | `TESTED` |
+| validation | offline integrity + integration check | `scripts/47_offline_check.py`, `tests/test_offline_check.py` | `TESTED` |
 
 ---
 
@@ -235,7 +235,8 @@ of these exist in this environment**, and `configs/phase_a.json` here is the
 committed placeholder rather than the local endpoint configuration. Every figure
 attributed to the 12-item diagnostic is therefore **operator-reported**, as the
 status records already say. Nothing in this repository was fabricated to fill
-that gap.
+that gap. That diagnostic is a single-model measurement, so it is
+**not a cross-model comparison**; no cross-model claim is made in this project.
 
 ---
 
@@ -278,7 +279,7 @@ prerequisite for the cross-model comparison, and it will not move G7.
 
 ```powershell
 python -X utf8 -m pytest -q
-python -X utf8 scripts/47_demo.py
+python -X utf8 scripts/47_offline_check.py
 python -X utf8 scripts/46_revise_target_candidates_v2.py --check
 python -X utf8 -c "from jurisuq.target import load_candidates as l; print(len(l('data/lexuq_target_candidates_v1.jsonl')), len(l('data/lexuq_target_candidates_v2.jsonl')))"
 ```
