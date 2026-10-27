@@ -515,6 +515,17 @@ aggregate could not: **every correct item is L1, and L7 yielded nothing.** Why i
 unexplained — neither report keeps per-item records — so the L7 investigation is
 the outstanding step, alongside human legal review.
 
+**Progress since that paragraph:** the L7 investigation now exists
+([`PHASE-G-L7-INVESTIGATION.md`](PHASE-G-L7-INVESTIGATION.md)), including a direct
+measurement on the twelve L7 candidates in its §3.4, and an AI-assisted reading of
+the twelve gold labels in
+[`reports/phaseG_l7_label_review_v1.md`](reports/phaseG_l7_label_review_v1.md). Four
+of those labels were revised into a **new, never-screened** candidate file,
+`data/lexuq_target_candidates_v2.jsonl`; the screens above are untouched and still
+describe v1. None of that is a legal finding and none of it moves a gate: the
+labels remain `PENDING_HUMAN_REVIEW`, `provenance.verified` is still `false`, and
+G5/G6/G7 are unchanged.
+
 `scripts/41` now emits `yield_by_slice` on every run, so an aggregate can no
 longer hide this. **G5/G6/G7 are unchanged**: a yield screen carries no detector
 fields, no method scores and no evaluated partition, so it cannot enter the §21.2
