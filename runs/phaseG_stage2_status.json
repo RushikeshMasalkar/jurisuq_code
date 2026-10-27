@@ -3,7 +3,7 @@
   "stage": 2,
   "generated_utc": "2026-10-25T11:47:05Z",
   "amended_utc": "2026-10-27",
-  "amendment": "records the operator-reported L7 diagnostic and the AI-assisted label review; the Stage 2 screen figures above are untouched, generated_utc is left as the original record time, and no gate, threshold or frozen artefact changed",
+  "amendment": "records the operator-reported L7 diagnostic and the AI-assisted label review; the Stage 2 screen figures above are untouched, generated_utc is left as the original record time, and no gate, threshold or frozen artefact changed; amended again the same day to record the v2 candidate set and its mock plumbing check, neither of which is a measurement",
   "headline": "Stage 2 screening is complete: all three Qwen3 14B artefacts are committed in this repository. The full run reports 3/24 majority-correct items (rate 0.1250, Wilson interval [0.0434, 0.3100]). The separate sliced run shows every correct item is L1 (3/12) and L7 produced 0 correct samples out of 120. These are automated screening results, not human legal verification. The L7 zero is attributed to the generator asserting the repealed IPC provision (per-sample evidence in PHASE-G-L7-INVESTIGATION.md), not to item difficulty or a scoring artefact; human legal review of the gold labels remains outstanding. G5, G6 and G7 are unchanged.",
   "status": "SCREEN_COMPLETE_L7_OUTSTANDING",
   "completed": [
@@ -380,5 +380,45 @@
       "runs/phaseG_screen_qwen3_14b_smoke.json"
     ],
     "label_review": "reports/phaseG_l7_label_review_v1.md"
+  },
+  "candidate_dataset_v2": {
+    "path": "data/lexuq_target_candidates_v2.jsonl",
+    "sha256": "44e7b5a2f3f968a7523b071a972ef522894f7ad0453e7390dff728b020878e8c",
+    "n_items": 24,
+    "slices": {
+      "L1": 12,
+      "L7": 12
+    },
+    "status": "AUTHORED_NOT_SCREENED",
+    "built_by": "scripts/46_revise_target_candidates_v2.py",
+    "revised_items": [
+      "L7-criminal_breach_of_trust-c003",
+      "L7-culpable_homicide-c003",
+      "L7-wrongful_restraint-c001",
+      "L7-wrongful_restraint-c003"
+    ],
+    "rows_unchanged": 20,
+    "basis": "ai_assisted_source_comparison; operator-decided 2026-10-27; not human legal verification",
+    "provenance_verified": false,
+    "review_status": "PENDING_HUMAN_REVIEW",
+    "config_points_at": "data/lexuq_target_candidates_v1.jsonl",
+    "records": [
+      "reports/phaseG_l7_label_review_v2_changes.md",
+      "runs/phaseG_l7_candidate_revisions_v1.json",
+      "tests/test_target_candidates_v2.py"
+    ],
+    "mock_plumbing_check": {
+      "report": "runs/phaseG_screen_mock_candidates_v2.json",
+      "per_item": "runs/phaseG_screen_mock_candidates_v2_items.jsonl",
+      "is_mock": true,
+      "what_it_checks": "that v2 loads, passes the candidate contract and screens end to end with the per-item evidence path, with no model and no network",
+      "what_it_shows": "24/24 correct at 1.0 by construction, because the mock provider answers the gold",
+      "must_not_be_read_as": "a yield estimate, evidence about any model, a measurement of v2, or a gate movement"
+    },
+    "must_not_be_pooled_with": [
+      "runs/phaseG_screen_qwen3_14b_full.json",
+      "runs/phaseG_screen_qwen3_14b_sliced.json",
+      "runs/phaseG_screen_qwen3_14b_smoke.json"
+    ]
   }
 }

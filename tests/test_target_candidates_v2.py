@@ -231,3 +231,37 @@ def test_the_builder_reproduces_the_committed_v2():
                             cwd=ROOT, capture_output=True, text=True)
     assert result.returncode == 0, result.stdout + result.stderr
     assert "matches the builder" in result.stdout
+
+
+# ----------------------------------------------------------------------
+# the v2 plumbing check exists and cannot be mistaken for evidence
+# ----------------------------------------------------------------------
+def test_the_v2_plumbing_check_is_mock_and_taken_over_v2():
+    report = json.loads(
+        (ROOT / "runs" / "phaseG_screen_mock_candidates_v2.json").read_text(encoding="utf-8"))
+    from jurisuq.target import content_sha256
+
+    assert report["is_mock"] is True
+    assert report["generator"] == report["provider"] == "mock"
+    assert report["data_sha256"] == content_sha256(V2)
+    assert report["data_path"].endswith("lexuq_target_candidates_v2.jsonl")
+    assert report["n_items"] == 24
+    assert report["candidate_contract"]["provenance_verified"] is False
+
+
+def test_the_v2_plumbing_check_is_recorded_as_not_evidence():
+    """The mock provider answers the gold, so its 1.0 rate proves plumbing only."""
+    status = json.loads((ROOT / "runs" / "phaseG_stage2_status.json").read_text(encoding="utf-8"))
+    check = status["candidate_dataset_v2"]["mock_plumbing_check"]
+    assert check["is_mock"] is True
+    disclaimer = check["must_not_be_read_as"].lower()
+    assert "yield estimate" in disclaimer
+    assert "gate" in disclaimer
+    assert check["what_it_shows"].strip()
+    assert status["candidate_dataset_v2"]["status"] == "AUTHORED_NOT_SCREENED"
+    assert status["candidate_dataset_v2"]["provenance_verified"] is False
+
+
+def test_the_status_record_does_not_point_the_config_at_v2():
+    status = json.loads((ROOT / "runs" / "phaseG_stage2_status.json").read_text(encoding="utf-8"))
+    assert status["candidate_dataset_v2"]["config_points_at"].endswith("_v1.jsonl")
