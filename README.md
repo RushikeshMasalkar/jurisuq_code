@@ -502,7 +502,7 @@ python -m pytest -q
 python scripts/00_env_check.py --skip-endpoint
 ```
 
-**Current suite (2026-10-27, Python 3.11.2, CPU-only sandbox): `649 passed, 1
+**Current suite (2026-10-27, Python 3.11.2, CPU-only sandbox): `650 passed, 1
 skipped` in about 9 s.** The one skip is the optional `torch`/`transformers`
 path, which needs the Phase A optional requirements; it is a genuine dependency
 skip, not a weakened test. Re-run the command for the count on your machine.

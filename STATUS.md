@@ -10,7 +10,7 @@ artefacts under `runs/` win, and this file is the thing to fix.
 |---|---|
 | Status date | 2026-10-27 |
 | Branch of record | `main` |
-| Full suite, actually run on 2026-10-27 | `python -X utf8 -m pytest -q` → **649 passed, 1 skipped** in about 9 s (650 collected; the skip is the optional torch/transformers path) |
+| Full suite, actually run on 2026-10-27 | `python -X utf8 -m pytest -q` → **650 passed, 1 skipped** in about 9 s (651 collected; the skip is the optional torch/transformers path) |
 | Offline demonstration | `python -X utf8 scripts/47_demo.py` — no model, no network |
 | Gate summary | G1 PASS · G2 NOT YET · G3 NOT MET · G4 PASS · G5 NOT_EVALUABLE · G6 NOT_MET · G7 NOT_MET · pilot ON_HOLD |
 

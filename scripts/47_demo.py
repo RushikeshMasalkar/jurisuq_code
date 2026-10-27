@@ -142,11 +142,15 @@ def build_demo(out_dir: Path, root: Path = ROOT, quick: bool = False) -> dict:
 
         # 4. the real screen harness with the mock provider: plumbing only
         if not quick:
+            # --force is scoped to this demo's own scratch directory: the screen
+            # harness refuses to overwrite an existing report, which is correct
+            # for shipped evidence and wrong for a repeatable demonstration.
             steps.append(_run("41_screen_target_yield.py",
                               ["--data", "data/lexuq_target_candidates_v1.jsonl",
                                "--slice", "L7", "--items", "2",
                                "--out", _out_path(out_dir, "demo_screen_mock.json"),
                                "--save-items", _out_path(out_dir, "demo_screen_mock_items.jsonl"),
+                               "--force",
                                "--set", "provider=mock", "--set", "n_samples=3"], root))
             artifacts.extend([_out_path(out_dir, "demo_screen_mock.json"),
                               _out_path(out_dir, "demo_screen_mock_items.jsonl")])

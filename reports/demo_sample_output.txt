@@ -20,7 +20,6 @@ HOW TO READ IT
   Candidates  -> both candidate sets validate and remain unverified
 
 BEGIN CAPTURED OUTPUT
--------------------------------------------------------------------------------
 --------------------------------------------------------------------------
 JURIS-UQ offline demonstration
 --------------------------------------------------------------------------
