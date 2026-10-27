@@ -171,28 +171,128 @@ jurisdiction, typed relations between asserted provisions) can separate
 
 ```mermaid
 flowchart TB
-  DS[(Dataset and questions<br/>data/lexuq_slice.jsonl)]
-  GEN["Answer generation<br/>scripts/02_run_inference.py<br/>10 samples per item"]
-  RUN[(Run storage<br/>runs/RUN_ID/items.jsonl + meta.json)]
-  EXT["Provision extraction<br/>and normalization<br/>jurisuq/normalize.py"]
-  VAL["Legal context and temporal validation<br/>statutes, crosswalk, as-of date<br/>jurisuq/context/"]
-  CM["Common-mode error detection<br/>jurisuq/warrant/"]
-  UQ["Uncertainty scoring<br/>jurisuq/uncertainty/"]
-  POL["Calibration and decision policy<br/>jurisuq/calibration/"]
-  DEC{{"Answer / verify / abstain<br/>with the reason"}}
-  EVAL["Evaluation and metrics<br/>jurisuq/evaluation/, scripts/42 and 43"]
-  GATES{{"Gate verdicts and reports<br/>runs/phaseG_eval_matrix.json"}}
-  POP["Two-class target population<br/>PLANNED"]
+  subgraph IN["Frozen and versioned inputs"]
+    DS[(Dataset<br/>data/lexuq_slice.jsonl)]
+    STAT[(Statute store<br/>built by scripts/20)]
+    XW[(IPC-BNS crosswalk<br/>data/relations/)]
+    C1[(Candidates v1<br/>screened)]
+    C2[(Candidates v2<br/>never screened)]
+  end
 
-  DS --> GEN --> RUN --> EXT --> VAL --> CM --> UQ --> POL
+  subgraph GEN["Generation, extraction and judging"]
+    MK["Slice builder<br/>scripts/01, jurisuq/facts.py"]
+    GENB["Generation, extraction, judging<br/>scripts/02, jurisuq/pipeline.py<br/>10 samples per item"]
+    R0[(Phase A run<br/>runs/phaseA-laptop-v2-rejudged/)]
+  end
+
+  subgraph REL["Phase B relation model — runs beside the chain"]
+    RELB["Pair mining, training, evaluation<br/>scripts/10–12 → G2 report"]
+    CKPT[(Relation checkpoint<br/>models/relation/)]
+  end
+
+  subgraph CHAIN["Legal context and detection — each stage writes a sibling run"]
+    CTX["Context packs<br/>scripts/21_attach_context.py"]
+    R1[(+ctx-r2 run)]
+    TYP["Typed clustering<br/>scripts/13_attach_typed.py"]
+    R2[(+typed run)]
+    WAR["Warrant detector<br/>scripts/23_detect_warrant.py"]
+    R3[(+warrant run)]
+  end
+
+  subgraph UQ["Uncertainty, calibration and policy"]
+    UQF["Fit legal-aware head<br/>scripts/25 — reads labels"]
+    MODELS[(Fitted models<br/>phaseE_model, phaseF_calibration_model)]
+    UQE["Score run, label-blind<br/>scripts/26"]
+    R4[(+uq-exact run)]
+    CALF["Fit calibration maps<br/>scripts/29 — reads labels"]
+    POL["Apply policy, label-blind<br/>scripts/30_apply_policy.py"]
+    R5[(+cal-r2 run)]
+    DEC{{"Answer / verify / abstain<br/>with the reason"}}
+  end
+
+  subgraph EVAL["Offline evaluation — reads stored runs, never regenerates"]
+    VG["Gate validation<br/>scripts/24 (G4), 31 (G6)"]
+    AUD["Population feasibility audit<br/>scripts/40"]
+    MTX["Section 21.2 matrix<br/>scripts/42 → G7"]
+    DEP["Section 21.3 deployment<br/>scripts/43"]
+  end
+
+  subgraph TGT["Target population — Phase G Stage 2"]
+    SCR["Candidate yield screen<br/>scripts/41"]
+    PIL["Pilot harness<br/>scripts/44 — BLOCKED"]
+    POP["Two-class target population<br/>PLANNED"]
+  end
+
+  GATES{{"Gate verdicts and reports<br/>runs/phaseG_eval_matrix.json"}}
+  CHK["Offline integrity check<br/>scripts/47 — re-runs 40, 41 mock, 42, 43"]
+
+  MK --> DS
+  DS --> GENB -->|"10 samples per item"| R0
+  R0 -->|"G1 report"| GATES
+  R0 -->|"observed pairs"| RELB
+  RELB --> CKPT
+  RELB -->|"G2 report"| GATES
+  R0 -->|"stored answers"| CTX
+  STAT --> CTX
+  XW --> CTX
+  CTX --> R1
+  R1 --> TYP
+  CKPT -->|"typed relations"| TYP
+  TYP --> R2
+  R2 --> WAR
+  STAT -->|"validity windows"| WAR
+  XW -->|"contradiction links"| WAR
+  WAR --> R3
+  R3 -->|"labels and flags"| VG
+  R5 --> VG
+  R3 -->|"labels"| UQF
+  UQF --> MODELS
+  R3 -->|"features"| UQE
+  MODELS --> UQE
+  UQE --> R4
+  R4 -->|"labels"| CALF
+  CALF --> MODELS
+  R4 --> POL
+  MODELS -->|"calibrated map"| POL
+  STAT -->|"harm class"| POL
+  POL --> R5
   POL --> DEC
-  POL --> EVAL
-  RUN -->|"stored records"| EVAL
-  EVAL --> GATES
-  POP -.->|"not available today"| EVAL
+  R4 --> AUD
+  R4 --> MTX
+  R5 -->|"calibrated arm"| MTX
+  R0 -->|"timings"| DEP
+  VG --> GATES
+  MTX --> GATES
+  DEP --> GATES
+  AUD --> GATES
+  AUD -.->|"defines what is missing"| POP
+  C1 -->|"four revisions"| C2
+  GENB -->|"generator under test"| SCR
+  C1 -->|"items"| SCR
+  SCR -.->|"would supply"| POP
+  DS -->|"item list"| PIL
+  PIL -.->|"blocked: no zero-cost provider"| GATES
+  POP -.->|"would make L7 rankable"| MTX
+  POP -.->|"would give L7 a stratum"| CALF
+  DS -->|"digests"| CHK
+  C2 -->|"--check"| CHK
+
+  classDef data fill:#eef2f7,stroke:#3b5b7a,stroke-width:1px,color:#12263a
+  classDef impl fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px,color:#10321a
+  classDef partial fill:#fff8e1,stroke:#a06b00,stroke-width:2px,color:#3a2a00
+  classDef planned fill:#f5f5f5,stroke:#666666,stroke-width:1px,stroke-dasharray:5 5,color:#222222
+  classDef blocked fill:#fdecea,stroke:#b3261e,stroke-width:1px,stroke-dasharray:4 3,color:#3a0d0a
+
+  class DS,STAT,XW,C1,MODELS data
+  class MK,GENB,R0,RELB,CKPT,CTX,TYP,WAR,UQF,UQE,CALF,POL,VG,AUD,MTX,SCR,CHK,GATES impl
+  class C2,DEP partial
+  class POP planned
+  class PIL blocked
 ```
 
-Cylinders are stored data (dataset, run outputs, statute rows under `data/`), rectangles are processing modules in `jurisuq/` and `scripts/`, hexagons are final outputs. Every label names the real module or file, so each stage can be traced to code. Solid arrows are implemented and tested; the one dashed arrow marks a dependency that is **PLANNED** — a two-class target population, which is why G5, the L7 half of G6 and G7 stay unmeasurable.
+Three properties of the real system drive this layout. **Runs are immutable**: each stage reads a stored run and writes a sibling (`+ctx`, `+typed`, `+warrant`, `+uq`, `+cal`), so nothing upstream is ever rewritten and every number can be recomputed from disk. **Two branches run beside the chain**, not inside it: the Phase B relation model mines pairs from the Phase A run and feeds its checkpoint into typed clustering, and the Phase G target-population work sits off to the side. **Shared inputs fan out**: the statute store and crosswalk reach context packing, the detector and the policy independently, and the offline evaluation layer fans in from several stored runs at once.
+
+Labels are read only by fitting and validation (`scripts/25`, `29`, `24`, `31`) and by the offline analyses; `scripts/26` and `scripts/30` are label-blind by construction. Solid boxes and arrows are `IMPLEMENTED` and tested; amber is `PARTIAL` (§21.3 deployment measurements, and the v2 candidate set, authored but never screened); dashed grey is `PLANNED`; dashed red is `BLOCKED`. The two dashed arrows into `MTX` and `CALF` are the target population that does not exist yet — the reason G5, the L7 half of G6 and G7 stay unmeasurable.
 
 ---
 
