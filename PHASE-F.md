@@ -23,7 +23,7 @@ run, and never writes into its source.
 | Conformal coverage layer (split-conformal, finite-sample corrected) | implemented, tested, evaluated |
 | E6 evaluation on the held-out partition | executed on two Phase E variants |
 | Gate G6 | **NOT_MET** — 2 of 4 conditions fail, 1 stratum unevaluable |
-| Post-merge follow-up (4 experiments) | executed; see [`PHASE-F-FOLLOWUP.md`](PHASE-F-FOLLOWUP.md) |
+| Post-merge follow-up (4 experiments) | executed; see the Follow-up experiments section below |
 
 Phase F is **not** complete in the sense the guide means by a phase gate. The
 machinery is complete and reproducible; the *claim* the gate exists to license
@@ -43,7 +43,7 @@ not change: it is NOT_MET in both.**
 
 Three further experiments (within-slice refitting, calibration-map selection
 under a pre-registered rule, and topic-clustered uncertainty intervals) are
-recorded in [`PHASE-F-FOLLOWUP.md`](PHASE-F-FOLLOWUP.md). None of them changes a
+recorded in the Follow-up experiments section below. None of them changes a
 gate constant or produces a pass. The §6 and §7 tables below are retained as the
 historical record of the as-merged run.
 

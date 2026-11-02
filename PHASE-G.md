@@ -171,7 +171,7 @@ artefact of the confound:
 | detector AUROC pooled | 0.7720 |
 
 The warrant score is very nearly a slice indicator, and within the only slice
-that has two classes it carries no information at all. `PHASE-F-FOLLOWUP.md`
+that has two classes it carries no information at all. `PHASE-F.md`
 experiment 2 measured the same confound on the score rather than the detector:
 pooled AUROC 0.6868 versus 0.8626 for the same estimator fitted within L1. Any
 future Phase G result must therefore be reported **within one slice**; a pooled

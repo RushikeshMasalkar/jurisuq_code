@@ -16,6 +16,274 @@ risk score, a decision policy, and a set of pre-registered evaluation gates.
 > legal annotations is still pending. Implementation completeness and scientific
 > validation are reported separately throughout this document.
 
+**Where to start.** [`STATUS.md`](STATUS.md) is the authoritative record of what
+is implemented, what is tested, what is blocked and why; [`ROADMAP.md`](ROADMAP.md)
+holds the dependency order of the remaining work.
+
+```bash
+python -X utf8 -m pytest -q                       # the suite
+python -X utf8 scripts/47_offline_check.py        # offline integrity + integration check
+```
+
+## Purpose and scope
+
+JURIS-UQ studies whether agreement among an LLM's sampled answers can hide a
+shared legal error. The current benchmark is matched around the transition
+from the Indian Penal Code (IPC) to the Bharatiya Nyaya Sanhita (BNS), effective
+1 July 2024:
+
+- **L7** asks for current law and uses the repealed IPC provision as the trap.
+- **L1** asks for law immediately before the transition and uses the BNS
+  successor as the trap.
+
+The phases are cumulative:
+
+1. **Phase A** builds the sampling, judging, clustering, and sample-only
+   uncertainty instrument.
+2. **Phase B** adds typed legal relations and re-clusters the frozen Phase A
+   answers.
+3. **Phase C** adds a deterministic statute store, validity windows,
+   IPC/BNS links, and context packs.
+4. **Phase D** detects whether agreement is legally warranted using observed
+   agreement, temporal validity, jurisdiction fit, and contradiction mass.
+5. **Phase E** consumes stored Phase D fields in a monotone uncertainty model
+   with an explicit sample-only fallback.
+6. **Phase F** calibrates that score per stratum and applies a harm-weighted
+   answer / verify / abstain policy with a conformal coverage layer.
+7. **Phase G** builds (and must first measure) the target population without
+   which G5 and the L7 half of G6 cannot be evaluated at all.
+
+The phases are deliberately separated: Phase C/D/E write sibling runs and
+leave their source runs unchanged. Phase E never recomputes Phase D outputs.
+
+## Compute and cost
+
+All inference runs locally through LM Studio on this machine. No accelerator is
+used: PyTorch reports `2.9.1+cpu`, with CUDA, MPS, and XPU unavailable.
+Inference and relation-model training therefore run on CPU. The project spent
+nothing: no paid API calls, subscriptions, or billing.
+
+The primary Phase A run remains `qwen2.5-7b-instruct`, with the frozen
+`p2-structured` prompt; it is the source of the 2,000 Phase A samples and all
+Phase B-E numbers. `Qwen3-14B Q4_K_M` (about 9 GB) was screened locally with
+reasoning on and off: it answered IPC 379 to a post-1-July-2024 theft question
+and scored 0% on L7. It is a screen only; no slice was regenerated with it.
+Gemini API screening found 2.5-flash unavailable, 3.8-flash returning 503,
+and 3.6-flash exhausting the free-tier daily quota (HTTP 429). Under the
+zero-cost constraint no API model was used.
+
+The Qwen3-14B local pilot screen (reasoning off, 24 items, 12 per slice)
+completed in 1,373 seconds with 100% judge coverage. Per-sample accuracy was
+L7 `0.00` and L1 `0.56`; the verdict mix was `stale_law=33`,
+`wrong_section=19`, `gold=16`, and `gold_operative=4`. This did not alter the
+frozen slice: the primary run remains `qwen2.5-7b-instruct`.
+
+Under this constraint L7 has no correct items, so G5 remains
+**NOT_EVALUABLE** and the L1-L7 comparison cannot be made. Per master-guide
+section 16.4, the failed G2 directs the project to its diagnostic
+contribution: Phase A plus the Phase D temporal detector. This is a finding
+about the model class under test, not a defect in the instrument.
+
+### Registry status through Block 8
+
+| Registry | Status |
+|---|---|
+| Files, fields, configs, scripts, and experiment outputs from Blocks 1-8 | registered in the phase guides and run metadata |
+| E5 / G5 | implemented and recorded as **NOT_EVALUABLE** |
+| Frozen dataset / statute / link digests | verified in every new context, warrant, typed, and uncertainty run metadata |
+| Aborted API/debug runs | deleted; no API-key patterns remain in `runs/**/meta.json` |
+
+The full repository suite was run in this environment with
+`python -m pytest -q`: **160 passed**.
+
+## Current status
+
+| Phase | Status | Run or record of reference |
+|---|---|---|
+| A | Complete and frozen | `runs/phaseA-laptop-v2-rejudged/` |
+| B | Implemented; run of record complete; supplemental evaluations retained | `runs/phaseB-relations-full/` |
+| C | Engineering complete; four mappings corrected and eight target rows verified from documented statutory text | `runs/phaseA-laptop-v2-rejudged+ctx/` |
+| D | Typed-cluster rerun complete; G4 PASS; CM coverage limited by 13 unresolved records | `runs/phaseA-laptop-v2-rejudged+ctx-r2+typed+warrant/` |
+| E | Two-variant typed-run evaluation; G5 NOT_EVALUABLE | `runs/phaseA-laptop-v2-rejudged+ctx-r2+typed+warrant+uq-typed/` and `...+uq-exact/` |
+| F | Implemented and evaluated; G6 NOT_MET (control-slice calibration and selective risk fail, L7 stratum unevaluable). Conformal figures superseded by the follow-up run `+cal-r2`; the original `+cal` is preserved unchanged | `runs/phaseA-laptop-v2-rejudged+ctx-r2+typed+warrant+uq-exact+cal/` (see also `...+cal-r2/`) |
+| G | Infrastructure implemented; §21.2 matrix and §21.3 deployment measurements computed offline; G7 is defined and **NOT_MET** (no target slice on which a ranking is defined). **API pilot ON HOLD** for resource reasons — no model output obtained. G5 NOT_EVALUABLE, G6 NOT_MET | `runs/phaseG_eval_matrix.json`, `runs/phaseG_deployment.json`, `runs/phaseG_pilot_status.json` |
+
+Phase E's target holdout contains only incorrect L7 answers, so its L7 AUROC
+is undefined and no G5 pass is claimed. The score is an uncalibrated risk
+ranking, not a probability.
+
+### Block 5b attribution-controlled evaluation
+
+Block 5b added four new sibling runs and did not modify the frozen Phase E
+outputs. Missing legal factors use the fitted sample-only degradation
+(intercept + `u_prov` + `u_text` + `u_prov*u_text`), with
+`uq_score_mode=sample_only_degraded`; all four runs have 187 legal-aware and
+13 degraded records, with no raw fallback or unscorable records. The pooled
+models use 156 development and 44 holdout records; the L1-only models use 78
+development and 22 holdout records and are evaluated only within L1.
+
+| Fit / variant | Evaluation | AUROC | AUPRC | nAURC | risk@50% | baseline AUROC |
+|---|---|---:|---:|---:|---:|---:|
+| pooled / typed | L1 (22) | 0.6238 | 0.7243 | 0.3963 | 0.5455 | 0.6381 |
+| pooled / exact | L1 (22) | 0.6905 | 0.7568 | 0.5054 | 0.5455 | 0.8714 |
+| L1-only / typed | L1 (22) | 0.5714 | 0.7129 | 0.3358 | 0.5455 | 0.6381 |
+| L1-only / exact | L1 (22) | 0.8714 | 0.9349 | 0.7078 | 0.4545 | 0.8714 |
+
+The L7 holdout in pooled runs is 22/22 incorrect, so AUROC and nAURC are
+undefined (AUPRC 1.0 and risk@50% 1.0 are reported descriptively). L1-only
+runs have no L7 evaluation population. Pooled paired AUROC differences
+(score minus baseline) are -0.0143 (typed, 95% CI [-0.1458, 0.0882]) and
+-0.1810 (exact, [-0.5000, 0.0000]); L1-only differences are -0.0667
+([-0.3158, 0.1880]) and 0.0000 ([0.0000, 0.0000]). G5 remains
+NOT_EVALUABLE. The exact-key variant is the like-for-like comparison with the
+frozen pilot; neither variant is selected.
+
+For the exact-key pooled L1 holdout, 20 records were legal-aware and 2 were
+degraded fallbacks; both fallbacks were incorrect. On the identical
+legal-aware subset, learned-score AUROC was 0.6868 versus exact `u_prov`
+0.8626. On the full L1 holdout after degradation rescaling, the corresponding
+values were 0.6905 and 0.8714. This is a negative result, not an imputation
+artifact. Typed entropy is exactly zero on 106/200 records (exact-key 33/200);
+the frozen pilot's 32 legal-aware records all had `u_prov=0`, explaining its
+zero fitted `u_prov` weight.
+
+### Structural limitation of the current instrument
+
+The temporal factor is constant within each slice: `T=1.0` on 94/94
+resolvable L1 records and `T=0.0` on 80/81 resolvable L7 records. With
+`J=1` and `K` approximately zero, `W=A` on L1 and `W=0` on L7. Thus `u_cm`
+is identically zero on L1, and `u_warrant` is only a function of observed
+agreement `A`, already encoded by `u_prov`. The legal-aware components have no
+within-slice information: zero variance on L1 and a single correctness class
+on L7.
+
+This explains the exact L1-only result (AUROC `0.8714` versus baseline
+`0.8714`; paired difference `0.0000`, interval `[0.0000, 0.0000]`) and the
+pooled exact result falling to `0.6905` within L1 because it uses `u_warrant`
+and `u_cm` as slice indicators. Therefore G5 cannot be satisfied by any
+estimator, hyperparameter, or ablation on this instrument. G5 requires a
+slice with both correctness classes where the detector both fires and stays
+silent. Building that population is Phase G work and the sole remaining G5
+blocker.
+
+Block 6 is a typed-representation trustworthiness check, not a route to G5:
+typed entropy is zero on 106/200 records versus 33/200 under exact keys, and
+`DIFFERENT_PROVISION` recall is `0.00`. It cannot create the missing variance
+in `T`. The expensive chain will be rerun once, after the two-class target
+population exists.
+
+Block 6 subsequently improved the relation model without rerunning the
+downstream chain. `relations_v2` combines synthetic and observed Phase A pairs
+(1,520 kept; 918/294/308 train/dev/test) and was trained for 12 epochs in
+5,980 seconds. On its 308-pair test split, macro-F1 is 0.9942 versus the
+0.7941 exact-key baseline (margin +0.2001), and
+`DIFFERENT_PROVISION` precision/recall/F1 are 1.0000/0.9726/0.9861.
+Separately thresholded merge precision/recall are 0.9753/1.0000 at
+`tau=0.05`.
+
+The gold/trap probe merge rates are L1 `0/10` at both 2024-01-01 and
+2026-10-01, and L7 `1/10` and `2/10`, respectively. E2 changed items remain
+a diagnostic (0 L1, 1 L7); the corrected rescue count is 0 in both slices.
+Thus corrected G2 is `NOT YET`: precision, macro-F1, and integrity pass, but
+the required unanimously-wrong collision rescue does not occur. G5 remains
+blocked by the missing within-slice temporal-factor variance, independently
+of this relation-model improvement.
+
+### Phase F — calibration and the decision layer (M9/M10)
+
+Phase F converts the uncalibrated Phase E score into a per-stratum
+`p_reliable` (isotonic regression, Platt scaling for small strata, grouped
+K-fold grouped by slice and offence cluster) and then into a decision
+(`answer` / `verify` / `abstain`) using a harm-weighted loss comparison rather
+than a coverage target. A split-conformal layer reports an approximate,
+finite-sample coverage threshold with its exchangeability assumption stated.
+The query path is label-blind: `scripts/30_apply_policy.py` reads only a
+whitelist of fields and never reads `majority_correct`, `sample_correct`,
+`gold` or `trap` when scoring, and the validator checks that statically by
+parsing the script.
+
+The phase is implemented and evaluated end to end in under a second on CPU, and
+**Gate G6 is NOT_MET**:
+
+| G6 condition | Threshold | Measured | Verdict |
+|---|---|---|---|
+| Calibration quality (development, cross-fitted) | ACE ≤ 0.05 | 0.2797 (L1, n=78) | FAIL |
+| Harm-weighted selective risk at 50 % coverage | below every baseline | 0.5455 vs 0.4545 (sample-only) | FAIL |
+| Conformal coverage within sampling tolerance | empirical ≥ target − tol | 0.8636 ≥ 0.80 − 0.1671 | pass |
+| No labels on the query path | static check | label-blind | pass |
+| Target stratum evaluable | both classes | L7 has 0 correct of 100 | not evaluable |
+
+Two structural notes, both recorded in the run: a monotone calibration map
+cannot change the ranking, so selective risk equals the raw score's by
+construction and only a different score is an informative baseline; and on this
+slice every offence cluster resolves to `custodial`, so harm weighting is a
+constant multiplier here. The L7 stratum is single-class, so `p_reliable` is
+`null` for all 100 L7 records and they take the declared `verify` action rather
+than receiving an imputed probability. G6 cannot pass until Phase G builds a
+target slice with both correctness classes; see `PHASE-F.md` for the full E6
+record, the descriptive isotonic-versus-Platt sensitivity, and the limitations.
+
+With Phase F added the suite is **216 passed, 1 skipped** (57 new Phase F tests;
+the skip is the pre-existing torch-gated Phase B test).
+
+#### Phase F follow-up (post-merge audit)
+
+Four follow-up experiments re-examined the E6 record. The conformal threshold
+had been taken from the same holdout items its coverage was measured on; that is
+corrected in a **new sibling run** (`+cal-r2`, original `+cal` preserved), which
+moves coverage from 0.8636 to 0.6818 and the threshold from 0.3855 to 0.4702
+**without changing the G6 verdict**. The other three: an L1-only refit of the
+Phase E legal head raises within-slice AUROC from 0.687 to 0.863 on the same 20
+items, a pre-registered input-range rule selects Platt over isotonic (dev
+cross-fit ACE 0.0911 vs 0.2797, both still above `ace_max = 0.05`), and
+topic-clustered bootstrap intervals show the ACE failure is stable under
+resampling while the selective-risk gap is unresolvable at n=78. No gate
+constant changed. Full record is in `PHASE-F.md`; suite is now **270 passed, 1
+skipped**.
+
+### Phase G — target population, the §21 evaluation matrix, and a pilot on hold
+
+Phase G is the guide's "measure everything" phase (§12, §21.1–21.3). Both G5 and
+the L7 half of G6 are blocked on one thing: no evaluation population has both
+correctness classes. The guide defines **Gate G7** for exactly this — "the target
+slice carries both correctness classes and the headline comparison is
+computable", failing when "no target slice exists on which a ranking is
+defined".
+
+> **Correction.** Earlier revisions of this README, `PHASE-G.md` and
+> `configs/phase_g_target.json` said the repository had no Phase G specification
+> and no Phase G gate. That was inaccurate and is retracted. The specification
+> exists; it lives in the project's external engineering guide, which is why its
+> text was not to hand. G7 is a defined gate, and it currently **fails**.
+
+§21.2's evaluation matrix and the offline half of §21.3 are now implemented
+(`jurisuq/evaluation/`, `scripts/42`, `scripts/43`) and computed from the frozen
+runs — no new generation. On the frozen evaluation partition, 44 items:
+
+| Method (larger score = more uncertain) | L1 AUROC | L7 AUROC |
+|---|---:|---|
+| exact agreement | 0.5714 | undefined — single class |
+| lexical similarity | undefined — not implemented | undefined — not implemented |
+| discrete semantic entropy | 0.5714 | undefined — single class |
+| standard semantic entropy | 0.4857 | undefined — single class |
+| SelfCheck | 0.5905 | undefined — single class |
+| p_true | undefined — no logprobs | undefined — no logprobs |
+| provision agreement | 0.8333 | undefined — single class |
+| legal-aware | 0.6524 | undefined — no calibrated score |
+| legal-aware, uncalibrated | 0.6524 | undefined — single class |
+
+Judge coverage is 1.0000 per slice. **G7 is NOT_MET**: L7 has 0 correct of 100
+items, so no ranking is defined there, and the calibrated arm is fitted on L1
+only. Stage-1 latency is measured (n=200, median 45.02 s, p95 67.41 s); full
+cascade latency and peak memory are `not_instrumented` and await a laptop run.
+Twenty-two items with 7 correct cannot rank methods, so no ordering is claimed.
+
+#### API pilot: ON HOLD
+
+**A resource-driven postponement, not a scientific finding and not evidence of a
+failed detector.** Machine-readable record:
+[`runs/phaseG_pilot_status.json`](runs/phaseG_pilot_status.json).
+
 | | |
 |---|---|
 | Research object | agreement under repeated sampling as a proxy for legal correctness |
@@ -796,6 +1064,12 @@ model. Use a **new** run id or suffix; never overwrite a frozen run.
 ```powershell
 # Phase A generation (writes a new run directory under runs/)
 python -X utf8 scripts/02_run_inference.py --config configs/phase_a.json --run-id phaseA-local-run1
+
+The checked-in 200-item data slice, relation dataset, statute table, manifests,
+overrides, run records, and validation JSON files are research artifacts. The
+current hashes are recorded in the historical results and result documents.
+Source runs are tree-hashed before and after overlay steps. Do not modify
+generated metrics or model outputs when documenting a new run.
 
 # re-judge stored samples without regenerating them
 python -X utf8 scripts/05_rejudge.py --run-id phaseA-local-run1 --out-suffix +rejudged

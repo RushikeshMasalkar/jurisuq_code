@@ -146,7 +146,7 @@ unit tests pass.
   estimator or hyper-parameter on this instrument can satisfy G5.
 - **Artifacts.** `runs/…+uq-exact/`, `runs/…+uq-typed/`, and the four Block-5b
   sibling runs; model JSONs `runs/phaseE*_model.json`; regression in
-  `PHASE-F-FOLLOWUP.md` and Block 6b runs.
+  `PHASE-F.md` and Block 6b runs.
 - **Remaining.** A slice with both correctness classes **and** both detector
   states. That is Phase G data.
 
