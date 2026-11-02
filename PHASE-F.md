@@ -403,3 +403,116 @@ python scripts/31_validate_calibration.py \
 4. **Do not tune the map to the gate.** Isotonic is the specified default; if a
    future run prefers Platt, that decision must be pre-registered on a
    development split that is not the reported holdout.
+
+## Follow-up experiments
+
+The post-merge audit confirmed four follow-up questions without changing any
+frozen artefact. The corrected calibration runs are new siblings (`+cal-r2`);
+the original `+cal` run remains unchanged.
+
+### Experiment 1 — conformal threshold from a disjoint set
+
+The original threshold was computed from the 22 holdout probabilities and then
+evaluated on those same items. The correction uses the 78 development items'
+grouped cross-fitted probabilities (fold-grouped by `slice|topic`, k=5), and
+reports a Clopper–Pearson lower bound alongside the Wald tolerance. A model
+without cross-fitted development probabilities is `NOT_EVALUABLE`, not a
+holdout fallback.
+
+| Quantity | v1 `+cal` | r2 `+cal-r2` (corrected) |
+|---|---|---|
+| Threshold source | the 22 holdout items (in-sample) | 78 development grouped cross-fitted |
+| Threshold | 0.3855 | **0.4702** |
+| Empirical coverage | 0.8636 (19/22) | **0.6818 (15/22)** |
+| Wald floor (0.80 − 0.1671) | 0.6329 → pass | 0.6329 → **pass** |
+| Clopper–Pearson lower 95 % | not reported | **0.4845** |
+| Exact bound reaches the 0.80 target | not reported | **no** |
+| G6 verdict | NOT_MET | **NOT_MET (unchanged)** |
+
+The reported coverage therefore moves from 0.86 to 0.68 because the honest
+threshold is higher; the gate verdict is unchanged. Artifacts:
+`runs/phaseF_calibration_model_r2.json` and the `+uq-exact+cal-r2` sibling run.
+
+### Experiment 2 — pooled versus within-slice Phase E fitting
+
+Both arms used the same 78 L1 development rows and the same 20 L1 holdout
+items. Eligibility was label-blind and neither arm was selected on holdout
+performance.
+
+| Arm | Training rows | L1 feature weights | AUROC (n=20) |
+|---|---|---|---|
+| Pooled (shipped) | 156 | non-zero on `u_warrant` 0.206, `u_cm` 0.207, and 6 interaction terms | 0.6868 |
+| Within-slice | 78 (42 correct / 36 incorrect) | `u_prov` 0.172, `u_text` 0.006, `u_prov*u_text` 0.171 | **0.8626** |
+
+With isotonic calibration, pooled versus within-slice holdout ACE was 0.2388
+versus 0.1941, Brier was 0.2722 versus 0.2073, log loss was 0.9769 versus
+0.8315, and selective risk at 50% was 0.5000 versus 0.4000. Both arms still
+miss `ace_max = 0.05` by a factor of four. The paired comparison is recorded
+in `runs/phaseF_exp2_within_slice.json`; materializing a new run would require
+rescoring a frozen Phase E artifact.
+
+### Experiment 3 — calibration map selection
+
+The pre-registered rule in `configs/phase_f_followup.json` uses Platt when
+`n_development < 100` **or** the reliability-input range `< 0.15`, otherwise
+isotonic. At n=78 and range 0.0795, it selects Platt; this rule was frozen
+before the holdout was scored.
+
+| Method | Dev cross-fit ACE | Holdout ACE | Holdout ECE(10) | Holdout Brier | Holdout log loss | Items pinned at 1.0 |
+|---|---|---|---|---|---|---|
+| raw (`1 − risk`, no fit) | *n/a* | 0.0555 | 0.1512 | 0.2177 | 0.6262 | 0 |
+| **Platt (chosen by the rule)** | **0.0911** | **0.1398** | 0.1398 | 0.2386 | 0.6718 | 0 |
+| isotonic (shipped) | 0.2797 | 0.2797 | 0.2797 | 0.2993 | 1.5375 | **1** |
+| constant (base rate) | *n/a* | 0.1434 | 0.1434 | 0.2375 | 0.6681 | 0 |
+
+Platt is better than isotonic but still above `ace_max = 0.05`; raw is
+reported only as an uncalibrated reference. L7 remains structurally
+unevaluable because all 78 development records are wrong and have one
+correctness class.
+
+### Experiment 4 — uncertainty at n=78
+
+The percentile bootstrap used 4000 resamples, seed 20261024, and 95% intervals.
+Topics were the primary sampling unit (10 development and 8 holdout topics);
+item-level resampling was the optimistic secondary.
+
+| Quantity | Point | 95% topic-clustered | 95% item-level |
+|---|---|---|---|
+| Development ACE (5-bin) | 0.2797 | [0.1249, 0.4598] | [0.1867, 0.3867] |
+| Holdout ACE (5-bin) | 0.2797 | [0.1562, 0.5302] | [0.1673, 0.4924] |
+| Development Brier | 0.2976 | [0.1702, 0.4183] | [0.2385, 0.3623] |
+| Holdout Brier | 0.2993 | [0.2353, 0.3909] | [0.2086, 0.4121] |
+| Selective-risk gap vs raw score | −0.0256 | [−0.1905, +0.0833] | [−0.1538, +0.0769] |
+| Selective-risk gap vs sample-only (`u_prov`) | **+0.0256** | **[−0.1765, +0.1750]** | [−0.1026, +0.1538] |
+
+`ace_max = 0.05` lies outside every interval, so the ACE failure is
+`stable_fail`. The selective-risk gap is unresolved at n=78 in either
+direction. Corrected conformal coverage is 15/22 = 0.6818, with Wilson 95%
+[0.4732, 0.8364] and Clopper–Pearson lower 0.4845: the Wald tolerance passes
+(0.6818 ≥ 0.6329), while the exact bound does not reach 0.80.
+
+### Follow-up implementation and record
+
+The implementation added `clopper_pearson_lower()` and `coverage_report()`,
+development cross-fitted conformal thresholds and provenance recording, the
+within-slice comparison, the frozen method-selection rule, and clustered
+uncertainty intervals. It added scripts
+`32_compare_within_slice.py`, `33_compare_calibration_methods.py`, and
+`34_estimate_uncertainty.py`, plus `configs/phase_f_followup.json` and their
+associated tests. No gate constant changed: `ace_max = 0.05`,
+`c_verify = 0.15`, `c_abstain = 0.35`, conformal target 0.80, and the
+`phaseE-v1` split remain exactly as merged.
+
+The test record was **216 passed, 1 skipped** before this work and **270
+passed, 1 skipped in 4.94 s** after it; 54 tests were added and the
+torch-gated `tests/test_relations.py:236` skip was pre-existing. Compileall
+was clean, with no repository linter or configured type checker.
+
+The limitations remain: 20 holdout items and 8 holdout topics make intervals
+indicative rather than exact; `ace_max = 0.05` is unreachable on this
+instrument regardless of map; the within-slice ranking gain is a Phase E
+finding requiring a re-scored run; clustered intervals are the appropriate
+default; and L7 remains structurally unevaluable (0 correct of 100). Future
+work must not tune the map to G6 or change gate constants without a
+pre-registered experiment and a new run id. Phase G §21.1 remains the
+blocking dependency.

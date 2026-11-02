@@ -73,6 +73,125 @@ where `A` is observed agreement (the modal cluster's share) and `W` is
 a repealed provision, `A = 1` and `W = 0`, so `CM = 1`: unanimous, coherent, and
 legally unsupported.
 
+The full and sliced files are **two independent runs**, not one run reported
+twice: they agree on 3/24 majority and differ on correct samples (34 vs 32).
+Neither supersedes the other and their sample counts must not be pooled.
+
+The sliced run answers the question the full run could not: **every correct item
+is L1, and L7 produced no correct sample at all in 120 generations.** The cause
+has since been investigated in
+[`PHASE-G-L7-INVESTIGATION.md`](PHASE-G-L7-INVESTIGATION.md): on L7 items of this
+design the model writes the **repealed IPC provision** — the committed
+`qwen3-14b` frozen-slice pilot labels 33 of 36 L7 samples `stale_law` and none
+correct — and the judge is not the cause, since the same run scored 32/240 correct
+samples on L1 with the same parser. That is corroboration from a different item
+set, not a direct measurement of these twelve items: the screen harness discarded
+its per-item records, which is now fixed (`--save-items`). Gold labels remain
+unverified pending human legal review.
+
+Because the aggregate rate that produces the 172-item projection is carried
+entirely by L1, a larger run cannot be expected to create an L7 correct class, and
+without one **G7 remains `NOT_MET`**. Human legal review is outstanding
+(`provenance.verified = false` throughout). Full reports:
+[`PHASE-G-STAGE2.md`](PHASE-G-STAGE2.md) and
+[`PHASE-G-L7-INVESTIGATION.md`](PHASE-G-L7-INVESTIGATION.md).
+
+The screen can now be aimed at one slice: `--slice L7` narrows the run to L7
+before the item cap (so `--slice L7 --items 12` is twelve L7 items, not six of
+each), refuses a slice the file does not contain, and leaving the flag out
+screens every slice exactly as before. The report records `slice_filter`, and
+`--save-items PATH` writes one JSONL record per item — the sampled text, the
+judge label and the reason — which is the evidence the aggregate report cannot
+carry. **The L7-only diagnostic that uses both flags has been run** (2026-10-27,
+qwen3-14b): 12 items × 3 samples, **0/12 majority correct, 0/36 correct samples**,
+Wilson 95% interval [0.0, 0.2425], with all twelve items `stale_law` and every
+sample asserting a repealed code. An earlier attempt was labelled with a
+placeholder model id and is **not** attributable to Qwen3-14B; the two are kept
+apart in [`PHASE-G-L7-INVESTIGATION.md`](PHASE-G-L7-INVESTIGATION.md) §3.4. Gold
+labels remain unverified, and the comparison that would follow review has not
+been run.
+
+Authoring items cannot move G7 on its own — the gate is defined over *measured*
+correctness classes from a stored run, and a set of questions with no answers
+cannot enter that grid. Correctness is computed (`pipeline.py`, `majority_correct`),
+never authored, so the dataset deliberately carries no correctness labels.
+
+Building the population is Stage 2, and its first step is now enforced in code
+rather than left to prose. Stage 2 begins by authoring a candidate item set "in
+the Phase A schema with `verified: false` provenance"; `jurisuq/target/candidates.py`
+checks exactly that before `scripts/41` screens anything, and the screen's report
+records the candidate file's `data_sha256` so a yield cannot be quoted against a
+different item set. The contract also states in the artefact what it does *not*
+establish — legal correctness, answerability and every gate are outside it. No
+candidate item set exists yet and none was invented, so Stage 2 remains blocked
+on authoring input.
+
+The suite is now **589 passed, 1 skipped** (319 Phase G tests: 34 population
+screening + 36 yield screen + 52 candidate-set contract and dataset + 18
+screen-report provenance + 39 evaluation matrix + 32 deployment + 51
+documentation guards + 57 pilot guards). With the screening artefacts committed,
+none of the screen-report checks skip any more; the single remaining skip is the
+pre-existing torch gate. Reports:
+`runs/phaseG_eval_matrix.json`, `runs/phaseG_deployment.json`,
+`runs/phaseG_pilot_status.json`.
+
+## Documentation map
+
+Project-level documents, read first:
+
+- [`STATUS.md`](STATUS.md) — the authoritative per-phase status: implemented
+  components and paths, tests actually run, artefacts and hashes, remaining
+  implementation and experimental work, human dependencies, the status label for
+  each phase, and the exact action that resolves each blocker.
+- [`ROADMAP.md`](ROADMAP.md) — the dependency order for the remaining work, with
+  the blocked milestones and their unblock conditions.
+
+Canonical phase guides, each containing implementation details and the complete
+historical results record:
+
+- [Phase A guide](PHASE-A.md) — sampling, judging, analysis, reproduction,
+  E1/G1 results, dataset hash, and historical run notes.
+- [Phase B guide](PHASE-B.md) — relation data, training, evaluation, E2,
+  metrics, confusion matrix, G2 interpretation, and limitations.
+- [Phase C guide](PHASE-C.md) — statute store, context-pack workflow,
+  verification evidence, hashes, coverage, and test records.
+- [Phase D guide](PHASE-D.md) — warrant detector, E4 metrics, confidence
+  interval, ablation, G4, integrity hashes, and legal limits.
+- [Phase E guide](PHASE-E.md) — legal-aware scoring, fallback behavior, paired
+  AUROC interval, G5 status, and separate environment test records.
+- [Phase F guide](PHASE-F.md) — calibration, decision policy, and the four
+  post-merge follow-up experiments.
+- [Phase G Stage 2 report](PHASE-G-STAGE2.md) — the candidate item set, its
+  data card and source record, the review that was and was not performed, the
+  three committed screening runs, and why G7 is unchanged.
+- [Phase G L7 investigation](PHASE-G-L7-INVESTIGATION.md) — why the L7 arm
+  yields nothing, the evidence that the generator asserts the repealed IPC
+  provision, the harness defect that hid it, the candidate provenance audit, and
+  the human review checklist.
+- [Phase G guide](PHASE-G.md) — the corrected specification status and Gate G7,
+  the §21.2 evaluation matrix with its undefined reason codes, the §21.3
+  deployment measurements, the target-population readiness check, the
+  feasibility audit, the pilot harness, and the API pilot's hold with its
+  reasons and restart conditions.
+- [Phase F guide](PHASE-F.md) — calibration maps, grouped cross-fitting, the
+  decision policy, the conformal layer, E6 results, and the G6 verdict with its
+  failure conditions and limitations.
+
+[Deployment and troubleshooting](DEPLOYMENT-GUIDE.md) contains operational
+setup notes and known environment issues. The machine-readable source records
+remain under `runs/`; do not replace them with README summaries.
+
+## Architecture
+
+```text
+CM = A - W
+```
+
+where `A` is observed agreement (the modal cluster's share) and `W` is
+*agreement the legal context can warrant*. On a slice where every sample asserts
+a repealed provision, `A = 1` and `W = 0`, so `CM = 1`: unanimous, coherent, and
+legally unsupported.
+
 ### 1.2 Why the IPC → BNS transition
 
 The Bharatiya Nyaya Sanhita replaced the Indian Penal Code with effect from
