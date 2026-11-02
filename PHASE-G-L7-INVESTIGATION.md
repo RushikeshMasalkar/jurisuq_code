@@ -487,7 +487,7 @@ not restraint under 126).
 
 Those four corrections were **decided and applied to a new file**, not to this
 dataset: `data/lexuq_target_candidates_v2.jsonl`, described in
-[`reports/phaseG_l7_label_review_v2_changes.md`](reports/phaseG_l7_label_review_v2_changes.md).
+[`reports/phaseG_l7_label_review_v1.md`](reports/phaseG_l7_label_review_v1.md).
 v1 — the file every result in this document was measured on — is unchanged. v2
 has not been screened, and its revisions are AI-assisted and operator-decided,
 not human legal approval.

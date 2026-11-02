@@ -188,3 +188,89 @@ One thing only: the pending human legal review now has a documented starting
 point. The next step for Phase G is unchanged in kind and narrower in scope — a
 human reviews these twelve labels, with this report as an input, four specific
 questions to answer, and no generation spent until then.
+
+## v2 changes
+
+**Status: authored, not screened, not human-reviewed.** `data/lexuq_target_candidates_v2.jsonl`
+exists so that four defects found by this AI-assisted label review could be
+corrected **without touching the dataset the screens were taken over**.
+
+### 1. Why a new file instead of an edit
+
+The three committed screen reports record `data_sha256 =
+f49f4d91946387eb0534718945092cc2f840bd9f2aee053ed9ac13c3f296d341`, the v1
+hash. Editing v1 would leave those reports pointing at a dataset that no longer
+exists, which is the failure mode the repository spends most of its Phase G
+documentation guarding against. The two files carry different hashes and must
+never be pooled: v1 carries the measured screens, v2 carries no measurement at
+all.
+
+### 2. The four revisions
+
+#### 2.1 `L7-criminal_breach_of_trust-c003` — wrong tier, wrong trap
+
+v1 used gold `BNS 316(2)`, trap `IPC 406`, and punishment up to five years. v2
+uses **`BNS 316(5)`**, **`IPC 409`**, and imprisonment for life, or up to ten
+years, and fine. The facts say A was B's agent for collecting rent; the human
+reviewer must decide whether that is "in the way of his business" as an agent.
+
+Sources: <https://devgan.in/bns/section/316/> and
+<https://lawrato.com/bharatiya-nyaya-sanhita/bns-section-316>.
+
+#### 2.2 `L7-culpable_homicide-c003` — the missing element
+
+v1 said A pushed B without intending death or injury likely to cause it and said
+nothing about **knowledge**. v2 adds that A knew the push was likely to make B
+fall and strike his head on the stone floor; B fell, struck his head and died.
+Gold changes from `BNS 105` to **`BNS 105(2)`**, with punishment up to ten years
+and fine. The trap stays `IPC 304`.
+
+Sources: <https://devgan.in/bns/section/105/> and
+<https://devgan.in/bns/section/106/>.
+
+#### 2.3 `L7-wrongful_restraint-c001` — facts re-authored, gold unchanged
+
+v1 had A block B's only exit from a room, which describes confinement under BNS
+127. v2 re-authors the facts to a plain obstruction: A stands in the road in
+front of B's car and refuses to move, so B cannot drive on. Gold `126(2)`, trap
+`IPC 341`, punishment, and distractor are unchanged.
+
+Sources: <https://devgan.in/bns/section/126/> and
+<https://devgan.in/bns/section/127/>.
+
+#### 2.4 `L7-wrongful_restraint-c003` — the section-level error
+
+A locks the gate of B's compound from outside so B cannot leave. That is BNS
+127, not restraint, and v1's distractor was the right answer. v2 changes gold
+from `BNS 126(2)` to **`BNS 127(2)`**, trap from `IPC 341` to **`IPC 342`**,
+punishment to **up to one year, or fine up to ₹5,000, or both**, and the
+distractor to **`BNS 126(2)`**.
+
+### 3. What did not change
+
+v1 is byte-identical with sha256 `f49f4d91…d341`; 20 of 24 rows are
+byte-identical to v1; every item_id and pair_id is unchanged; slices remain 12
+L1 and 12 L7; and `provenance.verified` stays `false` on all 24 items while
+`review.status` stays `PENDING_HUMAN_REVIEW`. No gate, threshold, config or
+frozen artefact was touched, and `configs/phase_g_target.json` still points at
+v1. The revision block in v2 records the date, basis, decision-maker, reason,
+sources, and changed fields without claiming verification.
+
+### 4. What this does not do
+
+It does not produce a measurement: v2 has never been screened and has no yield,
+interval, or projection. It does not change the recorded L7 result from
+2026-10-27: 0/12 majority and 0/36 samples. It does not verify anything
+legally, and it does not unblock the cross-model comparison. Human legal review
+remains required.
+
+### 5. Reproducing the revision
+
+```powershell
+python -X utf8 scripts/46_revise_target_candidates_v2.py --check
+python -X utf8 -c "from jurisuq.target import load_candidates as l; print(len(l('data/lexuq_target_candidates_v2.jsonl')))"
+python -X utf8 -m pytest tests/test_target_candidates_v2.py -q
+```
+
+`--check` rebuilds v2 in memory and compares it with the committed file, so any
+hand-edit of the dataset is caught.

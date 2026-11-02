@@ -68,7 +68,7 @@ the three committed screen reports record v1's hash as `data_sha256`, and editin
 v1 in place would detach them from the dataset they were taken over. The other
 twenty rows are byte-identical, every `item_id` is unchanged, all four revisions
 are recorded with their legal source and reasoning in
-[`reports/phaseG_l7_label_review_v2_changes.md`](reports/phaseG_l7_label_review_v2_changes.md)
+[`reports/phaseG_l7_label_review_v1.md`](reports/phaseG_l7_label_review_v1.md)
 and `runs/phaseG_l7_candidate_revisions_v1.json`. `configs/phase_g_target.json`
 still points at **v1**, and every item in both versions still carries
 `provenance.verified = false`. **v2 carries no measurement of any kind.**
