@@ -852,9 +852,12 @@ The two full-size files are separate runs whose sample counts must not be
 pooled. The aggregate rate is carried entirely by L1, so a larger run cannot be
 expected to create an L7 correct class.
 
-`data/lexuq_target_candidates_v2.jsonl` applies four decided corrections to v1
-and is **never screened**; `scripts/46_revise_target_candidates_v2.py --check`
-proves the committed file is byte-identical to its builder's output.
+`data/lexuq_target_candidates_v2.jsonl` applies four decided corrections to v1.
+The L7 half (12 items) was screened on 2026-11-07 at 12 items × 3 samples and
+yielded 0/12 majority-correct and 0/36 correct samples, with every item labelled
+`stale_law`; the L1 half (12 items) remains unscreened.
+`scripts/46_revise_target_candidates_v2.py --check` proves the committed file is
+byte-identical to its builder's output.
 
 **L7 diagnostic (operator-reported).** A 12-item × 3-sample L7-only diagnostic
 is recorded in [`PHASE-G-L7-INVESTIGATION.md`](PHASE-G-L7-INVESTIGATION.md)
@@ -916,7 +919,7 @@ data/                        FROZEN INPUTS
   lexuq_slice.jsonl          the 200-item matched slice
   lexuq_slice_summary.json   slice composition and provenance summary
   lexuq_target_candidates_v1.jsonl   Stage 2 candidates, screened
-  lexuq_target_candidates_v2.jsonl   Stage 2 candidates, four revisions, unscreened
+  lexuq_target_candidates_v2.jsonl   Stage 2 candidates, four revisions; L7 half (12 items) screened 2026-11-07 at 12 × 3, 0/12 majority-correct and 0/36 correct samples, every item labelled stale_law; L1 half (12 items) unscreened
   relations/                 crosswalk plus v1 and v2 pair datasets (train/dev/test)
   statutes/                  statutes_v1.jsonl, manifest, overrides, verification checklist
 runs/                        FROZEN OUTPUTS: run directories and report JSON
@@ -1170,7 +1173,10 @@ that gap, and this is stated wherever the channel's output appears.
 (24 items, sha256 `f49f4d91946387eb0534718945092cc2f840bd9f2aee053ed9ac13c3f296d341`,
 screened) and `data/lexuq_target_candidates_v2.jsonl` (24 items, sha256
 `44e7b5a2f3f968a7523b071a972ef522894f7ad0453e7390dff728b020878e8c`,
-authored and unscreened). Every item in both sets is `provenance.verified =
+authored; its L7 half (12 items) was screened on 2026-11-07 at 12 items × 3
+samples and yielded 0/12 majority-correct and 0/36 correct samples, with every
+item labelled `stale_law`; its L1 half (12 items) remains unscreened). Every
+item in both sets is `provenance.verified =
 false` and `review.status = PENDING_HUMAN_REVIEW`; `configs/phase_g_target.json`
 still points at v1 and is not silently repointed.
 
