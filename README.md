@@ -794,7 +794,7 @@ harm weighting is a constant multiplier. The conformal threshold in the run of
 record is fitted on development and its coverage measured on the holdout: an
 earlier sibling run fitted the threshold on the same items it measured, and that
 is corrected in `+cal-r2` without changing the verdict
-([`PHASE-F-FOLLOWUP.md`](PHASE-F-FOLLOWUP.md)).
+([`PHASE-F.md`](PHASE-F.md)).
 
 ### 6.8 Phase G — target population, evaluation matrix and the pilot (G7 `NOT_MET`)
 
@@ -1269,7 +1269,6 @@ Phase guides, each with the method and the complete historical result record:
 - [Phase D](PHASE-D.md) — warrant detector, E4, factor ablation, G4.
 - [Phase E](PHASE-E.md) — legal-aware scoring, fallback behaviour, G5.
 - [Phase F](PHASE-F.md) — calibration maps, grouped cross-fitting, policy, conformal, G6.
-- [Phase F follow-up](PHASE-F-FOLLOWUP.md) — four post-merge experiments and the corrected conformal provenance.
 - [Phase G](PHASE-G.md) — §21.2 matrix, §21.3 deployment, population audit, pilot hold.
 - [Phase G Stage 2](PHASE-G-STAGE2.md) — candidate set, data card, the three screening runs.
 - [Phase G L7 investigation](PHASE-G-L7-INVESTIGATION.md) — why the L7 arm yields nothing, the harness defect that hid it, the review checklist.
