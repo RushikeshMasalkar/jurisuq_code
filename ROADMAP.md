@@ -36,7 +36,7 @@ prerequisites.**
 | M4 | AI-assisted label review of the 12 L7 golds | M3 | **done** — 8 confirmed / 3 ambiguous / 1 unsupported, no label changed |
 | M5 | v2 candidate set with the four decided corrections | M4 | **done** — authored, never screened |
 | M6 | Maintenance surface: authoritative status doc, dependency roadmap, one-command offline integrity check | M1–M5 | **done** |
-| M7 | Screen `v2` (12 L7 items × 3 samples, ≈11–27 min, $0) | a local endpoint + the operator's go-ahead | **ready, unrun** |
+| M7 | Screen `v2` (12 L7 items × 3 samples, ≈11–27 min, $0) | a local endpoint + the operator's go-ahead | **done** — 2026-11-07; `runs/phaseG_screen_v2_l7.json`; zero yield, not a two-class population |
 | M8 | Cross-model comparison (`PHASE-G-L7-INVESTIGATION.md` §9) | human legal review of the labels | **BLOCKED** by protocol |
 | M9 | L7 calibration extension | a stored L7 run with both correctness classes | **BLOCKED** (needs M7 + a two-class outcome) |
 | M10 | §21.3 laptop measurements | a run on the target laptop with timings | **BLOCKED** on hardware |
@@ -49,7 +49,7 @@ prerequisites.**
 | Run the suite, the offline check, `--check` on the v2 builder | no | no | seconds |
 | Commit the diagnostic artefacts so the 0/12 / 0/36 figures become recomputable | no | no | — |
 | Reconcile the statute table's `verified` flag with its actual semantics | no | yes (to approve the wording) | an hour of review |
-| Screen `v2` on the local endpoint | **yes** | no (operator's call) | 11–27 min, $0 |
+| Screen `v2` on the local endpoint | **done** | no (operator's call) | `runs/phaseG_screen_v2_l7.json`; 0/12 majority-correct, 0/36 correct samples |
 | Cross-model comparison | yes | **yes** | 11–27 min per model, $0 |
 | Extend calibration to L7 | yes | no | minutes after data exists |
 
