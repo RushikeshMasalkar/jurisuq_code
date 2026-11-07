@@ -269,15 +269,15 @@ review, and nothing was fabricated.
 | Stage 2 screening (24 items × 10) | complete | `runs/phaseG_screen_qwen3_14b_{full,sliced}.json`; L1 3/12, **L7 0/12, 0/120 samples** | — |
 | L7 diagnostic (12 items × 3) | **operator-run, single-model; artefacts committed** | `runs/phaseG_l7_qwen3_14b_diagnostic.json` and `_items.jsonl`; `PHASE-G-L7-INVESTIGATION.md` §3.4 | human legal review of the twelve golds |
 | AI-assisted label review | complete, **not human** | `reports/phaseG_l7_label_review_v1.md`, `runs/phaseG_l7_label_review_v1.json` (8 confirmed / 3 ambiguous / 1 unsupported) | — |
-| v2 candidate set | authored, **never screened** | `data/lexuq_target_candidates_v2.jsonl`; `scripts/46_…py --check` | a decision to screen it |
+| v2 candidate set | screened on L7 only: 12 items × 3 samples, **0/12 majority-correct, 0/36 correct samples**, dominant label `stale_law` | `runs/phaseG_screen_v2_l7.json`; `runs/phaseG_screen_v2_l7_items.jsonl` | the L1 half of v2 remains unscreened |
 | Cross-model comparison (§9) | **BLOCKED** | `PHASE-G-L7-INVESTIGATION.md` §9: "must not be run until §10 has an outcome" | independent human legal review, or an explicit, documented amendment of that sequencing rule |
 | L7 calibration extension | **BLOCKED** | `PHASE-G.md`: calibrated arm is defined on L1 only (100/100, 0/100 on L7) | a stored L7 run with both classes |
 | §21.3 laptop measurements | **BLOCKED** | `runs/phaseG_deployment.json` reports two values as undefined with reasons | a run on the target laptop with timings |
 
-**The single most useful next experiment** is a screen of `v2` on the Qwen3-14B
-endpoint (12 items × 3 samples, ≈11–27 minutes, $0). It is cheap and it would
-replace four known-bad labels. It does **not** discharge the human review
-prerequisite for the cross-model comparison, and it will not move G7.
+The `v2` screen on the Qwen3-14B endpoint is complete and yielded zero correct
+L7 items, so it did not create a second correctness class. It does **not**
+discharge the human review prerequisite for the cross-model comparison. No gate
+moved.
 
 ---
 
