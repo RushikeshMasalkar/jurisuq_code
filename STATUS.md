@@ -225,18 +225,22 @@ unit tests pass.
   Qwen3-14B configuration is **not** present in this checkout and must not be
   committed if it contains machine-specific settings or keys.
 
-### Files the principal investigator reported as local-only, verified absent here
+### Files now accounted for in the L7 diagnostic record
 
-`runs/phaseG_l7_diagnostic.json`, `runs/phaseG_l7_diagnostic_items.jsonl`,
-`runs/phaseG_l7_qwen3_14b_diagnostic.json`,
-`runs/phaseG_l7_qwen3_14b_diagnostic_items.jsonl`,
-`runs/phaseG_l7_rehearsal.json`, `runs/phaseG_l7_rehearsal_items.jsonl` — **none
-of these exist in this environment**, and `configs/phase_a.json` here is the
-committed placeholder rather than the local endpoint configuration. Every figure
-attributed to the 12-item diagnostic is therefore **operator-reported**, as the
-status records already say. Nothing in this repository was fabricated to fill
-that gap. That diagnostic is a single-model measurement, so it is
-**not a cross-model comparison**; no cross-model claim is made in this project.
+- **COMMITTED, Run B:** `runs/phaseG_l7_qwen3_14b_diagnostic.json` and
+  `runs/phaseG_l7_qwen3_14b_diagnostic_items.jsonl` — qwen3-14b, 12 items x 3
+  samples, 0/12 majority correct, 0/36 correct samples, Wilson 95% [0.0,
+  0.2425], all items `stale_law`.
+- **COMMITTED, Run A (superseded):** `runs/phaseG_l7_diagnostic.json` and
+  `runs/phaseG_l7_diagnostic_items.jsonl` — model id recorded as a placeholder,
+  **not attributable to any model**; its numbers must not be cited as
+  Qwen3-14B.
+- **REMOVED as mock harness output:** `runs/phaseG_l7_rehearsal.json` and
+  `runs/phaseG_l7_rehearsal_items.jsonl`.
+
+The diagnostic is a single-model measurement, not a cross-model comparison; no
+cross-model claim is made. Gold labels remain unverified pending human legal
+review, and nothing was fabricated.
 
 ---
 
@@ -245,9 +249,11 @@ that gap. That diagnostic is a single-model measurement, so it is
 1. **The word "verified" in the statute table** (see Phase C) reads as legal
    approval when it means source-compared. Documentation fix or field rename,
    after human review.
-2. **The diagnostic artefacts are not committed**, so the 0/12 and 0/36 figures
-   cannot be recomputed here. `PHASE-G-L7-INVESTIGATION.md` §11 carries the
-   command that regenerates the item table once the files exist.
+2. **The Run B diagnostic artefacts are committed**, so 0/12 and 0/36 are
+   recomputable from the stored artefacts; Run A is preserved but not
+   attributable. The figures remain operator-run and single-model.
+   `PHASE-G-L7-INVESTIGATION.md` §11 carries the command that regenerates the
+   item table.
 3. **Only the 12 L7 items were label-reviewed.** The 12 L1 items have had no
    AI-assisted review either.
 4. **README suite counts are historical**, recorded at the time of each block
@@ -261,7 +267,7 @@ that gap. That diagnostic is a single-model measurement, so it is
 | Item | State | Evidence | What unblocks it |
 |---|---|---|---|
 | Stage 2 screening (24 items × 10) | complete | `runs/phaseG_screen_qwen3_14b_{full,sliced}.json`; L1 3/12, **L7 0/12, 0/120 samples** | — |
-| L7 diagnostic (12 items × 3) | **operator-reported**, artefacts absent | `PHASE-G-L7-INVESTIGATION.md` §3.4 | commit the two `runs/phaseG_l7_qwen3_14b_diagnostic*` files |
+| L7 diagnostic (12 items × 3) | **operator-run, single-model; artefacts committed** | `runs/phaseG_l7_qwen3_14b_diagnostic.json` and `_items.jsonl`; `PHASE-G-L7-INVESTIGATION.md` §3.4 | human legal review of the twelve golds |
 | AI-assisted label review | complete, **not human** | `reports/phaseG_l7_label_review_v1.md`, `runs/phaseG_l7_label_review_v1.json` (8 confirmed / 3 ambiguous / 1 unsupported) | — |
 | v2 candidate set | authored, **never screened** | `data/lexuq_target_candidates_v2.jsonl`; `scripts/46_…py --check` | a decision to screen it |
 | Cross-model comparison (§9) | **BLOCKED** | `PHASE-G-L7-INVESTIGATION.md` §9: "must not be run until §10 has an outcome" | independent human legal review, or an explicit, documented amendment of that sequencing rule |

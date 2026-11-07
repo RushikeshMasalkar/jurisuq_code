@@ -49,7 +49,7 @@ Committed artefacts only, plus code and deterministic probes:
 | `runs/pilot-qwen3-14b-pilot/pilot_items.jsonl` | **per-sample** qwen3-14b records, 24 items × 3 samples |
 | `runs/phaseA-laptop-v2-rejudged+ctx-r2/items.jsonl` | frozen Phase A per-sample records (200 items) |
 | `runs/phaseG_candidate_sources_v1.json` | the provenance registry for the candidate set |
-| `runs/phaseG_l7_qwen3_14b_diagnostic.json` and `…_items.jsonl` | the corrected diagnostic on the twelve candidate items (§3.4); not committed here at the time of writing |
+| `runs/phaseG_l7_qwen3_14b_diagnostic.json` and `…_items.jsonl` | the corrected diagnostic on the twelve candidate items (§3.4); committed at those paths |
 | a superseded diagnostic whose model id was a placeholder | preserved as history, not attributable to any model (§3.4) |
 | `jurisuq/judge.py`, `jurisuq/normalize.py`, `jurisuq/pipeline.py` | the correctness decision path |
 | `scripts/41_screen_target_yield.py` | the screen harness |
