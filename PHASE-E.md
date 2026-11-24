@@ -2,23 +2,11 @@
 
 Phase E turns the Phase A sample statistics and stored Phase D warrant outputs into a per-answer uncertainty score. It is an incremental, label-separated stage: fitting is supervised on a development partition; scoring is a separate label-blind command; validation reads correctness labels only after scores have been written.
 
-## Compute and cost
+## Inputs and evidence
 
-Inference runs locally through LM Studio on this machine. No accelerator is
-used: PyTorch reports `2.9.1+cpu`, with CUDA, MPS, and XPU unavailable, so
-inference and relation-model training run on CPU. The project spent nothing:
-there were no paid API calls, subscriptions, or billing. The primary Phase A
-run remains the frozen `qwen2.5-7b-instruct` run. Qwen3-14B Q4_K_M was a
-local screen only (reasoning on and off); it answered IPC 379 to a
-post-1-July-2024 theft question and scored 0% on L7. Gemini 2.5-flash was
-unavailable, 3.8-flash returned 503, and 3.6-flash hit the free-tier daily
-quota (HTTP 429), so no API model was used.
+The initial pilot, the four attribution-controlled Block 5b arms and the corrected typed-input Block 6b rehearsal use distinct sibling runs. Compare estimators on the same holdout and representation. The single-class L7 holdout leaves G5 **NOT_EVALUABLE**. [Exact-key evaluation](runs/phaseA-laptop-v2-rejudged+ctx-r2+typed+warrant+uq-exact/uq_validation.json)
 
-Under this zero-cost local-compute constraint L7 has no correct items. G5
-remains **NOT_EVALUABLE**, and the L1-L7 comparison cannot be made. Per
-master-guide section 16.4, the failed G2 directs the project to its
-diagnostic contribution: Phase A plus the Phase D temporal detector. This is
-a finding about the model class under test, not a defect in the instrument.
+The [Phase A guide](PHASE-A.md) records the local generator, compute environment and provider screening history.
 
 ## Field and script registry
 
@@ -87,7 +75,9 @@ The sigmoid output is an **uncalibrated monotone risk score**, not a calibrated 
 
 The split seed is `phaseE-v1`; test fraction is 0.20. The same input data and files produce the same split, fitted weights, and scores. No LM Studio endpoint or model downloads are required.
 
-## 4. Windows PowerShell workflow
+## 4. Historical Windows PowerShell reproduction workflow
+
+The current checkout already includes this phase. Use a disposable extraction for the historical commands below. Several commands write the named data files or run reports.
 
 First overlay the ZIP into the existing checkout (adjust `$zip` only if your download is elsewhere), then run from the repository root. `-Force` permits the two updated documentation files to be replaced; no Phase A/B/C/D files are overwritten. Phase E does not require reinstalling the project's dependencies.
 
@@ -189,9 +179,7 @@ On the current checked-in run the pair-grouped holdout has 44 items (22 per slic
 
 ## Complete experimental results and validation record
 
-### Merged record: `PHASE-E.md`
-
-# Phase E pilot results — M8 legal-aware uncertainty estimation
+## Phase E pilot results — M8 legal-aware uncertainty estimation
 
 ## Run identity and separation
 
@@ -368,7 +356,7 @@ records (T=1 on the remaining one). `u_cm` is zero on all resolvable L1
 records, so the missing within-slice variance remains structural rather than
 an estimator or representation artifact.
 
-This remains a rehearsal; Phase F has not started.
+At the time of this rehearsal, Phase F had not started. Its subsequent evaluation is recorded in [Phase F](PHASE-F.md).
 
 ### Why typed clustering cannot differ from exact-key on this instrument
 

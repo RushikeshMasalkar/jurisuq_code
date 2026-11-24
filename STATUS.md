@@ -1,23 +1,17 @@
 # JURIS-UQ — project status (authoritative)
 
-**This is the single source of truth for what is finished, what is not, and what
-each blocker needs.** The phase guides (`PHASE-A.md` … `PHASE-G.md`) own the
-method and the full historical result records; this file owns the summary and
-must not contradict them. If the two ever disagree, the phase guide and the
-artefacts under `runs/` win, and this file is the thing to fix.
+This document summarises implementation, evaluation and open dependencies. Stored measurements take precedence over prose. The phase guides retain the original protocols, denominators and correction histories. See the [roadmap](ROADMAP.md) for the order of future work.
 
-| | |
+| Record | Scope |
 |---|---|
-| Status date | 2026-10-27 |
+| Latest screening evidence | 2026-11-07 |
 | Branch of record | `main` |
-| Full suite, actually run on 2026-10-27 | `python -X utf8 -m pytest -q` → **645 passed, 1 skipped** in about 11 s (646 collected; the skip is the optional torch/transformers path) |
+| Latest offline suite, 2026-11-24 | **646 passed, 0 skipped, 0 failed** in an isolated Windows checkout with Python 3.13.1. |
+| Historical core-environment suite on 2026-10-27 | `python -X utf8 -m pytest -q` → **645 passed, 1 skipped** in about 11 s (646 collected; the skip is the optional Phase B threshold-selection test) |
 | Offline integrity check | `python -X utf8 scripts/47_offline_check.py` — no model, no network |
 | Gate summary | G1 PASS · G2 NOT YET · G3 NOT MET · G4 PASS · G5 NOT_EVALUABLE · G6 NOT_MET · G7 NOT_MET · pilot ON_HOLD |
 
-**Two things this project is not.** It is not a legal service and gives no legal
-advice. And "implemented and tested" is not "scientifically validated": only G1
-and G4 currently pass, and both are scoped to one quantized 7B checkpoint, one
-synthetic 200-item construction, and the artefacts actually stored here.
+G1 and G4 pass on a synthetic 200-item construction using stored answers from one quantized 7B checkpoint. The later Qwen3-14B screens address candidate yield. Software checks cover implementation behaviour. Independent human legal review remains pending.
 
 ---
 
@@ -26,12 +20,12 @@ synthetic 200-item construction, and the artefacts actually stored here.
 | Label | Meaning |
 |---|---|
 | `IMPLEMENTED` | code exists, is wired into the pipeline, and has tests |
-| `TESTED` | the tests for that component were executed and passed in this environment |
+| `TESTED` | the tests for that component were executed and passed in the recorded environment |
 | `BLOCKED` | cannot proceed without data, a model endpoint, or an external decision |
 | `PENDING_HUMAN_REVIEW` | a qualified human has not signed off; an AI/machine check is not a substitute |
 | `NOT_EVALUABLE` | the gate's own precondition is absent, so no verdict is possible |
 
-A phase gets `IMPLEMENTED`/`TESTED` for its software and a **separate** label for
+A phase receives `IMPLEMENTED`/`TESTED` for its software and a **separate** label for
 its science. Nothing below marks a phase experimentally complete because its
 unit tests pass.
 
@@ -44,7 +38,7 @@ unit tests pass.
 | **A** sampling + common-mode diagnostic | `IMPLEMENTED`, `TESTED` | **G1 PASS** (scoped) | none | none — frozen |
 | **B** typed legal relations | `IMPLEMENTED`, `TESTED` | **G2 NOT YET** (corrected) | relation labels are rule-generated, not human-annotated | needs a target population with a rescue collision |
 | **C** statute store + context packs | `IMPLEMENTED`, `TESTED` | **G3 NOT MET** | statute verification is machine-assisted, `PENDING_HUMAN_REVIEW` | independent legal check of the 48 statute rows |
-| **D** common-mode detector | `IMPLEMENTED`, `TESTED` | **G4 PASS** | 13 unresolved records limit coverage | none until Phase G data exists |
+| **D** common-mode detector | `IMPLEMENTED`, `TESTED` | **G4 PASS** | 13 undefined common-mode scores in the earlier typed run, 28 in the Block 6b rehearsal | none until Phase G data exists |
 | **E** legal-aware uncertainty | `IMPLEMENTED`, `TESTED` | **G5 `NOT_EVALUABLE`** | needs a slice with both correctness classes | unblocked only by Phase G data |
 | **F** calibration + decision layer | `IMPLEMENTED`, `TESTED` | **G6 `NOT_MET`** | same target-population dependency | same |
 | **G** target population + §21 matrix | `IMPLEMENTED`, `TESTED` | **G7 `NOT_MET`**, pilot **ON_HOLD** | human legal review of 12 L7 golds; a model endpoint | §7 below |
@@ -54,11 +48,11 @@ unit tests pass.
 | Gate | Verdict | Where it is recorded |
 |---|---|---|
 | G1 | PASS | `PHASE-A.md` §Gate G1; `runs/phaseA-laptop-v2-rejudged/e1_report.json` |
-| G2 | NOT YET (corrected) | `PHASE-B.md` §Gate G2 |
+| G2 | NOT YET (corrected) | [corrected v2 evaluation](runs/phaseB-relations-02/relation_report.json) |
 | G3 | NOT MET | `PHASE-C.md` §Block 7b |
-| G4 | PASS | `runs/…+ctx-r2+typed+warrant/warrant_validation.json` → `gate_g4.verdict` |
-| G5 | NOT_EVALUABLE | `PHASE-E.md` §6; `runs/phaseG_eval_matrix.json` |
-| G6 | NOT_MET | `PHASE-F.md` §7; `runs/…+uq-exact+cal-r2/` |
+| G4 | PASS | [typed validation](runs/phaseA-laptop-v2-rejudged+ctx-r2+typed+warrant/warrant_validation.json), `gate_g4.verdict` |
+| G5 | NOT_EVALUABLE | [exact-key validation](runs/phaseA-laptop-v2-rejudged+ctx-r2+typed+warrant+uq-exact/uq_validation.json) |
+| G6 | NOT_MET | [corrected calibration report](runs/phaseA-laptop-v2-rejudged+ctx-r2+typed+warrant+uq-exact+cal-r2/calibration_report.json) |
 | G7 | NOT_MET | `runs/phaseG_eval_matrix.json` → `gate_g7` |
 | Pilot | ON_HOLD | `runs/phaseG_pilot_status.json` |
 
@@ -73,7 +67,7 @@ unit tests pass.
 - **Implemented.** `jurisuq/{pipeline,generators,judge,normalize,cluster,metrics,facts}.py`;
   `scripts/01_make_data.py`, `02_run_inference.py`, `03_analyze_e1.py`, `04_make_figure.py`, `05_rejudge.py`, `06_pilot.py`.
 - **Tests.** `tests/test_data.py`, `test_judge.py`, `test_normalize.py`, `test_cluster.py`, `test_metrics.py`, `test_pipeline_smoke.py`, `test_gate.py`.
-- **Result.** G1 PASS on the L7 arm: 43.4 % correct on L1, 0/100 on L7;
+- **Result.** G1 PASS on the L7 arm: 43/99 scored majorities correct on L1 (43.4%, one unresolved), 0/100 on L7;
   sample-only AUROC on L7 is undefined because the slice has one class.
 - **Artifacts and reproducibility.** `runs/phaseA-laptop-v2-rejudged/`
   (`e1_report.json`, `items.jsonl`), dataset `data/lexuq_slice.jsonl`
@@ -112,9 +106,7 @@ unit tests pass.
   `runs/phaseA-laptop-v2-rejudged+ctx/`.
 - **Gate.** G3 **NOT MET** — no encoder earns a passing representation-safety claim.
 - **Human dependency — read this carefully.** All 48 rows carry `verified: true`
-  and each override records an `official_source`, but those sources are
-  **reproductions** (devgan.in) plus the MHA commencement notification, recorded
-  through `scripts/22_verify_statutes.py --apply`. No qualified lawyer reviewed
+  and each override records an `official_source`, but the provenance includes secondary reproductions and the MHA commencement notification. Four mappings (eight rows, including two corrected subsection mappings) subsequently received a source comparison using user-transcribed government-hosted text and the enacted BNS. No qualified lawyer reviewed
   them. In this table `verified` therefore means *compared with a cited source*,
   **not** *human-approved*. Status: `PENDING_HUMAN_REVIEW`.
 - **Next action.** An independent human read of the 48 rows using
@@ -132,7 +124,7 @@ unit tests pass.
   n=32 collision records; pinning the temporal factor to 1.0 drops AUROC to
   0.5000, so the temporal factor carries the signal.
 - **Artifacts.** `runs/phaseA-laptop-v2-rejudged+ctx-r2+typed+warrant/warrant_validation.json`.
-- **Remaining.** 13 records remain unresolved, which caps collision coverage.
+- **Coverage.** The earlier typed overlay had 13 unresolved records. In the corrected Block 6b rehearsal, common-mode scores were defined for 172/200. G4 still passed. [Block 6b validation](runs/phaseA-laptop-v2-rejudged+ctx-r2+typed-v2-r3+warrant-v2-r3/warrant_validation.json)
 
 ### Phase E — legal-aware uncertainty (M8)
 
@@ -141,8 +133,7 @@ unit tests pass.
 - **Implemented.** `jurisuq/uncertainty/*`; `scripts/25`–`28`, `34`.
 - **Tests.** `tests/test_uncertainty.py`.
 - **Result.** **G5 `NOT_EVALUABLE`**: the target holdout contains only incorrect
-  L7 answers, so AUROC is undefined there. The legal-aware factors are constant
-  within slice (`T=1.0` on 94/94 resolvable L1, `T=0.0` on 80/81 L7), so no
+  L7 answers, so AUROC is undefined there. Temporal validity shows little within-slice variation in Block 5c (`T=1.0` on 94/94 resolvable L1, `T=0.0` on 80/81 L7), so no
   estimator or hyper-parameter on this instrument can satisfy G5.
 - **Artifacts.** `runs/…+uq-exact/`, `runs/…+uq-typed/`, and the four Block-5b
   sibling runs; model JSONs `runs/phaseE*_model.json`; regression in
@@ -159,7 +150,7 @@ unit tests pass.
   `test_within_slice.py`, `test_uncertainty_intervals.py`.
 - **Result.** **G6 `NOT_MET`**: ACE 0.2797 on L1 (target ≤ 0.05); selective risk
   at 50 % coverage 0.5455 versus 0.4545 for the sample-only baseline; conformal
-  coverage passes; the query path is statically label-blind; the L7 stratum is
+  coverage in the corrected `+cal-r2` run is 15/22 (0.6818), above the Wald floor 0.6329. Its exact lower bound 0.4845 is below the nominal 0.80 target. The original `+cal` used the holdout to set its threshold and recorded 19/22 (0.8636). The query path is statically label-blind; the L7 stratum is
   not evaluable.
 - **Artifacts.** `runs/…+uq-exact+cal-r2/` (run of record),
   `runs/phaseF_exp{2,3,4}_*.json`, `runs/phaseF_calibration_model*.json`.
@@ -190,7 +181,7 @@ unit tests pass.
   `f49f4d91946387eb0534718945092cc2f840bd9f2aee053ed9ac13c3f296d341` (screened);
   `data/lexuq_target_candidates_v2.jsonl` sha256
   `44e7b5a2f3f968a7523b071a972ef522894f7ad0453e7390dff728b020878e8c`
-  (four revised L7 items, **never screened**).
+  (four revised L7 items, L7 screened on 2026-11-07, L1 unscreened by a real provider).
 - **Detail.** §7 below.
 
 ---
@@ -213,13 +204,12 @@ unit tests pass.
 
 ---
 
-## 5. Environment facts (this sandbox)
+## 5. Historical validation environment (27 October 2026)
 
-- Python 3.11.2; the suite runs in about 8 s here.
-- `torch`, `transformers`, `scipy`, `sklearn` are **not installed**, so the real
-  NLI clusterer and local generation cannot run here. Everything reported above
+- Python 3.11.2; the core-environment run is recorded above.
+- `torch`, `transformers`, `scipy`, `sklearn` were absent in that environment. Everything reported above
   is either stored from a prior local run or computed from stored artefacts.
-- No generator is reachable at `http://127.0.0.1:1234/v1` in this environment.
+- No generator was reachable at `http://127.0.0.1:1234/v1` in this environment.
 - `configs/phase_a.json` is the repository copy: `model` is the literal
   placeholder `REPLACE_WITH_YOUR_MODEL_ID`. The principal investigator's local
   Qwen3-14B configuration is **not** present in this checkout and must not be
@@ -240,11 +230,11 @@ unit tests pass.
 
 The diagnostic is a single-model measurement, not a cross-model comparison; no
 cross-model claim is made. Gold labels remain unverified pending human legal
-review, and nothing was fabricated.
+review.
 
 ---
 
-## 6. Known inconsistencies to resolve
+## 6. Provenance and interpretation
 
 1. **The word "verified" in the statute table** (see Phase C) reads as legal
    approval when it means source-compared. Documentation fix or field rename,
@@ -256,9 +246,7 @@ review, and nothing was fabricated.
    item table.
 3. **Only the 12 L7 items were label-reviewed.** The 12 L1 items have had no
    AI-assisted review either.
-4. **README suite counts are historical**, recorded at the time of each block
-   (160, 216, 270, 589 …). They are records, not claims about today's suite; run
-   the suite for the current number.
+4. **Historical suite counts** were 160 through Block 8, 216 passed and 1 skipped at Phase F merge, 270 passed and 1 skipped after the Phase F follow-up, and 589 passed and 1 skipped at the Phase G screening milestone. Phase E records separate Windows and sandbox runs.
 
 ---
 
@@ -291,4 +279,4 @@ python -X utf8 -c "from jurisuq.target import load_candidates as l; print(len(l(
 ```
 
 `tests/test_status_docs.py` checks that the hashes, counts and gate verdicts
-quoted above match the artefacts, so this file fails CI when it drifts.
+quoted above match the stored artifacts.

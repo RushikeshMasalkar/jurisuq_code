@@ -1,6 +1,6 @@
 # JURIS-UQ — Phase G Stage 2: candidate population, and where the measurement stops
 
-**Status: PARTIAL — screening complete, L7 investigation outstanding.** The
+**Stage 2 remains partial.** The [L7 investigation](PHASE-G-L7-INVESTIGATION.md) followed the v1 screening reported here. Independent legal review remains outstanding. The
 candidate item set is built and contract-valid. The target-yield screen has been
 run on Qwen3 14B via LM Studio, and **all three artefacts are committed in this
 repository**:
@@ -57,7 +57,7 @@ Built deterministically by `scripts/45_build_target_candidates.py`, which holds
 the item table and the citations in one file so the dataset and its provenance
 record cannot drift apart. No network, no model.
 
-**A second version exists and has never been screened.**
+**The v2 revision was screened on L7 only.**
 `data/lexuq_target_candidates_v2.jsonl` (sha256
 `44e7b5a2f3f968a7523b071a972ef522894f7ad0453e7390dff728b020878e8c`) revises
 **four L7 items** — the agent tier for criminal breach of trust, the knowledge
@@ -71,7 +71,7 @@ are recorded with their legal source and reasoning in
 [`reports/phaseG_l7_label_review_v1.md`](reports/phaseG_l7_label_review_v1.md)
 and `runs/phaseG_l7_candidate_revisions_v1.json`. `configs/phase_g_target.json`
 still points at **v1**, and every item in both versions still carries
-`provenance.verified = false`. **v2 carries no measurement of any kind.**
+`provenance.verified = false`. The dataset itself contains no measured correctness labels. The subsequent [L7-only screen](runs/phaseG_screen_v2_l7.json) recorded 0/12 majority-correct items and 0/36 correct samples. Its L1 half has no real-model screening record. The label-review report describes v2 at authoring time, before this screen.
 
 ### Data card
 
@@ -476,8 +476,8 @@ The investigation asked for here has been carried out and is reported in full in
   L7 samples as `stale_law` and **0** as correct, with 91.7% mean
   `repealed_code_share`; the frozen primary run shows the same at 832/1000.
 - **Not a scoring artefact.** The judge accepts correct L7 answers in every form
-  tested, tolerates a missing subsection in gold, and the same run scored 32/240
-  correct samples on L1 with the same parser — so no slice-agnostic defect can
+  tested, tolerates a missing subsection in gold, and the sliced run scored 32/120
+  correct samples on L1 (32/240 across both slices) with the same parser — so no slice-agnostic defect can
   produce the 3/12 versus 0/12 split.
 - **Two harness defects, fixed.** The screen discarded the per-item diagnostics it
   had already computed (the sole reason the zero was unattributable), and checked

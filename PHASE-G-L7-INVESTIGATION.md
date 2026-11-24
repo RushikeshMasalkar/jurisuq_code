@@ -287,7 +287,7 @@ exactly, and `tests/test_judge.py:66-78` already pins it:
 | `Section 103(1) BNS` | incorrect (`premature_law`) | **correct** |
 
 This yields a decisive argument about the Stage 2 result: **the L1 arm of the same
-run scored 32/240 correct samples with the same generator, judge, question
+run scored 32/120 correct samples (32/240 across both slices) with the same generator, judge, question
 template and item schema.** The pipeline therefore demonstrably *can* mark an
 answer correct on this item format. Any slice-agnostic defect — parsing,
 normalisation, matching, clustering — would depress both arms together and cannot
@@ -456,8 +456,7 @@ model with reasoning off; `provider` comes from `configs/phase_a.json` ("openai"
 so only the model id is overridden; `--allow-generation`; no paid API — the local
 endpoint cost $0.00 for all runs recorded here.
 
-**Expected cost.** The three committed Stage 2 screens ran at 44.5 s/sample; the
-pilot at 19.1 s/sample. A 36-generation comparison is therefore ≈ 11–27 minutes.
+**Expected cost.** The sliced Stage 2 run took 44.5 s/sample (10,684.6 s for 240 samples). The independent full run took 39.5 s/sample and the smoke run 36.2 s/sample. The earlier pilot took 19.1 s/sample. A 36-generation comparison is therefore ≈ 11–27 minutes.
 
 **Decision criteria, fixed in advance:**
 
@@ -489,8 +488,7 @@ Those four corrections were **decided and applied to a new file**, not to this
 dataset: `data/lexuq_target_candidates_v2.jsonl`, described in
 [`reports/phaseG_l7_label_review_v1.md`](reports/phaseG_l7_label_review_v1.md).
 v1 — the file every result in this document was measured on — is unchanged. v2
-has not been screened, and its revisions are AI-assisted and operator-decided,
-not human legal approval.
+was subsequently screened on L7 alone. On 7 November 2026 the [screen](runs/phaseG_screen_v2_l7.json) and [item records](runs/phaseG_screen_v2_l7_items.jsonl) recorded 0/12 majority-correct items and 0/36 correct samples. The v2 L1 half remains unscreened by a real model. The revisions were AI-assisted and operator-decided. Independent legal review remains pending.
 
 Reviewer instructions: for each item, open the source in §6.1, read the facts, and
 answer the five decisions. Record the source actually opened. Start with `cheating`,
@@ -719,7 +717,7 @@ approved, and update `review.status` per item — do not flip the field for the 
 ## 11. Reproducing the checks in this document
 
 **Regenerating §3.4's item table from the run** (read-only; requires the two
-diagnostic files, which are not committed here):
+committed Run B diagnostic files):
 
 ```powershell
 python -c "import json,collections; r=[json.loads(l) for l in open(r'runs\phaseG_l7_qwen3_14b_diagnostic_items.jsonl',encoding='utf-8')]; [print(x['item_id'], x['majority_verdict'], x.get('prov_counts'), x.get('repealed_code_share')) for x in sorted(r,key=lambda y:y['item_id'])]; print('majority', sum(x['majority_correct'] for x in r),'/',len(r)); print('samples', sum(sum(x['sample_correct']) for x in r),'/',sum(len(x['sample_correct']) for x in r)); print(collections.Counter(l for x in r for l in x['sample_verdict_labels']))"

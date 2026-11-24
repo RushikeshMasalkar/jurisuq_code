@@ -195,7 +195,7 @@ and the check is worth recording because it forecloses cheaper fixes:
 | L7 samples labelled `wrong_section` (BNS act, wrong section) | 150 / 1000 |
 | L7 samples asserting the gold section in parent form (e.g. `BNS 351` for gold `BNS 351(2)`) | **0** |
 | Per-topic gold-labelled samples | 0 in all 10 topics |
-| L1 majority accuracy (control) | 43 / 100 |
+| L1 correct majorities (control) | 43 / 100 items, or 43 / 99 scored |
 
 The comparator itself was probed directly on an L7 item before drawing that
 conclusion, because "the model never says the right thing" is also what a broken
@@ -210,16 +210,9 @@ comparator looks like:
 | `BNS 103 applies.` | `wrong_section` |
 | `IPC 304 applies.` | `stale_law` |
 
-The judge accepts the correct answer in every form tested, so the zero is a
-property of the generated text, not of the matching logic.
+The judge accepted each tested form of the correct provision. In the frozen sample, the parent-form check found no instance of a gold citation that this matching rule would reject.
 
-Two conclusions follow, and they are deliberately separated:
-
-1. **Confirmed.** On this slice, with this generator, no L7 item is answerable,
-   and no re-sampling, larger `n`, or different judge can change that — the gold
-   section never appears in 1,000 samples across ten offences. The judge is not
-   labelling a correct answer wrong: the parent-form check finds zero cases
-   where a section was asserted in a form the comparator would reject.
+1. **Observed.** None of the 1,000 stored L7 samples across ten offences received a correct label. These observations leave the yield of additional sampling unknown.
 2. **Hypothesis, not confirmed.** The pattern is consistent with a generator
    knowledge limit: the model frequently emits the *BNS* label with *IPC*
    numbering (`BNS 304`, `BNS 307`, `BNS 378`), which is what a model that has
@@ -474,7 +467,11 @@ ERROR: this script calls a model when provider != 'mock'.
   sense. The observation is a hypothesis with a plausible mechanism, not an
   attribution.
 
-## Remaining work: all of it blocked on the pilot
+<a id="remaining-work-all-of-it-blocked-on-the-pilot"></a>
+
+## Original staged plan
+
+The original section title was “Remaining work: all of it blocked on the pilot”, as cited in the immutable screen metadata. Local candidate screening subsequently proceeded under the zero-cost constraint. The [roadmap](ROADMAP.md) records the remaining dependencies.
 
 Everything that remains would require model generation, and generation is on
 hold. The engineering work is complete to the limit of the available evidence;
@@ -569,13 +566,7 @@ reproducible:
   duplication and every gate are **outside** this check.
 
 **What this does not do.** It does not author an item set, decide that any item
-is answerable or legally correct, estimate a real yield, or move G7. There is no
-candidate item set in the repository (`data/lexuq_target_candidates_v1.jsonl` is
-named in `configs/phase_g_target.json` but does not exist), and none was
-invented: authoring benchmark items is a scientific act with its own approval,
-not a file to be generated to make a pipeline look complete. Stage 2 therefore
-remains blocked at step 1's human input, and the mock screen numbers remain a
-plumbing check that must never be quoted as a yield.
+is answerable or legally correct, estimate a real yield, or move G7. At the contract-design milestone, no candidate item set had been authored. The two subsequent 24-item sets and the v1 screen are documented in [Stage 2](PHASE-G-STAGE2.md). A two-class measured L7 population still does not exist. The [v2 L7 screen](runs/phaseG_screen_v2_l7.json) also yielded zero correct samples. Mock screening exercises the contract only.
 
 No step here may change `ace_max = 0.05`, `c_verify = 0.15`, `c_abstain = 0.35`,
 the 0.80 conformal target, the `phaseE-v1` split, or any frozen run. None of

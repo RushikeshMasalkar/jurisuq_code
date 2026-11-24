@@ -1,4 +1,4 @@
-# JURIS-UQ Phase A: sampling and common-mode diagnostic
+# Phase A — sampling and the common-mode diagnostic
 
 Phase A is the diagnostic instrument. It builds a matched 200-item L1/L7
 slice, samples answers from an OpenAI-compatible local model, extracts asserted
@@ -7,13 +7,9 @@ and evaluates the E1 common-mode premise.
 
 ## Compute and cost
 
-Inference runs locally through LM Studio on this machine. No accelerator is
-used: PyTorch reports `2.9.1+cpu`, with CUDA, MPS, and XPU unavailable, so
-inference and relation-model training run on CPU. The project spent nothing:
-there were no paid API calls, subscriptions, or billing.
+The operator recorded local CPU inference through LM Studio and CPU relation-model training with PyTorch `2.9.1+cpu`. CUDA, MPS and XPU were unavailable in that environment. The project recorded zero spend.
 
-The primary frozen Phase A run remains `qwen2.5-7b-instruct`; all Phase A
-results and every Phase B-E number derive from its frozen `p2-structured`
+The primary frozen Phase A run remains `qwen2.5-7b-instruct`; downstream evaluations on the frozen benchmark use its `p2-structured`
 prompt and 2,000 stored samples. `Qwen3-14B Q4_K_M` (about 9 GB) was screened
 locally with reasoning on and off: it answered IPC 379 to a post-1-July-2024
 theft question and scored 0% on L7. It is a screen only; no slice was
@@ -56,7 +52,7 @@ All later run metadata must record the authoritative digest.
 ## Reproduce or inspect
 
 Install the shared requirements and, for the optional standard NLI backend,
-`requirements-phase-a.txt`. For a report-only analysis of the shipped run:
+`requirements-phase-a.txt`. The following analysis commands write the report and figures. Run them in a disposable copy. For read-only inspection, open the [stored E1 report](runs/phaseA-laptop-v2-rejudged/e1_report.json).
 
 ```bash
 python scripts/03_analyze_e1.py --run-id phaseA-laptop-v2-rejudged
@@ -84,7 +80,7 @@ python scripts/05_rejudge.py --config configs/phase_a.json --run-id phaseA-my-ru
 
 ## Result record
 
-[The results section below is authoritative. It preserves the E1 AUROC
+This guide contains the Phase A results record. The historical path `docs/results_phase_a.md` is absent from this checkout. The [E1 report](runs/phaseA-laptop-v2-rejudged/e1_report.json) contains the rejudged measurements. It preserves the E1 AUROC
 single-class limitation, collision counts, confidence
 intervals, G1 PASS, historical v1/re-judged runs, and the frozen dataset note.
 Phase B consumes the stored answers without changing this run.
@@ -93,9 +89,7 @@ Phase B consumes the stored answers without changing this run.
 
 ## Complete experimental results and validation record
 
-### Merged record: `PHASE-A.md`
-
-# Phase A results — E1 common-mode diagnostic
+## Phase A results — E1 common-mode diagnostic
 
 Run of record. The numbers below are transcribed from the run report produced by
 `scripts/03_analyze_e1.py` for the run named in the first row, on the dataset named in
@@ -111,7 +105,7 @@ rather than filled in. The authoritative machine-readable source is
 | Date / machine | not reported (Windows laptop, Lenovo IdeaPad Slim 5, Intel Core Ultra with Intel Arc graphics) |
 | Generator (name + quantisation) | Qwen2.5-7B-Instruct, Q4_K_M quantisation, served by LM Studio on an OpenAI-compatible endpoint at localhost |
 | Sampling: M, temperature, top_p, max_tokens | M = 10, temperature 1.0, top_p 1.0, max_tokens 220 |
-| Clustering channels used | discrete / entailment configured (`clusterer = both`; `nli_backend:` not reported). The primary diagnostic reported here is the provision-level agreement statistic, which does not depend on the entailment channel. |
+| Clustering channels used | discrete / entailment configured (`clusterer = both`; `nli_backend = lexical-proxy` in the rejudged metadata). The primary diagnostic reported here is the provision-level agreement statistic, which does not depend on the entailment channel. |
 | Correctness resolver | provision (`judge = provision`, `judge_scope = representatives`) |
 | Slice sizes | L7 = 100, L1 = 100 (100 matched pairs, matched on `pair_id`) |
 | Crosswalk verified (facts.py) | no — entries carry `provenance.verified = false`; verification is outstanding |
@@ -185,7 +179,7 @@ subpopulation property to the whole slice.
 
 ## Freeze note
 
-* L7 item ids frozen: **yes**. Hash of the dataset:
+* L7 item ids frozen: **yes**. Historical registry digest (superseded by the digest in Components and data):
   `certutil -hashfile data/lexuq_slice.jsonl SHA256` →
   `45b2d194e9c2f623457481c0d7d02f36c6267ec65c0b75ee3df2be4c0d1d010a`
   (200 items, 100 L1 / 100 L7, matched pairs).
@@ -214,16 +208,8 @@ IPC numbers as if they were BNS sections. The missing second correctness class
 on L7 is therefore a property of the model under test, not of the judge and
 not of the statute store.
 
-## Model-cutoff explanation for the L7 result
+## Training-cutoff hypothesis for the L7 result
 
-The frozen Phase A run was generated by `qwen2.5-7b-instruct`, with provider
-`openai-compat:qwen2.5-7b-instruct`, temperature `1.0`, `max_tokens = 220`,
-and `n_samples = 10` (see `runs/phaseA-laptop-v2-rejudged/meta.json`). The
-model's training data ends near the IPC/BNS transition, and it answers IPC
-379 to a post-1 July 2024 theft question.
+The frozen run used `qwen2.5-7b-instruct` through the OpenAI-compatible provider with `temperature = 1.0`, `max_tokens = 220` and `n_samples = 10`. It recorded 0/100 correct L7 majorities and 832/1,000 samples labelled `stale_law`. The historical interpretation attributed some of this behaviour to training coverage near the IPC/BNS transition, including the model's IPC 379 answer to a post-transition theft question. The stored answers establish the error pattern. They cannot establish the checkpoint's training corpus or how much the cutoff contributed. [Run metadata](runs/phaseA-laptop-v2-rejudged/meta.json) · [Item records](runs/phaseA-laptop-v2-rejudged/items.jsonl)
 
-Accordingly, the L7 result — 0/100 items correct and 832/1,000 stored answers
-labelled `stale_law` — is partly a model-cutoff artefact, not purely a
-legal-reasoning failure. A model with post-2024 training data is required
-before any L7-based gate, including G5, can be evaluated. This limitation is
-a property of the model under test, not a defect in the instrument.
+A comparison with a model trained on post-transition material was proposed to investigate that explanation. G5 requires measured variation in correctness and detector state within the target population. The [roadmap](ROADMAP.md) records the legal-review prerequisite for a cross-model comparison.

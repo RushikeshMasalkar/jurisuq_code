@@ -1,4 +1,30 @@
-# JURIS-UQ — Phase D deployment guide
+# JURIS-UQ deployment and reproduction guide
+
+## Working with the current checkout
+
+Install the [core environment](README.md#installation-and-offline-validation) and run commands from the repository root. Inspection and reproduction have different effects on disk.
+
+| Operation | Inputs and effects |
+|---|---|
+| Inspect a stored measurement | Read its report or JSONL items. No generator, model weights or writes are required. |
+| Validate the installation | Run pytest in a disposable checkout. The offline integration check writes scratch reports, including a deterministic mock screen. |
+| Reproduce an analysis | Use a disposable copy for historical commands that name a frozen run. Analysis and figure scripts write to the run directory. |
+| Fit or train | Phase B encoder training needs the optional dependencies and checkpoint. Phase E fitting and Phase F calibration consume stored features and labels and write new model artifacts. |
+| Generate new answers | Use an operator-approved endpoint, explicit model ID and fresh run or output paths. The API pilot is on hold. The pilot's `--run` mode can spend money. |
+
+Read the final Phase A report and inspect the candidate revisions offline with PowerShell:
+
+```powershell
+Get-Content -Raw runs/phaseA-laptop-v2-rejudged/e1_report.json | ConvertFrom-Json
+python -X utf8 scripts/46_revise_target_candidates_v2.py --check
+python -X utf8 scripts/47_offline_check.py --out-dir "$env:TEMP/jurisuq-offline-check"
+```
+
+The shared config supports overrides such as `--set model=YOUR_SERVED_MODEL_ID` on the inference command. Inspect the local packages with `python -X utf8 scripts/00_env_check.py --skip-endpoint`. Omitting that flag also probes the endpoint. The scientific settings of the frozen run are in its [metadata](runs/phaseA-laptop-v2-rejudged/meta.json). For approval and cost controls, see the [pilot record](runs/phaseG_pilot_status.json).
+
+## Historical Phase D distribution and Phase E extension
+
+The following sections document the original ZIP distribution, README patch, commands, hashes and test counts. Archive filenames refer to that distribution. Use a separate disposable extraction for replication, especially for commands that rebuild the statute table or use `--force`. The authoritative current hashes, run identifiers and corrected G2 verdict are in [project status](STATUS.md).
 
 This guide takes you from a fresh unzip to a fully run Phase D
 and an updated main `README.md`, in detail. It assumes you are
@@ -60,7 +86,7 @@ no model download, and no internet at runtime.
 
 ```powershell
 python -m venv .venv
-.\\.venv\\Scripts\\Activate.ps1        # Windows PowerShell
+./.venv/Scripts/Activate.ps1        # Windows PowerShell
 # source .venv/bin/activate            # macOS / Linux
 python -m pip install --upgrade pip
 python -m pip install -r requirements.txt
@@ -74,21 +100,20 @@ relation-model requirements (`requirements-phase-a.txt`,
 
 ## 3. Quick verification (the non-mutating check)
 
-Run the whole test suite first. This mutates nothing and is the
-fastest proof that your environment is correct:
+Run the software checks in the disposable extraction:
 
 ```powershell
 python -m pytest -q
 ```
 
-Expected (core environment, no torch):
+Historical result in the Phase D core environment:
 
 ```text
 138 passed, 1 skipped in ~1s
 ```
 
 The single skip is the pre-existing torch-gated Phase B
-relation-model test. The **24** new Phase D tests are in
+relation-model test. The original release notes counted **24** new Phase D tests are in
 `tests/test_warrant.py`; run them alone with:
 
 ```powershell
@@ -140,7 +165,7 @@ runs\relations-full\relation_report.json
 ```
 
 `runs\full` is a full E2 evaluation and reproduces the run-of-record test
-metrics and G2 PASS, with 130 changed items. `runs\relations-full` is a
+metrics and the original changed-item G2 PASS, with 130 changed items. `runs\relations-full` is a
 metrics-only evaluation with `--skip-e2`; its G2 result is `NOT YET` because
 the separation criterion was intentionally not evaluated. Neither replaces
 `runs\phaseB-relations-full`.
@@ -152,17 +177,17 @@ table, then re-attach context packs to the frozen Phase A run
 under a **new** suffix so the shipped `+ctx` run stays untouched:
 
 ```powershell
-:: Step 1 — build + validate the 48-row statute table
+# Step 1 — build + validate the 48-row statute table
 python scripts\20_build_statutes.py --out data\statutes\statutes_v1.jsonl
 python -m pytest tests\test_context.py -q            # 31 passed
 
-:: Step 2 — attach context packs (new suffix; shipped +ctx untouched)
+# Step 2 — attach context packs (new suffix; shipped +ctx untouched)
 python scripts\21_attach_context.py --run-id phaseA-laptop-v2-rejudged --out-suffix +ctx-repro --as-of 2026-10-01
 ```
 
 Step 2 prints `SOURCE RUN UNCHANGED (hard rule H2 satisfied)` and
-writes `runs/phaseA-laptop-v2-rejudged+ctx-repro/`. The statute
-table must hash to
+writes `runs/phaseA-laptop-v2-rejudged+ctx-repro/`. The Phase D distribution recorded the statute
+table hash as
 `20c98b74c0855c5ec4c8cda2b2d52388ea5f3e8d2514376f56db425bdd90b21e`
 (the post-override value; 40 of 48 rows verified).
 
@@ -175,10 +200,10 @@ table must hash to
 ### 4.4 Phase D — the new work
 
 ```powershell
-:: Step 1 — attach the warrant tuple to the Phase C +ctx run
+# Step 1 — attach the warrant tuple to the Phase C +ctx run
 python scripts\23_detect_warrant.py --run-id phaseA-laptop-v2-rejudged+ctx --out-suffix +warrant
 
-:: Step 2 — E4 validation and Gate G4
+# Step 2 — E4 validation and Gate G4
 python scripts\24_validate_warrant.py --run-id phaseA-laptop-v2-rejudged+ctx+warrant
 ```
 
@@ -263,83 +288,11 @@ its reasons and the restart conditions.
 | `runs/...+ctx+warrant/fig_warrant.png` / `.svg` | the three-panel E4 figure |
 | `runs/...+ctx+warrant/meta.json` | run metadata, input hashes, as-of policy |
 
-## 6. Update the main README about Phase D
+## 6. Historical README patch
 
-The complete zip already contains the updated `README.md`. If
-you are working from your own Phase C checkout, apply the
-Phase D README changes with the supplied patch:
+The complete Phase D ZIP included an updated README. For the separate drop, the original distribution supplied `README_phaseD_patch.diff` to apply against the matching Phase C checkout with `git apply` or `patch -p1`. That patch belonged to the historical ZIP workflow.
 
-```powershell
-cd D:\work\jurisuq_code
-git apply ..\README_phaseD_patch.diff
-# or, without git:
-# patch -p1 < ..\README_phaseD_patch.diff
-```
-
-The patch makes exactly these edits to `README.md`:
-
-1. **Badges** — "Implemented through" `Phase C` → `Phase D`;
-   tests `111 passed` → `138 passed`; adds a
-   `Gate G4-PASS` badge.
-2. **Disclaimer** — notes Phase D inherits Phase C's
-   legal-verification limit.
-3. **Overview** — "three cumulative phases" → "four cumulative
-   phases", adding the Phase D bullet.
-4. **Contributes-today list** — adds the detector line and
-   extends the artefact line to "Phase A–D".
-5. **Implementation-status table** — adds the Phase D row
-   (status: *Complete and frozen*; artefact of record
-   `runs/phaseA-laptop-v2-rejudged+ctx+warrant/`).
-6. **Scope boundary + warning** — "through Phase C" → "through
-   Phase D"; the warning notes Phase D reads the store.
-7. **Results at a glance** — a full **"Phase D: common-mode
-   failure detector"** subsection: the four-tuple definition, the
-   era-date rule, the validation table, the headline numbers
-   (AUROC 0.941, CI [0.853, 1.000]), the factor-attribution
-   table, the base-rate honesty line, and the Gate G4 PASS.
-8. **Table of contents** — adds the Phase D result and
-   reproduction entries.
-9. **System architecture** — the mermaid diagram gains the
-   Phase D detector and the `+ctx+warrant` sibling run, with its
-   own tree-hash edge; the component map gains the *Warrant*
-   layer (`jurisuq/warrant/`).
-10. **Repository structure** — adds `configs/phase_d_warrant.json`,
-    `PHASE-D.md`, `jurisuq/warrant/`, the
-    `+ctx+warrant` run, `scripts/23…24`, `PHASE-D.md`,
-    `PHASE-D.md`; test count 112 → 135.
-11. **Requirements** — adds the Phase D row (stdlib-only).
-12. **Quick verification** — `138 passed, 1 skipped`; adds the
-    focused Phase D suite command.
-13. **Reproducing the project** — adds a **"Phase D"**
-    subsection with the two commands and the useful options.
-14. **Data and artefact contracts** — adds the Phase D warrant
-    record contract (the `warrant_*` fields) and three Phase D
-    rows to the artefact registry.
-15. **Configuration** — adds the Phase D config paragraph.
-16. **Metrics and decision gates** — adds the **Gate G4**
-    definition and its PASS result.
-17. **Testing** — 112 → 135 tests, adds the `test_warrant.py`
-    row, updates the core-environment result.
-18. **Limitations** — adds a "Phase D detector scope"
-    subsection.
-19. **Troubleshooting** — adds four Phase D rows.
-20. **Documentation** — adds the three Phase D docs and the
-    Phase D config row.
-
-If you prefer to edit by hand rather than apply the patch, the
-authoritative Phase D prose already lives in
-`PHASE-D.md`, `PHASE-D.md` and
-`PHASE-D.md`; mirror those sections into the README
-at the anchor points listed above.
-
-After editing, commit on a new branch with a new run id for any
-experimental output (the project's change-control rule):
-
-```powershell
-git checkout -b phase-d-common-mode-detector
-git add .
-git commit -m "feat(phase-d): common-mode failure detector, E4 validation, Gate G4 PASS"
-```
+It updated the phase and G4 badges, scope statement, architecture diagram, component map, repository tree, configuration and artifact registries. It added the E4 collision, ablation and base-rate results, the detector's verification limits, and Phase D reproduction and troubleshooting instructions. The distribution listed 111 passing tests before integration and 138 passing with one skip afterwards. A separate inventory in the patch changed the listed test totals from 112 to 135. Those counts describe different historical records. The phase methods and validation tables are preserved in [Phase D](PHASE-D.md).
 
 ## 7. Merging the drop zip into your own Phase C checkout
 
@@ -381,7 +334,7 @@ commands in §4 work without `python -X utf8`.
 | `ModuleNotFoundError: jurisuq` | you ran from a subfolder | `cd` to the repo root (every script inserts the root into `sys.path`) |
 | `138 passed` becomes `111 passed` | the drop was not extracted into the repo root | re-extract the drop so `jurisuq/warrant/` sits next to `jurisuq/context/` |
 | `ERROR: no such run: …+ctx/items.jsonl` | Phase D was pointed at an unpacked run | run Phase C's `21_attach_context.py` first, or point at the shipped `phaseA-laptop-v2-rejudged+ctx` |
-| `ERROR: <out> already exists` | re-running a shipped suffix | use a new `--out-suffix`, or `--force` for a deliberate replacement |
+| `ERROR: <out> already exists` | re-running a shipped suffix | use a new `--out-suffix`, or reproduce the historical output in a disposable extraction |
 | Detector fires on **both** slices | `--as-of-policy fixed` was used | that is the deliberate ablation; use the default `era` policy |
 | `CM defined on 0/200` | the source run has no `asserted_keys` | detect on a Phase A run of record, not an empty tree |
 | `SOURCE RUN CHANGED` (exit 2) | something wrote into the frozen `+ctx` run | restore it from git / re-clone; investigate before trusting the report |
@@ -424,6 +377,6 @@ Get-Content runs\phaseA-laptop-v2-rejudged+ctx+warrant+uq\uq_validation.json -Ra
 python -X utf8 -m pytest -q
 ```
 
-The fit command creates `runs/phaseE_model.json`; scoring creates `runs/phaseA-laptop-v2-rejudged+ctx+warrant+uq/` with `items.jsonl`, `meta.json`, and a copy `uq_model.json`; validation adds `uq_validation.json`. If the `+uq` output already exists, use `--force` on script 26 to replace only that generated Phase E sibling output.
+The fit command creates `runs/phaseE_model.json`; scoring creates `runs/phaseA-laptop-v2-rejudged+ctx+warrant+uq/` with `items.jsonl`, `meta.json`, and a copy `uq_model.json`; validation adds `uq_validation.json`. For new work, select an unused model path and run suffix.
 
 The checked-in pilot produces 32 `legal_aware` and 168 `sample_only_fallback` rows. This can vary if the local Phase D files differ. The prior sandbox execution reported 149 passed, 1 skipped (the torch-gated test). A historical Windows PowerShell execution in the project `.venv` on 2026-10-21 reported 147 passed in 36.84s; the latest post-change Windows PowerShell execution in the same `.venv`, using `.\.venv\Scripts\python.exe -X utf8 -m pytest -q`, reported 149 passed in 7.58s. These are separate environment-specific executions. The current held-out L7 slice is single-class, so AUROC is undefined and G5 must report NOT_EVALUABLE—not PASS. The L1/control comparison is exploratory; it does not establish universal performance.

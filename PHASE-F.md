@@ -35,7 +35,7 @@ are not repairable by changing a threshold after the fact.
 An audit of the numbers in §6 found that the conformal threshold was computed
 from the same 22 holdout items its coverage was then measured on. The corrected
 pipeline takes the threshold from the 78 development items' grouped cross-fitted
-probabilities and report both a Wald tolerance and a Clopper–Pearson bound. The
+probabilities and reports both a Wald tolerance and a Clopper–Pearson bound. The
 corrected run is the **new sibling** `…+uq-exact+cal-r2`; the original `+cal`
 run is preserved unchanged and is **not** replaced. Coverage moves from 0.8636
 to 0.6818 (15/22), the threshold from 0.3855 to 0.4702, and **the G6 verdict does
@@ -179,11 +179,11 @@ interface rule (label-blind query path): True
 GATE G6: NOT_MET
 ```
 
-## 5. Runs of record
+## 5. Original calibration runs
 
 | Item | Value |
 |---|---|
-| Phase F run (primary) | `runs/phaseA-laptop-v2-rejudged+ctx-r2+typed+warrant+uq-exact+cal` |
+| Original exact-key run | `runs/phaseA-laptop-v2-rejudged+ctx-r2+typed+warrant+uq-exact+cal` |
 | Source run (read-only) | `runs/...typed+warrant+uq-exact` (Phase E, exact-key provision-entropy variant — the like-for-like frozen-pilot comparison) |
 | Supplementary run | `runs/...typed+warrant+uq-typed+cal` (typed-entropy variant) |
 | Calibration model (primary) | `runs/phaseF_calibration_model.json`, sha256 `f1095036d5f016c05656b80bf972f85f2bb01b114f724bf39e865182422b969a` |
@@ -199,7 +199,7 @@ development / 44 holdout records, recomputed from `data/lexuq_slice.jsonl`; the
 holdout item ids in the Phase F model are byte-identical to those in the
 consumed `uq_validation.json`.
 
-## 6. E6 results (measured, not projected)
+## 6. E6 results for the original `+cal` run
 
 ### 6.1 Primary variant — `+uq-exact`
 
@@ -253,7 +253,7 @@ evaluated on the pre-specified map only. The honest reading is that with 78
 development records the choice of map matters as much as the score does, and
 neither choice reaches ACE ≤ 0.05 on the primary variant.
 
-## 7. Gate G6 (master-guide §20.3)
+## 7. Original G6 assessment (master-guide §20.3)
 
 | Condition | Threshold | Measured (primary) | Verdict |
 |---|---|---|---|
@@ -413,7 +413,7 @@ the original `+cal` run remains unchanged.
 ### Experiment 1 — conformal threshold from a disjoint set
 
 The original threshold was computed from the 22 holdout probabilities and then
-evaluated on those same items. The correction uses the 78 development items'
+evaluated on those same items. The original report labels the threshold source as development cross-fitted probabilities. The post-merge audit traced it to the holdout and superseded that provenance claim. Compare the [original report](runs/phaseA-laptop-v2-rejudged+ctx-r2+typed+warrant+uq-exact+cal/calibration_report.json) with the [corrected report](runs/phaseA-laptop-v2-rejudged+ctx-r2+typed+warrant+uq-exact+cal-r2/calibration_report.json). The correction uses the 78 development items'
 grouped cross-fitted probabilities (fold-grouped by `slice|topic`, k=5), and
 reports a Clopper–Pearson lower bound alongside the Wald tolerance. A model
 without cross-fitted development probabilities is `NOT_EVALUABLE`, not a

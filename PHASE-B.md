@@ -1,21 +1,15 @@
-# JURIS-UQ Phase B: typed legal relations
+# Phase B — typed legal relations
 
 Phase B replaces identity-only grouping with a five-way relation model and
 typed clustering. It builds a deterministic relation dataset, trains/evaluates
 an InLegalBERT classifier, and re-clusters the frozen Phase A answers
 read-only.
 
-## Compute and cost
+## Inputs and evidence
 
-Inference runs locally through LM Studio on this machine. No accelerator is
-used: PyTorch reports `2.9.1+cpu`, with CUDA, MPS, and XPU unavailable.
-Inference and relation-model training therefore run on CPU. The project spent
-nothing: no paid API calls, subscriptions, or billing were used. The Phase A
-input remains the frozen `qwen2.5-7b-instruct` run; the Qwen3-14B Q4_K_M
-screen (reasoning on and off) answered IPC 379 to a post-1-July-2024 theft
-question and scored 0% on L7, so it was not used to regenerate a slice.
-Gemini 2.5-flash was unavailable, 3.8-flash returned 503, and 3.6-flash hit
-the free-tier daily quota (HTTP 429); no API model was used.
+The v1 training and E2 records below use the original relation dataset. The later `relations_v2` evaluation uses a distinct 308-pair test split. Changed cluster assignments and rescued unanimously wrong collisions count different events. The corrected G2 verdict is **NOT YET**. [Original training run](runs/phaseB-relations-full/) · [v2 evaluation and corrected G2](runs/phaseB-relations-02/relation_report.json)
+
+The [Phase A guide](PHASE-A.md) records the local generator, compute environment and provider screening history.
 
 ## Components and data
 
@@ -92,14 +86,14 @@ checkpoint, or frozen Phase A input:
 | `runs/relations-full/relation_report.json` | Learned test metrics with `--skip-e2` | Same test metrics; E2 intentionally skipped; G2 `NOT YET` because the separation criterion was not evaluated |
 
 These are supplemental reruns, not replacements for
-`runs/phaseB-relations-full/`. The authoritative Phase B result remains the
+`runs/phaseB-relations-full/`. The historical v1 result remains the
 run of record below because it includes the complete training metadata,
 training log, test report, and full E2 results. The shorter `full` report has
 the same metrics and gate outcome but does not include the training metadata.
 
 ## Result record
 
-[The results section below is authoritative. It preserves the complete
+The original v1 results section follows. It preserves the complete
 train/test metrics, confusion matrix, merge metrics,
 E2 counts and timing, G2 interpretation, and limitations. In particular,
 test macro-F1 is 0.7770 versus 0.7765 exact-key baseline; all six errors are
@@ -110,9 +104,7 @@ an exact collision.
 
 ## Complete experimental results and validation record
 
-### Merged record: `PHASE-B.md`
-
-# Phase B results — typed legal relations and the E2 re-clustering test
+## Phase B results — typed legal relations and the E2 re-clustering test
 
 Run of record. Numbers below are transcribed from
 `runs/phaseB-relations-full/dev_report.json` and

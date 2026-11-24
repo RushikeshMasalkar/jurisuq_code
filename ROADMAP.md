@@ -20,10 +20,7 @@ data (frozen)  ──►  A sampling/judging  ──►  B relations  ──► 
                                                      G target population ──► G5 / G6-L7 / G7
 ```
 
-Downstream phases consume stored artefacts of upstream phases; they never
-recompute them. So the rule for new work is: **if it does not need a new model
-run, it can be done now; if it does, it waits for the endpoint and the
-prerequisites.**
+Downstream analyses read stored upstream records. A new model run requires an approved endpoint and the prerequisites listed below. A human review can proceed independently of endpoint availability.
 
 ## 2. Milestones
 
@@ -32,26 +29,25 @@ prerequisites.**
 | M0 | Phases A–F implemented, evaluated, gates recorded | frozen data | **done** (G1, G4 pass; G2, G3, G5, G6 as recorded) |
 | M1 | Phase G infrastructure: audit, screen harness, §21.2 matrix, §21.3 deployment, pilot harness | M0 | **done** |
 | M2 | Stage 2 candidate set + three screening runs | M1 | **done** (L7 0/12) |
-| M3 | L7 investigation: why the L7 arm yields nothing | M2 | **done** (document); diagnostic **operator-reported** |
+| M3 | L7 investigation: why the L7 arm yields nothing | M2 | **done** — operator-run diagnostic and per-item records committed |
 | M4 | AI-assisted label review of the 12 L7 golds | M3 | **done** — 8 confirmed / 3 ambiguous / 1 unsupported, no label changed |
-| M5 | v2 candidate set with the four decided corrections | M4 | **done** — authored, never screened |
+| M5 | v2 candidate set with the four decided corrections | M4 | **done** — four L7 items revised before the L7-only screen at M7 |
 | M6 | Maintenance surface: authoritative status doc, dependency roadmap, one-command offline integrity check | M1–M5 | **done** |
 | M7 | Screen `v2` (12 L7 items × 3 samples, ≈11–27 min, $0) | a local endpoint + the operator's go-ahead | **done** — 2026-11-07; `runs/phaseG_screen_v2_l7.json`; zero yield, not a two-class population |
 | M8 | Cross-model comparison (`PHASE-G-L7-INVESTIGATION.md` §9) | human legal review of the labels | **BLOCKED** by protocol |
-| M9 | L7 calibration extension | a stored L7 run with both correctness classes | **BLOCKED** (needs M7 + a two-class outcome) |
+| M9 | L7 calibration extension | a stored L7 run with both correctness classes | **BLOCKED** — M7 yielded no correct L7 items |
 | M10 | §21.3 laptop measurements | a run on the target laptop with timings | **BLOCKED** on hardware |
 | M11 | Independent human legal review of the 12 L7 golds and the 48 statute rows | a qualified reviewer | **PENDING_HUMAN_REVIEW** |
 
-## 3. What can be done today, and what it costs
+## 3. Resources for remaining work
 
 | Task | Needs a model? | Needs a human? | Cost |
 |---|---|---|---|
-| Run the suite, the offline check, `--check` on the v2 builder | no | no | seconds |
-| Commit the diagnostic artefacts so the 0/12 / 0/36 figures become recomputable | no | no | — |
+| Run the suite, the offline check, `--check` on the v2 builder | no | no | environment-dependent |
+| Inspect the committed Run B per-item diagnostic (§11 of the L7 investigation) | no | no | offline |
 | Reconcile the statute table's `verified` flag with its actual semantics | no | yes (to approve the wording) | an hour of review |
-| Screen `v2` on the local endpoint | **done** | no (operator's call) | `runs/phaseG_screen_v2_l7.json`; 0/12 majority-correct, 0/36 correct samples |
 | Cross-model comparison | yes | **yes** | 11–27 min per model, $0 |
-| Extend calibration to L7 | yes | no | minutes after data exists |
+| Fit L7 calibration on eligible stored data | no for fitting | no | requires a two-class measured population |
 
 ## 4. Explicitly out of scope until a prerequisite is met
 
@@ -66,10 +62,9 @@ prerequisites.**
 
 ## 5. Definition of done for the software
 
-1. `python -X utf8 -m pytest -q` green, with the skip explained.
+1. `python -X utf8 -m pytest -q` green, with any dependency skips explained.
 2. `python -X utf8 scripts/47_offline_check.py` exits 0, writes
-   `runs/offline_check/offline_check_summary.json`, and modifies nothing under
-   `runs/` or `data/`.
+   `runs/offline_check/offline_check_summary.json` and companion scratch reports. Use a temporary output directory to keep these outside the checkout.
 3. `python -X utf8 scripts/46_revise_target_candidates_v2.py --check` reports that
    the committed v2 matches its builder.
 4. `STATUS.md` agrees with the artefacts (checked by `tests/test_status_docs.py`).
